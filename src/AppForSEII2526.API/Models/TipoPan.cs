@@ -13,7 +13,6 @@ namespace AppForSEII2526.API.Models
         [Required]
         public string Nombre { get; set; }
 
-        IList<TipoPan> panes = new List<TipoPan>();
 
         public override bool Equals(object? obj)
         {
