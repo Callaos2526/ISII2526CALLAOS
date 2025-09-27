@@ -1,0 +1,28 @@
+﻿namespace AppForSEII2526.API.Models
+{
+    public class TipoPan
+    {
+        public TipoPan(int panid, string nombre)
+        {
+            PanId = panid;
+            Nombre = nombre;
+        }
+
+        [Key]
+        public int PanId { get; set; }
+        [Required]
+        public string Nombre { get; set; }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is TipoPan pan &&
+                   PanId == pan.PanId &&
+                   Nombre == pan.Nombre;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(PanId, Nombre);
+        }
+    }
+}
