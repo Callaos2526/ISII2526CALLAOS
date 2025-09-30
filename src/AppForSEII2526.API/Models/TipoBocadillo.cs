@@ -1,31 +1,33 @@
 ﻿
+
 namespace AppForSEII2526.API.Models
 {
     public class TipoBocadillo
     {
-        public TipoBocadillo(int panid, string nombreTipo)
+        public TipoBocadillo(int idTipo, string nombreTipo)
         {
-            PanId = panid;
+            IdTipo = idTipo;
             NombreTipo = nombreTipo;
         }
 
         [Key]
-        public int PanId { get; set; }
+        public int IdTipo { get; set; }
         [Required]
         public string NombreTipo { get; set; }
-
-        IList<TipoBocadillo> bocadillos = new List<TipoBocadillo>();
+        [Required]
+        public IList<BonoBocadillo> Bonos { get; set ; } = new List<BonoBocadillo>();
 
         public override bool Equals(object? obj)
         {
             return obj is TipoBocadillo bocadillo &&
-                   PanId == bocadillo.PanId &&
-                   NombreTipo == bocadillo.NombreTipo;
+                   IdTipo == bocadillo.IdTipo &&
+                   NombreTipo == bocadillo.NombreTipo &&
+                   EqualityComparer<IList<BonoBocadillo>>.Default.Equals(Bonos, bocadillo.Bonos);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(PanId, NombreTipo);
+            return HashCode.Combine(IdTipo, NombreTipo, Bonos);
         }
     }
 }
