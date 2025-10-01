@@ -1,9 +1,10 @@
+using static AppForSEII2526.API.Models.Resenya;
 
 namespace AppForSEII2526.API.Models
 {
     public class ResenyaBocadillo
     {
-        public ResenyaBocadillo(int bocadilloId, int puntuacion, string resenyaId)
+        public ResenyaBocadillo(int bocadilloId, int puntuacion, int resenyaId)
         {
             BocadilloId = bocadilloId;
             Puntuacion = puntuacion;
@@ -15,7 +16,11 @@ namespace AppForSEII2526.API.Models
         [Required]
         public int Puntuacion { get; set; }
         [Required]
-        public string ResenyaId { get; set; }
+        public int ResenyaId { get; set; }
+
+        [Required]
+        public Resenya Resenya { get; set; }
+        public ValoracionGeneral Valoracion { get; set; }
 
         public override bool Equals(object? obj)
         {

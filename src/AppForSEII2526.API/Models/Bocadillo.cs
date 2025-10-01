@@ -25,6 +25,10 @@ namespace AppForSEII2526.API.Models
         [Required]
         public int stock { get; set; }
 
+        public int TipoPanId { get; set; }
+        public TipoPan tipopan { get; set; }
+        public List<ResenyaBocadillo> ResenyaBocadillo { get; set; } = new List<ResenyaBocadillo>();
+
         public override bool Equals(object? obj)
         {
             return obj is Bocadillo bocadillo &&

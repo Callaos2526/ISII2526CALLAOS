@@ -21,6 +21,10 @@ namespace AppForSEII2526.API.Models
         [Required]
         public string titulo { get; set; }
 
+        [Required]
+        public List<ResenyaBocadillo> ResenyaBocadillo { get; set; }
+
+
         public override bool Equals(object? obj)
         {
             return obj is Resenya resenya &&
