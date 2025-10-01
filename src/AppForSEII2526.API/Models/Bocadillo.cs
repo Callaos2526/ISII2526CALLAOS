@@ -27,7 +27,7 @@ namespace AppForSEII2526.API.Models
 
         public int TipoPanId { get; set; }
         public TipoPan tipopan { get; set; }
-        public List<ResenyaBocadillo> ResenyaBocadillo { get; set; } = new List<ResenyaBocadillo>();
+        public IList<ResenyaBocadillo> ResenyaBocadillo { get; set; } = new List<ResenyaBocadillo>();
 
         public override bool Equals(object? obj)
         {

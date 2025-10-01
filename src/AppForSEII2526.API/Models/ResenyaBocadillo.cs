@@ -20,6 +20,8 @@ namespace AppForSEII2526.API.Models
 
         [Required]
         public Resenya Resenya { get; set; }
+        [Required]
+        public Bocadillo Bocadillo { get; set; }
         public ValoracionGeneral Valoracion { get; set; }
 
         public override bool Equals(object? obj)

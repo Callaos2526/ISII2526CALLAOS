@@ -13,7 +13,7 @@ namespace AppForSEII2526.API.Models
         [Required]
         public string Nombre { get; set; }
         [Required]
-        public List<Bocadillo> Bocadillos { get; set; } = new List<Bocadillo>();
+        public IList<Bocadillo> Bocadillos { get; set; } = new List<Bocadillo>();
 
 
         public override bool Equals(object? obj)
