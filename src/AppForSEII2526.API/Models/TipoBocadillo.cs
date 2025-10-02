@@ -1,14 +1,17 @@
-﻿
-
-namespace AppForSEII2526.API.Models
+﻿namespace AppForSEII2526.API.Models
 {
     public class TipoBocadillo
     {
+        //Constructor vacío
+        public TipoBocadillo()
+        {
+        }
         public TipoBocadillo(int idTipo, string nombreTipo)
         {
             IdTipo = idTipo;
             NombreTipo = nombreTipo;
         }
+        
 
         [Key]
         public int IdTipo { get; set; }

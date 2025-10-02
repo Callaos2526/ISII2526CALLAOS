@@ -2,8 +2,13 @@
 {
     public class CompraBono
     {
+        // Constructor vacío
+
+        public CompraBono()
+        {
+        }
         // Constructor de la clase CompraBono con atributos: ApellidoBono1, ApellidoBono2, CompraBonoId, FechaCompraBono, metodoPago, nBonos, NombreCliente, PrecioTotalBono
-        public CompraBono(int compraBonoId, string nombreCliente, string apellidoBono1, string apellidoBono2, DateTime fechaCompraBono, string metodoPago, int nBonos, double precioTotalBono)
+        public CompraBono(int compraBonoId, string nombreCliente, string apellidoBono1, string apellidoBono2, DateTime fechaCompraBono, PaymentMethodTypes metodoPago, int nBonos, double precioTotalBono)
         {
             CompraBonoId = compraBonoId;
             NombreCliente = nombreCliente;
@@ -14,6 +19,7 @@
             NBonos = nBonos;
             PrecioTotalBono = precioTotalBono;
         }
+        
         [Key]
         public int CompraBonoId { get; set; }
         [Required]
@@ -25,7 +31,7 @@
         [Required]
         public DateTime FechaCompraBono { get; set; }
         [Required]
-        public string MetodoPago { get; set; }
+        public PaymentMethodTypes MetodoPago { get; set; }
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "El número de bonos debe ser mayor que 0")]
         public int NBonos { get; set; }
@@ -34,6 +40,13 @@
         public double PrecioTotalBono { get; set; }
         [Required]
         public IList<BonosComprados> bonosComprados { get; set; } = new List<BonosComprados>();
+        public enum PaymentMethodTypes
+        {
+            CreditCard,
+            Cash,
+            PayPal
+        }
+
 
         public override bool Equals(object? obj)
         {

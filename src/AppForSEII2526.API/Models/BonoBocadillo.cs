@@ -1,19 +1,22 @@
-﻿using System.Diagnostics.CodeAnalysis;
-
-namespace AppForSEII2526.API.Models
+﻿namespace AppForSEII2526.API.Models
 {
     public class BonoBocadillo
     {
-        public BonoBocadillo(int bonoId, int cantidadDisponible, int nBocadillos, string nombre, double pvp, TipoBocadillo tipoBocadillos)
+        //Constructor vacío
+        public BonoBocadillo()
+        {
+        }
+        public BonoBocadillo(int bonoId, int cantidadDisponible, int nBocadillos, string nombre, int pvp, TipoBocadillo tipoBocadillo)
         {
             BonoId = bonoId;
             CantidadDisponible = cantidadDisponible;
             NBocadillos = nBocadillos;
             Nombre = nombre;
             PVP = pvp;
-            TipoBocadillos = tipoBocadillos;
+            TipoBocadillos = tipoBocadillo;
         }
-        [Required]
+        
+        [Key]
         public int BonoId { get; set; }
         [Required]
         [Range(1, int.MaxValue)]
@@ -22,7 +25,6 @@ namespace AppForSEII2526.API.Models
         [Range(1, int.MaxValue)]
         public int NBocadillos { get; set; }
         [Required]
-        [NotNull]
         public string Nombre { get; set; }
         [Required]
         public double PVP { get; set; }
