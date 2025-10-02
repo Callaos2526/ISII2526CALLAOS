@@ -17,7 +17,7 @@
         public int IdTipo { get; set; }
         [Required]
         public string NombreTipo { get; set; }
-        [Required]
+        
         public IList<BonoBocadillo> Bonos { get; set ; } = new List<BonoBocadillo>();
 
         public override bool Equals(object? obj)

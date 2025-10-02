@@ -23,12 +23,16 @@
         [Key]
         public int CompraBonoId { get; set; }
         [Required]
+        [StringLength(30, ErrorMessage = "No puedes introducir un nombre mayor a 30 caracteres")]
         public string NombreCliente { get; set; }
         [Required]
+        [StringLength(40, ErrorMessage = "No puedes introducir un apellido mayor a 40 caracteres")]
         public string ApellidoBono1 { get; set; }
         [Required]
+        [StringLength(40, ErrorMessage = "No puedes introducir un apellido mayor a 40 caracteres")]
         public string ApellidoBono2 { get; set; }
         [Required]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime FechaCompraBono { get; set; }
         [Required]
         public PaymentMethodTypes MetodoPago { get; set; }
@@ -38,7 +42,7 @@
         [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio total debe ser mayor que 0")]
         public double PrecioTotalBono { get; set; }
-        [Required]
+
         public IList<BonosComprados> bonosComprados { get; set; } = new List<BonosComprados>();
         public enum PaymentMethodTypes
         {

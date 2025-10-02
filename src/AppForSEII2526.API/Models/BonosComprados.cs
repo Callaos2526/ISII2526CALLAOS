@@ -30,9 +30,9 @@ namespace AppForSEII2526.API.Models
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor que 0")]
         public double PrecioBono { get; set; }
        
-        [Required]
+        
         public BonosComprados Bono { get; set; }
-        [Required]
+        
         public CompraBono Compra { get; set; }
 
         public override bool Equals(object? obj)
