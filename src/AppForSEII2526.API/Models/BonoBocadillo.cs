@@ -4,16 +4,21 @@ namespace AppForSEII2526.API.Models
 {
     public class BonoBocadillo
     {
-        public BonoBocadillo(int bonoId, int cantidadDisponible, int nBocadillos, string nombre, double pvp, TipoBocadillo tipoBocadillos)
+        //Constructor vacío
+        public BonoBocadillo()
+        {
+        }
+        public BonoBocadillo(int bonoId, int cantidadDisponible, int nBocadillos, string nombre, int pvp, TipoBocadillo tipoBocadillo)
         {
             BonoId = bonoId;
             CantidadDisponible = cantidadDisponible;
             NBocadillos = nBocadillos;
             Nombre = nombre;
             PVP = pvp;
-            TipoBocadillos = tipoBocadillos;
+            TipoBocadillos = tipoBocadillo;
         }
-        [Required]
+        
+        [Key]
         public int BonoId { get; set; }
         [Required]
         [Range(1, int.MaxValue)]
@@ -21,14 +26,13 @@ namespace AppForSEII2526.API.Models
         [Required]
         [Range(1, int.MaxValue)]
         public int NBocadillos { get; set; }
-        [Required]
-        [NotNull]
+        [StringLength(20, ErrorMessage="No puedes introducir un nombre mayor a 20 caracteres")]
         public string Nombre { get; set; }
-        [Required]
+        [Range(1, double.MaxValue)]
         public double PVP { get; set; }
         [Required]
         public TipoBocadillo TipoBocadillos { get; set; }
-        [Required]
+
         public IList<BonosComprados> bonosComprados { get; set; } = new List<BonosComprados>();
 
         public override bool Equals(object? obj)
