@@ -15,8 +15,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         base.OnModelCreating(builder);
 
-       builder.Entity<BonosComprados>()//Unique key compuesto por CompraId y BonoId
-            .HasAlternateKey(bc => new{bc.CompraId, bc.BonoId});
+        builder.Entity<BonosComprados>()
+             .HasAlternateKey(bc => new { bc.CompraId, bc.BonoId });
     }
     
 }
