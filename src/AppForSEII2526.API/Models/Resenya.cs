@@ -2,6 +2,7 @@ namespace AppForSEII2526.API.Models
 {
     public class Resenya
     {
+        public Resenya() { }
         public Resenya(int id, string descripcion, DateTime fechaPublicacion, string nombreUsuario, string titulo)
         {
             Id = id;

@@ -4,6 +4,7 @@ namespace AppForSEII2526.API.Models
 {
     public class Bocadillo
     {
+        public Bocadillo() { }
         public Bocadillo(int comprasDelBocadillo, int id, string Nombre ,int pvp,int Stock)
         {
             ComprasDelBocadillo = comprasDelBocadillo;

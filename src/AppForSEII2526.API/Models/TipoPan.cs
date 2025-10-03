@@ -3,6 +3,7 @@ namespace AppForSEII2526.API.Models
 {
     public class TipoPan
     {
+        public TipoPan() { }
         public TipoPan(string nombre,int panId)
         {
             PanId = panId;

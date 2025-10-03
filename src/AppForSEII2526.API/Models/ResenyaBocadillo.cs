@@ -4,6 +4,7 @@ namespace AppForSEII2526.API.Models
 {
     public class ResenyaBocadillo
     {
+        public ResenyaBocadillo() { }
         public ResenyaBocadillo(int bocadilloId, int puntuacion, int resenyaId)
         {
             BocadilloId = bocadilloId;
