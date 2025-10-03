@@ -16,6 +16,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<TipoProducto> TipoProducto { get; set; }
     public DbSet<Compra_Producto> Compra_Producto { get; set; }
     public DbSet<Producto_Compra> Producto_Compra { get; set; }
+    public DbSet<Bocadillo> Bocadillos { get; set; }
+    public DbSet<TipoPan> TiposPan { get; set; }
+    public DbSet<ResenyaBocadillo> ResenyasBocadillo { get; set; }
+    public DbSet<Resenya> Resenyas { get; set; }
 
 
 
@@ -25,6 +29,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         builder.Entity<BonosComprados>()
              .HasAlternateKey(bc => new { bc.CompraId, bc.BonoId });
+        modelBuilder.Entity<ResenyaBocadillo>()
+            .HasKey(rb => new { rb.BocadilloId, rb.ResenyaId });
     }
     
 
