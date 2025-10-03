@@ -9,6 +9,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<CompraBono> ComprasBono { get; set; }
     public DbSet<BonoBocadillo> BonosBocadillos { get; set; }
     public DbSet<BonosComprados> BonosComprados { get; set; }
+    public DbSet<Tarjeta> Tarjetas { get; set; }
+    public DbSet<GooglePay> GooglePays { get; set; }
+    public DbSet<Paypal> Paypals { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder builder)

@@ -1,10 +1,13 @@
 ﻿namespace AppForSEII2526.API.Models
 {
-    public enum MetodoPago
+    public abstract class MetodoPago
     {
-        Tarjeta = 0,
-        Paypal = 1,
-        GooglePay = 2
+        public string metodoName { get; set; }
+        [Key]
+        public int metodoPagoId { get; set; }
+
+        public IList<CompraBono> compraBonos { get; set; } = new List<CompraBono>();
+
     }
 }
 

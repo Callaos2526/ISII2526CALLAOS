@@ -34,6 +34,7 @@
         [Required]
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime FechaCompraBono { get; set; }
+        public int MetodoPagoId { get; set; }
         [Required]
         public MetodoPago  MetodoPago { get; set; }
         [Required]
