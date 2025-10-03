@@ -2,22 +2,25 @@
 {
     public class Producto_Compra
     {
-        public Producto_Compra(int cantidad, int compraid, int productoid, int pvp)
+        public Producto_Compra(int cantidad, int compraid, int productoid, int pvp, int id)
         {
             Cantidad = cantidad;
             Compraid = compraid;
             //Productoid = productoid;
             PVP = pvp;
+            Id = id;
         }
         [Key]
+        public int Id { get; set; }
         public int Compraid { get; set; }
         //[ForeignKey("Producto")] ??
-        //public Productoid { get; set; }
+        public int Productoid { get; set; }
         [Required]
         public int Cantidad { get; set; }
         [Required]
         public int PVP { get; set; }
-        IList<Producto_Compra> productos_compras = new List<Producto_Compra>();
+        public Compra_Producto compra { get; set; }
+        public Producto producto { get; set; }
         public override bool Equals(object? obj)
         {
             return obj is Producto_Compra producto_compra &&

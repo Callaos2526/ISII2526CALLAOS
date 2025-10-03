@@ -17,7 +17,8 @@
         public int PVP { get; set; }
         [Required]
         public int Stock { get; set; }
-        IList<Producto> productos = new List<Producto>();
+        public TipoProducto TipoProducto { get; set; }
+        IList<Producto_Compra> producto_Compras = new List<Producto_Compra>();
         public override bool Equals(object? obj)
         {
             return obj is Producto producto &&

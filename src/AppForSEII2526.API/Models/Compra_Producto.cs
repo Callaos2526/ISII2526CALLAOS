@@ -27,7 +27,7 @@
         public int PrecioFinal { get; set; }
         public string Apellido_1 { get; set; }
         public string Apellido_2 { get; set; }
-        IList<Compra_Producto> compras_productos = new List<Compra_Producto>();
+        IList<Producto_Compra> ListaCompra = new List<Producto_Compra>();
         public override bool Equals(object? obj)
         {
             return obj is Compra_Producto compra_producto &&
