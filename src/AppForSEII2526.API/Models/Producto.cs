@@ -2,13 +2,15 @@
 {
     public class Producto
     {
-        public Producto(string nombre, int productoid, int pvp, int stock)
+        public Producto() { }
+        public Producto(int productoid, string nombre, int pvp, int stock)
         {
-            Nombre = nombre;
             Productoid = productoid;
+            Nombre = nombre;
             PVP = pvp;
             Stock = stock;
         }
+
         [Key]
         public int Productoid { get; set; }
         [Required]
@@ -18,7 +20,7 @@
         [Required]
         public int Stock { get; set; }
         public TipoProducto TipoProducto { get; set; }
-        IList<Producto_Compra> producto_Compras = new List<Producto_Compra>();
+        public IList<Producto_Compra> producto_Compras = new List<Producto_Compra>();
         public override bool Equals(object? obj)
         {
             return obj is Producto producto &&

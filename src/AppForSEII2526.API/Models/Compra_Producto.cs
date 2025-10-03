@@ -2,6 +2,7 @@
 {
     public class Compra_Producto
     {
+        public Compra_Producto() { }
         public Compra_Producto(string apellido_1, string apellido_2, int compraid, string direccionEnvio, DateTime fechaCompra, string metodo_Pago, string nombre, int precioFinal) 
         {
             Apellido_1 = apellido_1;
@@ -27,7 +28,7 @@
         public int PrecioFinal { get; set; }
         public string Apellido_1 { get; set; }
         public string Apellido_2 { get; set; }
-        IList<Producto_Compra> ListaCompra = new List<Producto_Compra>();
+        public IList<Producto_Compra> ListaCompra = new List<Producto_Compra>();
         public override bool Equals(object? obj)
         {
             return obj is Compra_Producto compra_producto &&

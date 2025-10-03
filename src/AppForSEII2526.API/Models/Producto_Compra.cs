@@ -2,6 +2,7 @@
 {
     public class Producto_Compra
     {
+        public Producto_Compra() { }
         public Producto_Compra(int cantidad, int compraid, int productoid, int pvp, int id)
         {
             Cantidad = cantidad;
