@@ -4,8 +4,9 @@ namespace AppForSEII2526.API.Models
     public class CompraBocadillo
     {
         public CompraBocadillo() { }
-        public CompraBocadillo(int bocadilloid,int compraid, int cantidad, string nombrebocadillo, float precio, TipoPan tipopan)
+        public CompraBocadillo(int id, int bocadilloid,int compraid, int cantidad, string nombrebocadillo, float precio)
         {   
+            Id = id;
             //clave foranea
             BocadilloId = bocadilloid;
 
@@ -15,16 +16,15 @@ namespace AppForSEII2526.API.Models
             Cantidad = cantidad;
             NombreBocadillo = nombrebocadillo;
             Precio = precio;
-            TipoPan = tipopan;
-
         }
+        [Key]
+        public int Id { get; set; }
+        [ForeignKey("BocadilloId")]
         //relacion con Bocadillo
-        [Required]
         public int BocadilloId { get; set; } //clave foranea DE BOCADILLO
         
-
+        [ForeignKey("CompraId")]
         //relacion con Compra
-        [Required]
         public int CompraId { get; set; } //clave foranea DE COMPRA
        
         [Required]
@@ -34,10 +34,8 @@ namespace AppForSEII2526.API.Models
         [Required]
         public float Precio { get; set; }
         [Required]
-        public TipoPan TipoPan { get; set; }
-        [Required]
+        public List<TipoPan> TipoPan { get; set; } = new List<TipoPan>();
         public Compra Compra { get; set; }
-        [Required]
         public Bocadillo Bocadillo { get; set; }
 
         public override bool Equals(object? obj)
@@ -48,7 +46,6 @@ namespace AppForSEII2526.API.Models
                    Cantidad == bocadillo.Cantidad &&
                    NombreBocadillo == bocadillo.NombreBocadillo &&
                    Precio == bocadillo.Precio &&
-                   EqualityComparer<TipoPan>.Default.Equals(TipoPan, bocadillo.TipoPan) &&
                    EqualityComparer<Compra>.Default.Equals(Compra, bocadillo.Compra) &&
                    EqualityComparer<Bocadillo>.Default.Equals(Bocadillo, bocadillo.Bocadillo);
         }

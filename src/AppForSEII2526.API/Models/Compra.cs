@@ -26,6 +26,8 @@
         [Required]
         public int nBoadillos { get; set; }
         [Required]
+        public MetodoPago metodoPago { get; set; }
+        [Required]
         public float PrecioTotal { get; set; }
         //Vector de relacion 1:N con CompraBocadillo
         [Required]
