@@ -21,10 +21,8 @@ namespace AppForSEII2526.API.Models
 
         [Required]
         public Resenya Resenya { get; set; }
-        public int Resenyaid { get; set; }
         [Required]
         public Bocadillo Bocadillo { get; set; }
-        public int Bocadilloid { get; set; }
         
 
         public override bool Equals(object? obj)
