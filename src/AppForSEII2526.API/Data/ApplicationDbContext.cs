@@ -12,6 +12,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Tarjeta> Tarjetas { get; set; }
     public DbSet<GooglePay> GooglePays { get; set; }
     public DbSet<Paypal> Paypals { get; set; }
+    public DbSet<Producto> Producto { get; set; }
+    public DbSet<TipoProducto> TipoProducto { get; set; }
+    public DbSet<Compra_Producto> Compra_Producto { get; set; }
+    public DbSet<Producto_Compra> Producto_Compra { get; set; }
 
 
 
@@ -23,4 +27,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
              .HasAlternateKey(bc => new { bc.CompraId, bc.BonoId });
     }
     
-}
+
+    
+    
+
