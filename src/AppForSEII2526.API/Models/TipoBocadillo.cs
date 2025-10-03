@@ -1,4 +1,6 @@
-﻿namespace AppForSEII2526.API.Models
+﻿
+
+namespace AppForSEII2526.API.Models
 {
     public class TipoBocadillo
     {
@@ -11,7 +13,7 @@
             IdTipo = idTipo;
             NombreTipo = nombreTipo;
         }
-        
+
 
         [Key]
         public int IdTipo { get; set; }

@@ -13,6 +13,7 @@ namespace AppForSEII2526.API.Models
         {
             Id = id;
             BonoId = bonoId;
+            Cantidad = cantidad;
             CompraId = compraId;
             Cantidad = cantidad;
             PrecioBono = precioBono;

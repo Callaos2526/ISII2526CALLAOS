@@ -1,4 +1,6 @@
-﻿namespace AppForSEII2526.API.Models
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace AppForSEII2526.API.Models
 {
     public class BonoBocadillo
     {
@@ -18,8 +20,10 @@
         
         [Key]
         public int BonoId { get; set; }
+        [Required]
         [Range(1, int.MaxValue)]
         public int CantidadDisponible { get; set; }
+        [Required]
         [Range(1, int.MaxValue)]
         public int NBocadillos { get; set; }
         [StringLength(20, ErrorMessage="No puedes introducir un nombre mayor a 20 caracteres")]
