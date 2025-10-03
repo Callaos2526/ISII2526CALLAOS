@@ -1,18 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="AppForSEII2526.API.Models.Bocadillo">
-    <Position X="3" Y="1.25" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAACACAAAAAAAAAQgAAggAAAgAAAAIAAABAAAAAAAEA=</HashCode>
-      <FileName>Models\Bocadillo.cs</FileName>
-    </TypeIdentifier>
-    <ShowAsAssociation>
-      <Property Name="TipoPan" />
-    </ShowAsAssociation>
-    <ShowAsCollectionAssociation>
-      <Property Name="ComprasDelBocadillo" />
-    </ShowAsCollectionAssociation>
-  </Class>
   <Class Name="AppForSEII2526.API.Models.Compra">
     <Position X="8" Y="1.25" Width="1.5" />
     <TypeIdentifier>
@@ -29,12 +16,12 @@
   <Class Name="AppForSEII2526.API.Models.CompraBocadillo">
     <Position X="5.75" Y="1.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAwAAEAAIAAAAAQgAAAAAAQAAAAAIAAAAAEAAIAAAA=</HashCode>
+      <HashCode>AAAyAAEAAIAAAAAQgAAAAAAQAAAAAIAAAAAEAAIAAAA=</HashCode>
       <FileName>Models\CompraBocadillo.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
-      <Property Name="Bocadillo" />
       <Property Name="Compra" />
+      <Property Name="Bocadillo" />
     </ShowAsAssociation>
   </Class>
   <Class Name="AppForSEII2526.API.Models.GooglePay">
@@ -47,7 +34,7 @@
   <Class Name="AppForSEII2526.API.Models.MetodoPago">
     <Position X="12" Y="1.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAIgAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAAAABAAIgAAAAAAAAA=</HashCode>
       <FileName>Models\Metodo_Pago.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -74,6 +61,16 @@
     <ShowAsCollectionAssociation>
       <Property Name="Bocadillos" />
     </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="AppForSEII2526.API.Models.Bocadillo">
+    <Position X="3" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAACADAAAAAAAAAAgAAggAAAgAAAAIAAIBAAAAAAAEA=</HashCode>
+      <FileName>Models\Bocadillo.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="tipopan" />
+    </ShowAsAssociation>
   </Class>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

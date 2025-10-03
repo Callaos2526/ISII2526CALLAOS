@@ -15,8 +15,7 @@ namespace AppForSEII2526.API.Models
         [Key]
         public int PanId { get; set; }
         [Required]
-        public required string Nombre { get; set; } //obliga a que no sea null aunque uses constructor vacio
-        //Vector de relacion 1:N con Bocadillo
+        public string Nombre { get; set; }
         [Required]
         public IList<Bocadillo> Bocadillos { get; set; }=new List<Bocadillo>();
 
