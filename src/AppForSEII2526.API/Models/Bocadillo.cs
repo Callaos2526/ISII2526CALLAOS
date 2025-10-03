@@ -1,30 +1,44 @@
-﻿
+﻿using NuGet.Versioning;
+
 
 namespace AppForSEII2526.API.Models
 {
+   
     public class Bocadillo
     {
+        
         public Bocadillo() { }
-        public Bocadillo(int comprasDelBocadillo, int id, string Nombre ,int pvp,int Stock)
+        
+        public Bocadillo(int id, string nombre, float pvp, string resenyabocadillo, int stock, string tamano, int comprasDelBocadillo)
         {
             ComprasDelBocadillo = comprasDelBocadillo;
+            
+
             Id = id;
-            nombre = Nombre;
-            PVP= pvp;
-            stock = Stock;
+            Nombre = nombre;
+            Pvp = pvp;
+            Resenyabocadillo = resenyabocadillo;
+            Stock = stock;
+            Tamano = tamano;
+
+            
         }
         [Required]
         public int ComprasDelBocadillo { get; set; }
         [Key]
         public int Id { get; set; }
         [Required]
-        public string nombre { get; set; }
-
+        public string Nombre { get; set; }
         [Required]
-        public int PVP { get; set; }
-
+        public float Pvp { get; set; }
         [Required]
-        public int stock { get; set; }
+        public string Resenyabocadillo { get; set; }
+        [Required]
+        public int Stock { get; set; }
+        [Required]
+        public string Tamano { get; set; }
+
+
         public Tamaño tamaño { get; set; }
 
    
@@ -36,14 +50,17 @@ namespace AppForSEII2526.API.Models
             return obj is Bocadillo bocadillo &&
                    ComprasDelBocadillo == bocadillo.ComprasDelBocadillo &&
                    Id == bocadillo.Id &&
-                   nombre == bocadillo.nombre &&
-                   PVP == bocadillo.PVP &&
-                   stock == bocadillo.stock;
+                   Nombre == bocadillo.Nombre &&
+                   Pvp == bocadillo.Pvp &&
+                   ResenyaBocadillo == bocadillo.ResenyaBocadillo &&
+                   Stock == bocadillo.Stock;
+                   
+                   
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(ComprasDelBocadillo, Id, nombre, PVP, stock);
+            return HashCode.Combine(Id, Nombre, Pvp, ResenyaBocadillo, Stock, Tamano, ComprasDelBocadillo);
         }
     }
 }
