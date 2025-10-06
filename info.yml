@@ -1,10 +1,10 @@
 project:
-  name: 'ISII-2526-GrupoA-ISII2526Callaos'
+  name: 'ISII-2526-GrupoA-Callaos2526'
   owner: 'GrupoA'
-  teamId: 'ISII2526Callaos'
+  teamId: 'Callaos2526'
   identities: {}
   notifications:
-    email: 'tomas.romero1@alu.uclm.es,jesus.lopez22@alu.uclm.es,miguel.requena@alu.uclm.es,marta.tosca@alu.uclm.es'
+    email: 'tomas.romero1@alu.uclm.es, jesus.lopez22@alu.uclm.es, miguel.requena@alu.uclm.es, marta.tosca@alu.uclm.es'
   members:
     member1:
       name: 'Tomás'
