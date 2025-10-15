@@ -27,11 +27,8 @@ namespace AppForSEII2526.API.Models
         [Key]
         public int Id { get; set; }
         public string Nombre { get; set; }
-        [Required]
         public float Pvp { get; set; }
-        [Required]
         public string Resenyabocadillo { get; set; }
-        [Required]
         public int Stock { get; set; }
         public string Tamano { get; set; }
 
@@ -41,6 +38,7 @@ namespace AppForSEII2526.API.Models
    
         public TipoPan tipopan { get; set; }
         public IList<ResenyaBocadillo> ResenyaBocadillo { get; set; } = new List<ResenyaBocadillo>();
+        public IList<CompraBocadillo> ComprasBocadillo { get; set; } = new List<CompraBocadillo>();
 
         public override bool Equals(object? obj)
         {
@@ -49,15 +47,31 @@ namespace AppForSEII2526.API.Models
                    Id == bocadillo.Id &&
                    Nombre == bocadillo.Nombre &&
                    Pvp == bocadillo.Pvp &&
-                   ResenyaBocadillo == bocadillo.ResenyaBocadillo &&
-                   Stock == bocadillo.Stock;
-                   
-                   
+                   Resenyabocadillo == bocadillo.Resenyabocadillo &&
+                   Stock == bocadillo.Stock &&
+                   Tamano == bocadillo.Tamano &&
+                   tamaño == bocadillo.tamaño &&
+                   EqualityComparer<TipoPan>.Default.Equals(tipopan, bocadillo.tipopan) &&
+                   EqualityComparer<IList<ResenyaBocadillo>>.Default.Equals(ResenyaBocadillo, bocadillo.ResenyaBocadillo) &&
+                   EqualityComparer<IList<CompraBocadillo>>.Default.Equals(ComprasBocadillo, bocadillo.ComprasBocadillo);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id, Nombre, Pvp, ResenyaBocadillo, Stock, Tamano, ComprasDelBocadillo);
+            HashCode hash = new HashCode();
+            hash.Add(ComprasDelBocadillo);
+            hash.Add(Id);
+            hash.Add(Nombre);
+            hash.Add(Pvp);
+            hash.Add(Resenyabocadillo);
+            hash.Add(Stock);
+            hash.Add(Tamano);
+            hash.Add(tamaño);
+            hash.Add(tipopan);
+            hash.Add(ResenyaBocadillo);
+            hash.Add(ComprasBocadillo);
+            return hash.ToHashCode();
         }
     }
 }
+   
