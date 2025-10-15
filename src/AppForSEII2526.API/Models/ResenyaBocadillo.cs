@@ -20,9 +20,7 @@ namespace AppForSEII2526.API.Models
         public int Puntuacion { get; set; }
         public int ResenyaId { get; set; }
 
-        [Required]
         public Resenya Resenya { get; set; }
-        [Required]
         public Bocadillo Bocadillo { get; set; }
         
 

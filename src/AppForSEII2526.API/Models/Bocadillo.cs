@@ -23,11 +23,9 @@ namespace AppForSEII2526.API.Models
 
             
         }
-        [Required]
         public int ComprasDelBocadillo { get; set; }
         [Key]
         public int Id { get; set; }
-        [Required]
         public string Nombre { get; set; }
         [Required]
         public float Pvp { get; set; }
@@ -35,7 +33,6 @@ namespace AppForSEII2526.API.Models
         public string Resenyabocadillo { get; set; }
         [Required]
         public int Stock { get; set; }
-        [Required]
         public string Tamano { get; set; }
 
 

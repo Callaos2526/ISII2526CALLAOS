@@ -6,39 +6,37 @@ namespace AppForSEII2526.API.Models
         public Resenya(int id, string descripcion, DateTime fechaPublicacion, string nombreUsuario, string titulo)
         {
             Id = id;
-            this.descripcion = descripcion;
-            this.fechaPublicacion = fechaPublicacion;
-            this.nombreUsuario = nombreUsuario;
-            this.titulo = titulo;
+            Descripcion = descripcion;
+            FechaPublicacion = fechaPublicacion;
+            NombreUsuario = nombreUsuario;
+            Titulo = titulo;
         }
 
         [Key]
         public int Id { get; set; }
         [Required]
-        public string descripcion { get; set; }
+        public string Descripcion { get; set; }
+        public DateTime FechaPublicacion { get; set; }
+        public string? NombreUsuario { get; set; }
         [Required]
-        public DateTime fechaPublicacion { get; set; }
-        public string nombreUsuario { get; set; }
-        [Required]
-        public string titulo { get; set; }
+        public string Titulo { get; set; }
 
-        [Required]
         public IList<ResenyaBocadillo> ResenyaBocadillo { get; set; } = new List<ResenyaBocadillo>();
-
 
         public override bool Equals(object? obj)
         {
             return obj is Resenya resenya &&
                    Id == resenya.Id &&
-                   descripcion == resenya.descripcion &&
-                   fechaPublicacion == resenya.fechaPublicacion &&
-                   nombreUsuario == resenya.nombreUsuario &&
-                   titulo == resenya.titulo;
+                   Descripcion == resenya.Descripcion &&
+                   FechaPublicacion == resenya.FechaPublicacion &&
+                   NombreUsuario == resenya.NombreUsuario &&
+                   Titulo == resenya.Titulo &&
+                   EqualityComparer<IList<ResenyaBocadillo>>.Default.Equals(ResenyaBocadillo, resenya.ResenyaBocadillo);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id, descripcion, fechaPublicacion, nombreUsuario, titulo);
+            return HashCode.Combine(Id, Descripcion, FechaPublicacion, NombreUsuario, Titulo, ResenyaBocadillo);
         }
 
         public enum ValoracionGeneral
