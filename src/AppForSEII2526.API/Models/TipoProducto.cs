@@ -11,7 +11,6 @@ namespace AppForSEII2526.API.Models
         }
         [Key]
         public int Productoid { get; set; }
-        [Required]
         public string Nombre { get; set; }
         public IList<Producto> Productos = new List<Producto>();
         public override bool Equals(object? obj)

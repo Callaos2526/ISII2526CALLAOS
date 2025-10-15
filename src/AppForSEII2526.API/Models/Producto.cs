@@ -13,11 +13,8 @@
 
         [Key]
         public int Productoid { get; set; }
-        [Required]
         public string Nombre { get; set; }
-        [Required]
         public int PVP { get; set; }
-        [Required]
         public int Stock { get; set; }
         public TipoProducto TipoProducto { get; set; }
         public IList<Producto_Compra> producto_Compras = new List<Producto_Compra>();

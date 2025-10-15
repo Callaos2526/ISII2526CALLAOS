@@ -14,11 +14,8 @@
         [Key]
         public int Id { get; set; }
         public int Compraid { get; set; }
-        //[ForeignKey("Producto")] ??
         public int Productoid { get; set; }
-        [Required]
         public int Cantidad { get; set; }
-        [Required]
         public int PVP { get; set; }
         public Compra_Producto compra { get; set; }
         public Producto producto { get; set; }

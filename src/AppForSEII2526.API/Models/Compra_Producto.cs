@@ -3,7 +3,7 @@
     public class Compra_Producto
     {
         public Compra_Producto() { }
-        public Compra_Producto(string apellido_1, string apellido_2, int compraid, string direccionEnvio, DateTime fechaCompra, string metodo_Pago, string nombre, int precioFinal) 
+        public Compra_Producto(ApplicationUser Apellido_1,ApplicationUser Apellido_2, int compraid, string direccionEnvio, DateTime fechaCompra, MetodoPago metodo_Pago, string nombre, int precioFinal) 
         {
             Apellido_1 = apellido_1;
             Apellido_2 = apellido_2;
@@ -20,14 +20,14 @@
         public string Nombre { get; set; }
         [Required]
         public string DireccionEnvio { get; set; }
-        [Required]
         public DateTime FechaCompra { get; set; }
         [Required]
-        public string Metodo_Pago { get; set; }
+        public MetodoPago Metodo_Pago { get; set; }
         [Required]
         public int PrecioFinal { get; set; }
-        public string Apellido_1 { get; set; }
-        public string Apellido_2 { get; set; }
+        [Required]
+        public ApplicationUser apellido_1 { get; set; }
+        public ApplicationUser? apellido_2 { get; set; }
         public IList<Producto_Compra> ListaCompra = new List<Producto_Compra>();
         public override bool Equals(object? obj)
         {
@@ -38,12 +38,12 @@
                    FechaCompra == compra_producto.FechaCompra &&
                    Metodo_Pago == compra_producto.Metodo_Pago &&
                    PrecioFinal == compra_producto.PrecioFinal &&
-                   Apellido_1 == compra_producto.Apellido_1 &&
-                   Apellido_2 == compra_producto.Apellido_2;
+                   apellido_1 == compra_producto.apellido_1 &&
+                   apellido_2 == compra_producto.apellido_2;
         }
         public override int GetHashCode()
         {
-            return HashCode.Combine(Compraid, Nombre, DireccionEnvio, FechaCompra, Metodo_Pago, PrecioFinal, Apellido_1, Apellido_2);
+            return HashCode.Combine(Compraid, Nombre, DireccionEnvio, FechaCompra, Metodo_Pago, PrecioFinal, apellido_1, apellido_2);
         }
     }
 }
