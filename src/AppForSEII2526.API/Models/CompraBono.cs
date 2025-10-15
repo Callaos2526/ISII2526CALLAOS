@@ -8,7 +8,7 @@
         {
         }
         // Constructor de la clase CompraBono con atributos: ApellidoBono1, ApellidoBono2, CompraBonoId, FechaCompraBono, metodoPago, nBonos, NombreCliente, PrecioTotalBono
-        public CompraBono(int compraBonoId, string nombreCliente, string apellidoBono1, string apellidoBono2, DateTime fechaCompraBono, MetodoPago metodoPago, int nBonos, double precioTotalBono)
+        public CompraBono(int compraBonoId, ApplicationUser nombreCliente, ApplicationUser apellidoBono1, ApplicationUser apellidoBono2, DateTime fechaCompraBono, MetodoPago metodoPago, int nBonos, double precioTotalBono)
         {
             CompraBonoId = compraBonoId;
             NombreCliente = nombreCliente;
@@ -24,23 +24,25 @@
         public int CompraBonoId { get; set; }
         [Required]
         [StringLength(30, ErrorMessage = "No puedes introducir un nombre mayor a 30 caracteres")]
-        public string NombreCliente { get; set; }
+        public ApplicationUser NombreCliente { get; set; }
+
         [Required]
         [StringLength(40, ErrorMessage = "No puedes introducir un apellido mayor a 40 caracteres")]
-        public string ApellidoBono1 { get; set; }
+        public ApplicationUser ApellidoBono1 { get; set; }
+
         [Required]
         [StringLength(40, ErrorMessage = "No puedes introducir un apellido mayor a 40 caracteres")]
-        public string ApellidoBono2 { get; set; }
-        [Required]
+        public ApplicationUser ApellidoBono2 { get; set; }
+
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
+
         public DateTime FechaCompraBono { get; set; }
-        public int MetodoPagoId { get; set; }
         [Required]
         public MetodoPago  MetodoPago { get; set; }
-        [Required]
+
         [Range(1, int.MaxValue, ErrorMessage = "El número de bonos debe ser mayor que 0")]
         public int NBonos { get; set; }
-        [Required]
+
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio total debe ser mayor que 0")]
         public double PrecioTotalBono { get; set; }
 
