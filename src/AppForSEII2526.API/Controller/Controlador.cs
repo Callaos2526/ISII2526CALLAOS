@@ -114,7 +114,7 @@ namespace AppForSEII2526.API.Controller
                 return BadRequest(new ValidationProblemDetails(ModelState));
             }
 
-            // === Construimos entidad Resenya (EF asignará Id) ===
+            
             var resenya = new Resenya(
                 id: 0,
                 descripcion: resenyaForCreate.Descripcion,
