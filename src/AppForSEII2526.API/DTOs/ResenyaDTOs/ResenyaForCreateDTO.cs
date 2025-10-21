@@ -1,11 +1,11 @@
 ﻿
-using static AppForSEII2526.API.Models.Resenya; // para ValoracionGeneral
+using static AppForSEII2526.API.Models.Resenya; 
 
 namespace AppForSEII2526.API.DTOs.ResenyaDTOs
 {
     public class ResenyaForCreateDTO
     {
-        // Constructor completo (estilo profe)
+        
         public ResenyaForCreateDTO(string? nombreUsuario,
                                    string titulo,
                                    string descripcion,
@@ -19,7 +19,7 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
             ResenyaBocadillo = resenyaBocadillo ?? throw new ArgumentNullException(nameof(resenyaBocadillo));
         }
 
-        // Constructor vacío (serialización)
+        
         public ResenyaForCreateDTO()
         {
             ResenyaBocadillo = new List<ResenyaItemDTO>();
