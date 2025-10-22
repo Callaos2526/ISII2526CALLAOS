@@ -29,8 +29,8 @@ namespace AppForSEII2526.API.Models
         [StringLength(20, ErrorMessage="No puedes introducir un nombre mayor a 20 caracteres")]
         public string Nombre { get; set; }
         
-        [Range(1, double.MaxValue)]
-        public double PVP { get; set; }
+        [Range(1, int.MaxValue)]
+        public int PVP { get; set; }
         
         public TipoBocadillo TipoBocadillos { get; set; }
 
