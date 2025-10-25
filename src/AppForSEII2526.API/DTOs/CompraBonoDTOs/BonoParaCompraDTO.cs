@@ -6,7 +6,7 @@
         public BonoParaCompraDTO(int bonoID, string nombre, int pvp,  int numeroDeBocadillos, string tipo)
         {
             Nombre = nombre;
-            Precio = precio;
+            Precio = pvp;
             NumeroDeBocadillos = numeroDeBocadillos;
             Tipo = tipo;
         }
