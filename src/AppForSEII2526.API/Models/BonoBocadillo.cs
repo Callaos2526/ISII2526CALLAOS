@@ -5,10 +5,9 @@ namespace AppForSEII2526.API.Models
     public class BonoBocadillo
     {
         //Constructor vacío
-        public BonoBocadillo()
-        {
-        }
-        public BonoBocadillo(int bonoId, int cantidadDisponible, int nBocadillos, string nombre, int pvp, TipoBocadillo tipoBocadillo)
+        public BonoBocadillo() { }
+
+        public BonoBocadillo(int bonoId, int cantidadDisponible, int nBocadillos, string nombre, double pvp, TipoBocadillo tipoBocadillo)
         {
             BonoId = bonoId;
             CantidadDisponible = cantidadDisponible;
@@ -17,7 +16,7 @@ namespace AppForSEII2526.API.Models
             PVP = pvp;
             TipoBocadillos = tipoBocadillo;
         }
-        
+
         [Key]
         public int BonoId { get; set; }
 
@@ -29,8 +28,8 @@ namespace AppForSEII2526.API.Models
         [StringLength(20, ErrorMessage="No puedes introducir un nombre mayor a 20 caracteres")]
         public string Nombre { get; set; }
         
-        [Range(1, int.MaxValue)]
-        public int PVP { get; set; }
+        [Range(0.01, double.MaxValue)]
+        public double PVP { get; set; }
         
         public TipoBocadillo TipoBocadillos { get; set; }
 
