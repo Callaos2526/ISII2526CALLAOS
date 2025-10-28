@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppForSEII2526.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251006210627_CreateIdentityEsquema")]
-    partial class CreateIdentityEsquema
+    [Migration("20251022143518_1")]
+    partial class _1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -439,18 +439,17 @@ namespace AppForSEII2526.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("descripcion")
+                    b.Property<string>("Descripcion")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("fechaPublicacion")
+                    b.Property<DateTime>("FechaPublicacion")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("nombreUsuario")
-                        .IsRequired()
+                    b.Property<string>("NombreUsuario")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("titulo")
+                    b.Property<string>("Titulo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -745,7 +744,7 @@ namespace AppForSEII2526.API.Migrations
             modelBuilder.Entity("AppForSEII2526.API.Models.CompraBocadillo", b =>
                 {
                     b.HasOne("AppForSEII2526.API.Models.Bocadillo", "Bocadillo")
-                        .WithMany()
+                        .WithMany("ComprasBocadillo")
                         .HasForeignKey("BocadilloId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -879,6 +878,8 @@ namespace AppForSEII2526.API.Migrations
 
             modelBuilder.Entity("AppForSEII2526.API.Models.Bocadillo", b =>
                 {
+                    b.Navigation("ComprasBocadillo");
+
                     b.Navigation("ResenyaBocadillo");
                 });
 
