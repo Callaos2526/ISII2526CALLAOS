@@ -1,39 +1,58 @@
-﻿using AppForSEII2526.API.Models;
+﻿using AppForSEII2526.API.DTOs.PedidoBocaDTOs;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
-namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
+namespace AppForSEII2526.API
 {
 
-    public class SelectBocadilloDTO
+    [Route("api/[controller]")]
+    [ApiController]
+    public class BocadilloController : ControllerBase
     {
-        //Paso 2. El sistema muestra la lista de bocadillos disponibles para pedir en tienda, indicando
-        //su nombre, tamaño, tipo de pan y precio.
+        private readonly ApplicationDbContext _context;
+        private readonly ILogger<BocadilloController> _logger;
 
-
-
-        public SelectBocadilloDTO(int bocadilloID, string nombreBocadillo, string tamano, string tipoPanNombre, float pvp)
+        public BocadilloController(ApplicationDbContext context,
+            ILogger<BocadilloController> logger)
         {
-            BocadilloID = bocadilloID;
-            NombreBocadillo = nombreBocadillo;
-            Tamano = tamano;
-            TipoPanNombre = tipoPanNombre;
-            Pvp = pvp;
+            _context = context;
+            _logger = logger;
         }
 
-        [Key]
-        public int BocadilloID { get; set; }
-        public string NombreBocadillo { get; set; }
-        public string Tamano { get; set; }
-        public string TipoPanNombre { get; set; } //dice noelia que bien que sea string y no objeto tipopan
-        public float Pvp { get; set; }
-
-        public override bool Equals(object? obj)
+        //Listar bocadillos (con filtros por tamaño y tipo pan
+        [HttpGet] //Accion que responde a peticiones HTTP GET
+        [Route("[action]")]
+        //si todo va bien devolvemos una lista SelectBocadilloDTO
+        [ProducesResponseType(typeof(IList<SelectBocadilloDTO>), (int)HttpStatusCode.OK)]
+        //metodo que devuelve un ActionResult 
+        public async Task<ActionResult> GetBocadilloParaPedir(string? filtroTamano, string? filtroTipoPan) //tipo Pan bien que sea String 
         {
-            return obj is SelectBocadilloDTO dTO &&
-                   BocadilloID == dTO.BocadilloID &&
-                   NombreBocadillo == dTO.NombreBocadillo &&
-                   Tamano == dTO.Tamano &&
-                   TipoPanNombre == dTO.TipoPanNombre &&
-                   Pvp == dTO.Pvp;
+            //Empiezas una consulta LINQ sobre tabla Movies en ApplicationDbContext
+            IList<SelectBocadilloDTO> bocadillos = await _context.Bocadillos
+                .Include(b => b.tipopan) //cuando cargue cada bocadillo, que incluya navegacion TipoPan
+                .Include(b => b.ComprasBocadillo) //igual con comprasBocadillo
+                    .ThenInclude(cb => cb.Compra) //para cada compraBocadillo incluye su compra
+                                                  //FILTROS: tamáño y tipo de pan (los 2 como string)
+                    .Where(bocadillo => (filtroTamano == null || bocadillo.Tamano.Equals(filtroTamano)) &&
+                (filtroTipoPan == null || bocadillo.tipopan.Nombre.Equals(filtroTipoPan)))
+                .OrderBy(bocadillo => bocadillo.Nombre)
+
+                //CREO EL DTO que voy a exponer al cliente: SelectBocadilloDTO
+                .Select(b => new SelectBocadilloDTO(b.Id, b.Nombre, b.Tamano, b.tipopan.Nombre, b.Pvp))
+                .ToListAsync();
+
+            //Comprobamos si hay resultados
+            if (!bocadillos.Any()) //no hace falta lo del null porque bocadillos nunca va a ser null despues de ToListAsync() (si puede ser [])
+            {
+                return NotFound("No hay bocadillos que cumplan los requisitos");
+            }
+            return Ok(bocadillos);
+
+
+
+
         }
+
+
     }
 }
