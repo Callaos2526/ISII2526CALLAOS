@@ -3,16 +3,14 @@
     public class Producto_Compra
     {
         public Producto_Compra() { }
-        public Producto_Compra(int cantidad, int compraid, int productoid, int pvp, int id)
+        public Producto_Compra(int cantidad, int compraid, int productoid, int pvp)
         {
             Cantidad = cantidad;
             Compraid = compraid;
-            //Productoid = productoid;
+            Productoid = productoid;
             PVP = pvp;
-            Id = id;
         }
         [Key]
-        public int Id { get; set; }
         public int Compraid { get; set; }
         public int Productoid { get; set; }
         public int Cantidad { get; set; }

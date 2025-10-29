@@ -2,15 +2,15 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AppForSEII2526.API.Controller
+namespace AppForSEII2526.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ComprarMerchandaisingController : ControllerBase
+    public class MerchandaisingController : ControllerBase
     {
         private readonly ApplicationDbContext _context; 
-        private readonly ILogger<ComprarMerchandaisingController> _logger;
-        public ComprarMerchandaisingController(ApplicationDbContext context, ILogger<ComprarMerchandaisingController> logger)
+        private readonly ILogger<MerchandaisingController> _logger;
+        public MerchandaisingController(ApplicationDbContext context, ILogger<MerchandaisingController> logger)
         {
             _context = context;
             _logger = logger;
@@ -23,11 +23,12 @@ namespace AppForSEII2526.API.Controller
         {
             IList<ComprarMerchandaisingDTO> productos = await _context.Producto
                 .Include(tp => tp.TipoProducto)
-                .Include(tp => tp.producto_Compras).ThenInclude(c => c.compra)
-                .Where(producto => (filtroTipo == null || producto.TipoProducto.Nombre.Equals(filtroTipo)) &&
-                                (filtroPrecio == null || producto.PVP >= filtroPrecio))
-                .OrderBy(producto => producto.Nombre)
-                .Select(p => new ComprarMerchandaisingDTO(p.Productoid, p.Nombre, p.PVP, p.Stock, p.TipoProducto.ToString()))
+                    .Include(tp => tp.producto_Compras)
+                        .ThenInclude(c => c.compra)
+                .Where(producto => (filtroTipo == null || producto.TipoProducto.NombreProducto.Equals(filtroTipo)) &&
+                                (filtroPrecio == null || producto.PVP == filtroPrecio)) //Preguntar como hacer el tipo precio 
+                .OrderBy(producto => producto.NombreProducto)
+                .Select(p => new ComprarMerchandaisingDTO(p.Productoid, p.NombreProducto, p.PVP, p.Stock, p.TipoProducto.NombreProducto))
                 .ToListAsync();
             if (productos == null || !productos.Any())
             {

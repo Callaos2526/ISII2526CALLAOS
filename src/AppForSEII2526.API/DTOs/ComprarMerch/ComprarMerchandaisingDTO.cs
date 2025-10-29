@@ -2,18 +2,32 @@
 {
     public class ComprarMerchandaisingDTO
     {
-        public int ProductoId { get; set; }
-        public string Nombre { get; set; }
-        public decimal PVP { get; set; }
-        public int Stock { get; set; }
-        public string Tipo { get; set; }
-        public ComprarMerchandaisingDTO(int productoId, string nombre, decimal pvp, int stock, string tipo)
+        //Paso 2. El sistema muestra un listado con todos los productos de merchandising disponibles
+        //(que tengan stock) indicando su nombre, precio, tipo y el stock.
+
+        public ComprarMerchandaisingDTO(int productoId, string nombreProducto, double pvp, int stock, string tipo)
         {
             ProductoId = productoId;
-            Nombre = nombre;
+            NombreProducto = nombreProducto;
             PVP = pvp;
             Stock = stock;
             Tipo = tipo;
+        }
+        [Key]
+        public int ProductoId { get; set; }
+        public string NombreProducto { get; set; }
+        public double PVP { get; set; }
+        public int Stock { get; set; }
+        public string Tipo { get; set; }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is ComprarMerchandaisingDTO dTO &&
+                   ProductoId == dTO.ProductoId &&
+                   NombreProducto == dTO.NombreProducto &&
+                   PVP == dTO.PVP &&
+                   Stock == dTO.Stock &&
+                   Tipo == dTO.Tipo;
         }
     }
 }

@@ -23,7 +23,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Resenya> Resenyas { get; set; }
     public DbSet<Compra> Compras { get; set; }
     public DbSet<CompraBocadillo> ComprasBocadillos { get; set; }
-
+    public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder builder)
