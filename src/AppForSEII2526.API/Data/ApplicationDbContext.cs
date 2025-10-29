@@ -24,6 +24,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Compra> Compras { get; set; }
     public DbSet<CompraBocadillo> ComprasBocadillos { get; set; }
 
+    public DbSet<ApplicationUser> ApplicationUser { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder builder)
