@@ -2,7 +2,7 @@
 
 namespace AppForSEII2526.API.DTOs.ResenyaDTOs
 {
-    public class ResenyaDetailDTO
+    public class ResenyaDetailDTO : ResenyaForCreateDTO
     {
         public ResenyaDetailDTO(int id,
                                 DateTime fechaPublicacion,
