@@ -27,6 +27,35 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
         [Display(Name = "Fecha de publicacion")]
         public DateTime FechaPublicacion { get; set; }
 
+        public override bool Equals(object? obj)
+        {
+            return obj is ResenyaDetailDTO dTO &&
+                   base.Equals(obj) &&
+                   NombreUsuario == dTO.NombreUsuario &&
+                   Puntuacion == dTO.Puntuacion &&
+                   Titulo == dTO.Titulo &&
+                   Descripcion == dTO.Descripcion &&
+                   Valoracion == dTO.Valoracion &&
+                   EqualityComparer<IList<ResenyaItemDTO>>.Default.Equals(ResenyaBocadillo, dTO.ResenyaBocadillo) &&
+                   NumeroDeBocadillos == dTO.NumeroDeBocadillos &&
+                   Id == dTO.Id &&
+                   FechaPublicacion == dTO.FechaPublicacion;
+        }
 
+        public override int GetHashCode()
+        {
+            HashCode hash = new HashCode();
+            hash.Add(base.GetHashCode());
+            hash.Add(NombreUsuario);
+            hash.Add(Puntuacion);
+            hash.Add(Titulo);
+            hash.Add(Descripcion);
+            hash.Add(Valoracion);
+            hash.Add(ResenyaBocadillo);
+            hash.Add(NumeroDeBocadillos);
+            hash.Add(Id);
+            hash.Add(FechaPublicacion);
+            return hash.ToHashCode();
+        }
     }
 }

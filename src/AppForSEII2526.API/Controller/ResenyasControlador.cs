@@ -43,16 +43,14 @@ namespace AppForSEII2526.API.Controller
                     r.NombreUsuario,
                     r.Titulo,
                     r.Descripcion,
-                    
+                    r.Puntuacion,                    
                     ValoracionGeneral.Tres,
                     r.ResenyaBocadillo
                         .Select(rb => new ResenyaItemDTO(
                             rb.BocadilloId,
                             rb.Bocadillo.Nombre,
                             rb.Bocadillo.Pvp,
-                            rb.Bocadillo.Tamano,
-                            rb.Bocadillo.tipopan != null ? rb.Bocadillo.tipopan.Nombre : null,
-                            rb.Puntuacion
+                            rb.Bocadillo.Tamano
                         ))
                         .ToList()
                 ))
