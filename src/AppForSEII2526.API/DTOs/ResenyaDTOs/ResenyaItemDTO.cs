@@ -1,15 +1,14 @@
-﻿namespace AppForSEII2526.API.DTOs.ResenyaDTOs
+﻿
+namespace AppForSEII2526.API.DTOs.ResenyaDTOs
 {
     public class ResenyaItemDTO
     {
-        public ResenyaItemDTO(int bocadilloId, string nombre, float pvp, string tamano, string? tipoPanNombre, int puntuacion)
+        public ResenyaItemDTO(int bocadilloId, string nombre, float pvp, string tamano)
         {
             BocadilloId = bocadilloId;
             Nombre = nombre;
             Pvp = pvp;
             Tamano = tamano;
-            TipoPanNombre = tipoPanNombre;
-            Puntuacion = puntuacion;
         }
 
         public ResenyaItemDTO() { }
@@ -18,23 +17,19 @@
         public string Nombre { get; set; }
         public float Pvp { get; set; }
         public string Tamano { get; set; }
-        public string? TipoPanNombre { get; set; }
-        public int Puntuacion { get; set; }
 
         public override bool Equals(object? obj)
         {
-            return obj is ResenyaItemDTO dto &&
-                   BocadilloId == dto.BocadilloId &&
-                   Nombre == dto.Nombre &&
-                   Pvp == dto.Pvp &&
-                   Tamano == dto.Tamano &&
-                   TipoPanNombre == dto.TipoPanNombre &&
-                   Puntuacion == dto.Puntuacion;
+            return obj is ResenyaItemDTO dTO &&
+                   BocadilloId == dTO.BocadilloId &&
+                   Nombre == dTO.Nombre &&
+                   Pvp == dTO.Pvp &&
+                   Tamano == dTO.Tamano;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(BocadilloId, Nombre, Pvp, Tamano, TipoPanNombre, Puntuacion);
+            return HashCode.Combine(BocadilloId, Nombre, Pvp, Tamano);
         }
     }
 }
