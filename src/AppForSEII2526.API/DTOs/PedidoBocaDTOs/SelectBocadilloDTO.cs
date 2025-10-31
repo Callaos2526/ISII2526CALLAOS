@@ -10,7 +10,7 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
 
       
         
-        public SelectBocadilloDTO(int bocadilloID,string nombreBocadillo, string tamano, string tipoPanNombre, float pvp)
+        public SelectBocadilloDTO(int bocadilloID,string nombreBocadillo, Tamaño tamano, string tipoPanNombre, float pvp)
         {   
             BocadilloID= bocadilloID;
             NombreBocadillo = nombreBocadillo;
@@ -22,7 +22,7 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
         [Key]
         public int BocadilloID { get; set; }
         public string NombreBocadillo { get; set; }
-        public string Tamano { get; set; }
+        public Tamaño Tamano { get; set; }
         public string TipoPanNombre { get; set; } //dice noelia que bien que sea string y no objeto tipopan
         public float Pvp { get; set; }
 

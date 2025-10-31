@@ -10,11 +10,9 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
         //(nombre, precio y tipo de pan y cantidad). 
 
 
-
-
         public DetailsPedidoDTO(int id, DateTime fechaPedido, string nombreCliente, string apellidoCliente1, string? apellidoCliente2,
             MetodoPago metodo, IList<ItemPedidoDTO> bocadilloItem)
-               : base(nombreCliente, apellidoCliente1, apellidoCliente2, metodo, bocadilloItem) //llamo al constructor de la clase padre
+               : base(nombreCliente, apellidoCliente1, apellidoCliente2, metodo, bocadilloItem) 
         {   //inicializo los atributos de la clase hija que no estan en la clase padre
             Id = id;
             FechaPedido = fechaPedido;
@@ -23,9 +21,7 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
         
         public int Id { get; set; }
         //Darle formato para que solo entre dia mes y año
-        [DataType(System.ComponentModel.DataAnnotations.DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
-        [Display(Name = "Fecha de pedido")]
+         [Display(Name = "Fecha de pedido")]
         public DateTime FechaPedido { get; set; }
         
         public override bool Equals(object? obj)

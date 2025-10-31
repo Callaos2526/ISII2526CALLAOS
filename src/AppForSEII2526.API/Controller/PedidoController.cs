@@ -113,6 +113,7 @@ namespace AppForSEII2526.API.Controllers
 
             var paypal = _context.Paypals.FirstOrDefault(p => p.metodoName == metodoName);
             var googlepay = _context.GooglePays.FirstOrDefault(g => g.metodoName == metodoName);
+            //
             if(paypal == null && googlepay == null)
             {
                  ModelState.AddModelError("Metodo", "Error! Método de pago no registrado.");

@@ -38,7 +38,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .HasKey(rb => new { rb.BocadilloId, rb.ResenyaId });
         builder.Entity<CompraBocadillo>()
            .HasKey(cb => new { cb.CompraId, cb.BocadilloId });
+
+        builder.Entity<MetodoPago>()
+            .HasDiscriminator<string>("Discriminator")
+            .HasValue<MetodoPago>("MetodoPago")
+            .HasValue<Tarjeta>("Tarjeta")
+            .HasValue<Paypal>("Paypal")
+            .HasValue<GooglePay>("GooglePay");
     }
+
 }
     
 

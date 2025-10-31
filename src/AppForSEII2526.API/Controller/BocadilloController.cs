@@ -26,14 +26,15 @@ namespace AppForSEII2526.API
         [ProducesResponseType(typeof(IList<SelectBocadilloDTO>),(int)HttpStatusCode.OK)]
         //metodo que devuelve un ActionResult 
         public async Task<ActionResult> GetBocadilloParaPedir(string? filtroTamano, string? filtroTipoPan) //tipo Pan bien que sea String 
-        { 
+        {
+            
             //Empiezas una consulta LINQ sobre tabla Movies en ApplicationDbContext
             IList<SelectBocadilloDTO> bocadillos= await _context.Bocadillos
                 .Include(b => b.tipopan) //cuando cargue cada bocadillo, que incluya navegacion TipoPan
                 .Include(b=> b.ComprasBocadillo) //igual con comprasBocadillo
                     .ThenInclude(cb=>cb.Compra) //para cada compraBocadillo incluye su compra
                      //FILTROS: tamáño y tipo de pan (los 2 como string)
-                    .Where(bocadillo=>(filtroTamano==null || bocadillo.Tamano.Equals(filtroTamano)) && 
+                    .Where(bocadillo=>(filtroTamano==null || bocadillo.Tamano.ToString().Equals(filtroTamano)) && 
                 (filtroTipoPan==null  || bocadillo.tipopan.Nombre.Equals(filtroTipoPan)))
                 .OrderBy(bocadillo=> bocadillo.Nombre)
 

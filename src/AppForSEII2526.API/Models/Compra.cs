@@ -12,12 +12,7 @@
             ApplicationUser= applicationUser;
         }
         [Key]
-        public int CompraId { get; set; }
-        //[Required]
-        //public string NombreCliente { get; set; }
-        //[Required]
-        //public string ApellidoCliente1 { get; set; }
-        //public string? ApellidoCliente2 { get; set; }
+        public int CompraId { get; set; }       
 
         [Required]
         //Darle formato para que solo entre dia mes y año

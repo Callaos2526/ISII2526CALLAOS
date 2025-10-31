@@ -1,10 +1,8 @@
 ﻿using AppForSEII2526.API.Models;
-
 namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
 {
     public class CreatePedidoDTO
     {
-
         //PASO 5. El sistema muestra la lista de bocadillos seleccionados incluyendo su nombre, precio 
         //y tipo de pan
         //
