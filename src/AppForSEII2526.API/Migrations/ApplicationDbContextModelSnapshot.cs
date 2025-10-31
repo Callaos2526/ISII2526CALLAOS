@@ -71,12 +71,11 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Sruename2")
+                    b.Property<string>("Surname1")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Surname1")
-                        .IsRequired()
+                    b.Property<string>("Surname2")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -210,20 +209,12 @@ namespace AppForSEII2526.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CompraId"));
 
-                    b.Property<string>("Apellido_1Cliente")
+                    b.Property<string>("ApplicationUserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Apellido_2Cliente")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("FechaCompra")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("NombreCliente")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<float>("PrecioTotal")
                         .HasColumnType("real");
@@ -235,6 +226,8 @@ namespace AppForSEII2526.API.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("CompraId");
+
+                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("metodoPagoId");
 
@@ -730,11 +723,19 @@ namespace AppForSEII2526.API.Migrations
 
             modelBuilder.Entity("AppForSEII2526.API.Models.Compra", b =>
                 {
+                    b.HasOne("AppForSEII2526.API.Models.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("AppForSEII2526.API.Models.MetodoPago", "metodoPago")
                         .WithMany()
                         .HasForeignKey("metodoPagoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ApplicationUser");
 
                     b.Navigation("metodoPago");
                 });
@@ -742,7 +743,7 @@ namespace AppForSEII2526.API.Migrations
             modelBuilder.Entity("AppForSEII2526.API.Models.CompraBocadillo", b =>
                 {
                     b.HasOne("AppForSEII2526.API.Models.Bocadillo", "Bocadillo")
-                        .WithMany()
+                        .WithMany("ComprasBocadillo")
                         .HasForeignKey("BocadilloId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -876,6 +877,8 @@ namespace AppForSEII2526.API.Migrations
 
             modelBuilder.Entity("AppForSEII2526.API.Models.Bocadillo", b =>
                 {
+                    b.Navigation("ComprasBocadillo");
+
                     b.Navigation("ResenyaBocadillo");
                 });
 

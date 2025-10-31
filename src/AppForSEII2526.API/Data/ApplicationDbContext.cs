@@ -23,6 +23,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Resenya> Resenyas { get; set; }
     public DbSet<Compra> Compras { get; set; }
     public DbSet<CompraBocadillo> ComprasBocadillos { get; set; }
+    //esto lo acabo de añadir
+    public DbSet<ApplicationUser> ApplicationUser { get; set; }
 
 
 

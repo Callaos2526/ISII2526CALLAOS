@@ -1,57 +1,57 @@
 ﻿namespace AppForSEII2526.API.Models
 {
-    public class Compra
+    public class Compra //en esta clase preguntar a noelia si tengo que quitar la inicializacion de los string del usuario abajo
     {
-        public Compra() { }
-        public Compra(string apellido_1cliente, string apellido_2cliente, int compraid, DateTime fechacompra, int nbocadillos, string nombrecliente, float preciototal)
+        public Compra() { } //si me pide que añada direccion la gestiono con ns q
+        public Compra(int compraid, DateTime fechacompra, int nbocadillos, float preciototal, ApplicationUser applicationUser)
         {
-            Apellido_1Cliente = apellido_1cliente;
-            Apellido_2Cliente = apellido_2cliente;
             CompraId = compraid;
             FechaCompra = fechacompra;
             nBoadillos = nbocadillos;
-            NombreCliente = nombrecliente;
             PrecioTotal = preciototal;
+            ApplicationUser= applicationUser;
         }
         [Key]
         public int CompraId { get; set; }
+        //[Required]
+        //public string NombreCliente { get; set; }
+        //[Required]
+        //public string ApellidoCliente1 { get; set; }
+        //public string? ApellidoCliente2 { get; set; }
+
         [Required]
-        public string NombreCliente { get; set; }
-        [Required]
-        public string Apellido_1Cliente { get; set; }
-        [Required]
-        public string Apellido_2Cliente { get; set; }
-        [Required]
+        //Darle formato para que solo entre dia mes y año
+        [DataType(System.ComponentModel.DataAnnotations.DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
+        [Display(Name = "Fecha de compra")]
         public DateTime FechaCompra { get; set; }
-        [Required]
+        
         public int nBoadillos { get; set; }
         [Required]
         public MetodoPago metodoPago { get; set; }
-        [Required]
+        
         public float PrecioTotal { get; set; }
+
+        public ApplicationUser ApplicationUser { get; set; }
         //Vector de relacion 1:N con CompraBocadillo
-        [Required]
+        
         public IList<CompraBocadillo> BocadillosComprados { get; set; } = new List<CompraBocadillo>();
 
         public override bool Equals(object? obj)
         {
             return obj is Compra compra &&
                    CompraId == compra.CompraId &&
-                   NombreCliente == compra.NombreCliente &&
-                   Apellido_1Cliente == compra.Apellido_1Cliente &&
-                   Apellido_2Cliente == compra.Apellido_2Cliente &&
                    FechaCompra == compra.FechaCompra &&
                    nBoadillos == compra.nBoadillos &&
+                   EqualityComparer<MetodoPago>.Default.Equals(metodoPago, compra.metodoPago) &&
                    PrecioTotal == compra.PrecioTotal &&
+                   EqualityComparer<ApplicationUser>.Default.Equals(ApplicationUser, compra.ApplicationUser) &&
                    EqualityComparer<IList<CompraBocadillo>>.Default.Equals(BocadillosComprados, compra.BocadillosComprados);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(CompraId, NombreCliente, Apellido_1Cliente, Apellido_2Cliente, FechaCompra, nBoadillos, PrecioTotal, BocadillosComprados);
+            return HashCode.Combine(CompraId, FechaCompra, nBoadillos, metodoPago, PrecioTotal, ApplicationUser, BocadillosComprados);
         }
-
-       
-
     }
 }
