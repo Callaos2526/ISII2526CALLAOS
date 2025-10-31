@@ -19,6 +19,7 @@ namespace AppForSEII2526.API.Models
         }
         [Key]
         public int Id { get; set; }
+
         [ForeignKey("BocadilloId")]
         //relacion con Bocadillo
         public int BocadilloId { get; set; } //clave foranea DE BOCADILLO

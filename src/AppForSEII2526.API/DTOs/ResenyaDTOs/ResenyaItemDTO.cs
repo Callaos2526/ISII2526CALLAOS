@@ -5,7 +5,7 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
     public class ResenyaItemDTO
     {
         // Constructor para el GET (detalle)
-        public ResenyaItemDTO(int bocadilloId, string nombre, float pvp, string tamano, int puntuacion)
+        public ResenyaItemDTO(int bocadilloId, string nombre, float pvp, Tamaño tamano, int puntuacion)
         {
             BocadilloId = bocadilloId;
             Nombre = nombre;
@@ -29,7 +29,7 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
         // Estos tres son opcionales: solo se devuelven en el GET
         public string? Nombre { get; set; }
         public float? Pvp { get; set; }
-        public string? Tamano { get; set; }
+        public Tamaño Tamano { get; set; }
 
         [Required]
         [Range(1, 10, ErrorMessage = "La puntuación debe estar entre 1 y 10.")]
