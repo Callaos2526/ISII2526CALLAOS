@@ -10,14 +10,12 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
                                    string titulo,
                                    string descripcion,
                                    ValoracionGeneral valoracion,
-                                   int puntuacion,
                                    IList<ResenyaItemDTO> resenyaBocadillo)
         {
             NombreUsuario = nombreUsuario;
             Titulo = titulo ?? throw new ArgumentNullException(nameof(titulo));
             Descripcion = descripcion ?? throw new ArgumentNullException(nameof(descripcion));
             Valoracion = valoracion;
-            Puntuacion = puntuacion;
             ResenyaBocadillo = resenyaBocadillo ?? throw new ArgumentNullException(nameof(resenyaBocadillo));
         }
 
@@ -29,9 +27,6 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
 
         [StringLength(100, ErrorMessage = "El nombre de usuario no puede superar 100 caracteres")]
         public string? NombreUsuario { get; set; }
-
-        [Required(ErrorMessage = "Por favor, proporciona una puntuación total entre 1 y 10")]
-        public int Puntuacion { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Por favor, escribe un título para la reseña")]
         [StringLength(120, MinimumLength = 3, ErrorMessage = "El título debe tener entre 3 y 120 caracteres")]
@@ -53,14 +48,12 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
         [JsonPropertyName("NumeroDeBocadillos")]
         public int NumeroDeBocadillos => ResenyaBocadillo?.Count ?? 0;
 
-        protected static bool TodasLasPuntuacionesValidas(IEnumerable<ResenyaItemDTO> items)
-            => items.All(i => i.Puntuacion >= 1 && i.Puntuacion <= 10);
+        
 
         public override bool Equals(object? obj)
         {
             return obj is ResenyaForCreateDTO dTO &&
                    NombreUsuario == dTO.NombreUsuario &&
-                   Puntuacion == dTO.Puntuacion &&
                    Titulo == dTO.Titulo &&
                    Descripcion == dTO.Descripcion &&
                    Valoracion == dTO.Valoracion &&
@@ -70,7 +63,7 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(NombreUsuario, Puntuacion, Titulo, Descripcion, Valoracion, ResenyaBocadillo, NumeroDeBocadillos);
+            return HashCode.Combine(NombreUsuario,Titulo, Descripcion, Valoracion, ResenyaBocadillo, NumeroDeBocadillos);
         }
     }
 }

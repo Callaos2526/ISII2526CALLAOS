@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AppForSEII2526.API.Models;
 using AppForSEII2526.API.DTOs.ResenyaDTOs;
-using static AppForSEII2526.API.Models.Resenya;
+using static AppForSEII2526.API.Models.ResenyaBocadillo;
 
 namespace AppForSEII2526.API.Controller
 {
@@ -43,8 +43,7 @@ namespace AppForSEII2526.API.Controller
                     r.NombreUsuario,
                     r.Titulo,
                     r.Descripcion,
-                    r.Puntuacion,                    
-                    ValoracionGeneral.Tres,
+                    r.Valoracion,
                     r.ResenyaBocadillo
                         .Select(rb => new ResenyaItemDTO(
                             rb.BocadilloId,
@@ -74,10 +73,6 @@ namespace AppForSEII2526.API.Controller
         {
             if (resenyaForCreate.ResenyaBocadillo == null || resenyaForCreate.ResenyaBocadillo.Count == 0)
                 ModelState.AddModelError("ResenyaBocadillo", "Error: Debes incluir al menos un bocadillo con su puntuación (1..10)");
-
-            if (resenyaForCreate.ResenyaBocadillo != null &&
-                resenyaForCreate.ResenyaBocadillo.Any(i => i.Puntuacion < 1 || i.Puntuacion > 10))
-                ModelState.AddModelError("Puntuacion", "Error: La puntuación de cada bocadillo debe estar entre 1 y 10");
 
             if (resenyaForCreate.ResenyaBocadillo != null)
             {
@@ -126,7 +121,6 @@ namespace AppForSEII2526.API.Controller
                 resenya.ResenyaBocadillo.Add(new ResenyaBocadillo(
                     id: 0,
                     bocadilloId: item.BocadilloId,
-                    puntuacion: item.Puntuacion,
                     resenyaId: 0
                 ));
             }
@@ -152,9 +146,7 @@ namespace AppForSEII2526.API.Controller
                           b.Id,
                           b.Nombre,
                           b.Pvp,
-                          b.Tamano,
-                          b.TipoPanNombre,
-                          i.Puntuacion
+                          b.Tamano
                       ))
                 .ToList();
 

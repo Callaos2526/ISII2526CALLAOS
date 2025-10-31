@@ -1,4 +1,5 @@
 ﻿using static AppForSEII2526.API.Models.Resenya;
+using static AppForSEII2526.API.Models.ResenyaBocadillo;
 
 namespace AppForSEII2526.API.DTOs.ResenyaDTOs
 {
@@ -9,10 +10,9 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
                                 string? nombreUsuario,
                                 string titulo,
                                 string descripcion,
-                                int puntuacion,
                                 ValoracionGeneral valoracion,
                                 IList<ResenyaItemDTO> resenyaBocadillo)
-            : base(nombreUsuario, titulo, descripcion, valoracion, puntuacion, resenyaBocadillo)
+            : base(nombreUsuario, titulo, descripcion, valoracion, resenyaBocadillo)
         {
             Id = id;
             FechaPublicacion = fechaPublicacion;
