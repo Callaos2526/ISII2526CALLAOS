@@ -172,7 +172,7 @@ namespace AppForSEII2526.API.Controller
                 resenyaBocadillo: itemsDetalle
             );
 
-            return CreatedAtAction(nameof(GetResenya), new { id = resenya.Id }, resenyaDetail);
+            return CreatedAtAction("GetResenya", new { id = resenya.Id }, resenyaDetail);
         }
     }
 }
