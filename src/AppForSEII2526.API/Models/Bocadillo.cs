@@ -1,6 +1,5 @@
 ﻿using NuGet.Versioning;
 
-
 namespace AppForSEII2526.API.Models
 {
    
@@ -9,7 +8,7 @@ namespace AppForSEII2526.API.Models
         
         public Bocadillo() { }
         
-        public Bocadillo(int id, string nombre, float pvp, string resenyabocadillo, int stock, string tamano, int comprasDelBocadillo)
+        public Bocadillo(int id, string nombre, float pvp, string resenyabocadillo, int stock, Tamaño tamano, int comprasDelBocadillo)
         {
             ComprasDelBocadillo = comprasDelBocadillo;
             
@@ -30,10 +29,9 @@ namespace AppForSEII2526.API.Models
         public float Pvp { get; set; }
         public string Resenyabocadillo { get; set; }
         public int Stock { get; set; }
-        public string Tamano { get; set; }
+       // public string Tamano { get; set; }
 
-
-        public Tamaño tamaño { get; set; }
+        public Tamaño Tamano { get; set; }
 
    
         public TipoPan tipopan { get; set; }
@@ -50,7 +48,6 @@ namespace AppForSEII2526.API.Models
                    Resenyabocadillo == bocadillo.Resenyabocadillo &&
                    Stock == bocadillo.Stock &&
                    Tamano == bocadillo.Tamano &&
-                   tamaño == bocadillo.tamaño &&
                    EqualityComparer<TipoPan>.Default.Equals(tipopan, bocadillo.tipopan) &&
                    EqualityComparer<IList<ResenyaBocadillo>>.Default.Equals(ResenyaBocadillo, bocadillo.ResenyaBocadillo) &&
                    EqualityComparer<IList<CompraBocadillo>>.Default.Equals(ComprasBocadillo, bocadillo.ComprasBocadillo);
@@ -66,7 +63,6 @@ namespace AppForSEII2526.API.Models
             hash.Add(Resenyabocadillo);
             hash.Add(Stock);
             hash.Add(Tamano);
-            hash.Add(tamaño);
             hash.Add(tipopan);
             hash.Add(ResenyaBocadillo);
             hash.Add(ComprasBocadillo);

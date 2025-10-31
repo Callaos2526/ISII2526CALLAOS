@@ -33,7 +33,7 @@ namespace AppForSEII2526.API
                 .Include(b => b.ComprasBocadillo) //igual con comprasBocadillo
                     .ThenInclude(cb => cb.Compra) //para cada compraBocadillo incluye su compra
                                                   //FILTROS: tamáño y tipo de pan (los 2 como string)
-                    .Where(bocadillo => (filtroTamano == null || bocadillo.Tamano.Equals(filtroTamano)) &&
+                    .Where(bocadillo => (filtroTamano == null || bocadillo.Tamano.ToString().Equals(filtroTamano)) &&
                 (filtroTipoPan == null || bocadillo.tipopan.Nombre.Equals(filtroTipoPan)))
                 .OrderBy(bocadillo => bocadillo.Nombre)
 
