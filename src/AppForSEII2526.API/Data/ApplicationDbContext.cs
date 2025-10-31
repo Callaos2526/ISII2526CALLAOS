@@ -43,8 +43,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
              .HasAlternateKey(bc => new { bc.CompraId, bc.BonoId });
         builder.Entity<ResenyaBocadillo>()
             .HasKey(rb => new { rb.BocadilloId, rb.ResenyaId });
+        //builder.Entity<CompraBocadillo>()
+        // .HasKey(cb => new { cb.CompraId, cb.BocadilloId });
+
         builder.Entity<CompraBocadillo>()
-           .HasKey(cb => new { cb.CompraId, cb.BocadilloId });
+       .HasIndex(cb => new { cb.CompraId, cb.BocadilloId })
+       .IsUnique();
     }
 }
     

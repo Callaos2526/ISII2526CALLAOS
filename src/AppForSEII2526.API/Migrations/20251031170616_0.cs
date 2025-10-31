@@ -427,17 +427,17 @@ namespace AppForSEII2526.API.Migrations
                 name: "ComprasBocadillos",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     BocadilloId = table.Column<int>(type: "int", nullable: false),
                     CompraId = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false),
                     Cantidad = table.Column<int>(type: "int", nullable: false),
                     NombreBocadillo = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Precio = table.Column<float>(type: "real", nullable: false),
-                    TipoPanPanId = table.Column<int>(type: "int", nullable: false)
+                    Precio = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ComprasBocadillos", x => new { x.CompraId, x.BocadilloId });
+                    table.PrimaryKey("PK_ComprasBocadillos", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ComprasBocadillos_Bocadillos_BocadilloId",
                         column: x => x.BocadilloId,
@@ -449,12 +449,6 @@ namespace AppForSEII2526.API.Migrations
                         column: x => x.CompraId,
                         principalTable: "Compras",
                         principalColumn: "CompraId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ComprasBocadillos_TiposPan_TipoPanPanId",
-                        column: x => x.TipoPanPanId,
-                        principalTable: "TiposPan",
-                        principalColumn: "PanId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -549,9 +543,10 @@ namespace AppForSEII2526.API.Migrations
                 column: "BocadilloId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ComprasBocadillos_TipoPanPanId",
+                name: "IX_ComprasBocadillos_CompraId_BocadilloId",
                 table: "ComprasBocadillos",
-                column: "TipoPanPanId");
+                columns: new[] { "CompraId", "BocadilloId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ComprasBono_MetodoPagoId",

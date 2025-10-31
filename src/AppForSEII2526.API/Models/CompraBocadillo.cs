@@ -34,7 +34,7 @@ namespace AppForSEII2526.API.Models
         public string NombreBocadillo { get; set; }
         [Required]
         public float Precio { get; set; }
-        [Required]
+        [NotMapped]
         public List<TipoPan> TipoPan { get; set; } = new List<TipoPan>();
         public Compra Compra { get; set; }
         public Bocadillo Bocadillo { get; set; }
