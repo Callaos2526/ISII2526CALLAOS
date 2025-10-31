@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AppForSEII2526.API.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateIdentityEsquema : Migration
+    public partial class Identityschema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,9 +30,9 @@ namespace AppForSEII2526.API.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Surname1 = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Sruename2 = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NombreCliente = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApellidoCliente1 = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApellidoCliente2 = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -267,20 +267,23 @@ namespace AppForSEII2526.API.Migrations
                 {
                     CompraBonoId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    NombreCliente = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
-                    ApellidoBono1 = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
-                    ApellidoBono2 = table.Column<string>(type: "nvarchar(40)", maxLength: 40, nullable: false),
                     FechaCompraBono = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    MetodoPagoId = table.Column<int>(type: "int", nullable: false),
+                    metodoPagoId = table.Column<int>(type: "int", nullable: false),
                     NBonos = table.Column<int>(type: "int", nullable: false),
-                    PrecioTotalBono = table.Column<double>(type: "float", nullable: false)
+                    PrecioTotalBono = table.Column<double>(type: "float", nullable: false),
+                    ClienteId = table.Column<string>(type: "nvarchar(450)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ComprasBono", x => x.CompraBonoId);
                     table.ForeignKey(
-                        name: "FK_ComprasBono_MetodoPago_MetodoPagoId",
-                        column: x => x.MetodoPagoId,
+                        name: "FK_ComprasBono_AspNetUsers_ClienteId",
+                        column: x => x.ClienteId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ComprasBono_MetodoPago_metodoPagoId",
+                        column: x => x.metodoPagoId,
                         principalTable: "MetodoPago",
                         principalColumn: "metodoPagoId",
                         onDelete: ReferentialAction.Cascade);
@@ -543,9 +546,14 @@ namespace AppForSEII2526.API.Migrations
                 column: "BocadilloId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ComprasBono_MetodoPagoId",
+                name: "IX_ComprasBono_ClienteId",
                 table: "ComprasBono",
-                column: "MetodoPagoId");
+                column: "ClienteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ComprasBono_metodoPagoId",
+                table: "ComprasBono",
+                column: "metodoPagoId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Producto_Compra_Compraid",
@@ -614,9 +622,6 @@ namespace AppForSEII2526.API.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "BonosBocadillos");
 
             migrationBuilder.DropTable(
@@ -633,6 +638,9 @@ namespace AppForSEII2526.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "TiposBocadillos");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "TiposPan");

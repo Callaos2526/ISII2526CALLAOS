@@ -28,9 +28,9 @@ namespace AppForSEII2526.API.Controller
                 .Include(b => b.TipoBocadillos)
                 .Include(b => b.bonosComprados).ThenInclude(lc => lc.Compra)
                 .Where(bono => (filtroNombre == null || bono.Nombre.Contains(filtroNombre)) &&
-                                 (tipoBocadillo == null || bono.TipoBocadillos.ToString() == tipoBocadillo))
+                                 (tipoBocadillo == null || bono.TipoBocadillos.NombreTipo == tipoBocadillo))
                 .OrderBy(bono => bono.Nombre)
-                .Select(b => new SelectBonoDTO(b.BonoId, b.Nombre, b.PVP, b.NBocadillos, b.TipoBocadillos.ToString()))
+                .Select(b => new SelectBonoDTO(b.BonoId, b.Nombre, b.PVP, b.NBocadillos, b.TipoBocadillos.NombreTipo))
                 .ToListAsync();
             if (bonos == null || !bonos.Any())
             {

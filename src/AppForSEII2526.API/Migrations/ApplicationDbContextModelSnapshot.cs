@@ -30,6 +30,14 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("ApellidoCliente1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ApellidoCliente2")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -47,7 +55,7 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("NombreCliente")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -69,14 +77,6 @@ namespace AppForSEII2526.API.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Sruename2")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Surname1")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -277,36 +277,27 @@ namespace AppForSEII2526.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CompraBonoId"));
 
-                    b.Property<string>("ApellidoBono1")
+                    b.Property<string>("ClienteId")
                         .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
-
-                    b.Property<string>("ApellidoBono2")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("FechaCompraBono")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("MetodoPagoId")
-                        .HasColumnType("int");
-
                     b.Property<int>("NBonos")
                         .HasColumnType("int");
-
-                    b.Property<string>("NombreCliente")
-                        .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
 
                     b.Property<double>("PrecioTotalBono")
                         .HasColumnType("float");
 
+                    b.Property<int>("metodoPagoId")
+                        .HasColumnType("int");
+
                     b.HasKey("CompraBonoId");
 
-                    b.HasIndex("MetodoPagoId");
+                    b.HasIndex("ClienteId");
+
+                    b.HasIndex("metodoPagoId");
 
                     b.ToTable("ComprasBono");
                 });
@@ -760,11 +751,19 @@ namespace AppForSEII2526.API.Migrations
 
             modelBuilder.Entity("AppForSEII2526.API.Models.CompraBono", b =>
                 {
+                    b.HasOne("AppForSEII2526.API.Models.ApplicationUser", "Cliente")
+                        .WithMany()
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("AppForSEII2526.API.Models.MetodoPago", "MetodoPago")
                         .WithMany("compraBonos")
-                        .HasForeignKey("MetodoPagoId")
+                        .HasForeignKey("metodoPagoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Cliente");
 
                     b.Navigation("MetodoPago");
                 });

@@ -8,31 +8,18 @@
         {
         }
         // Constructor de la clase CompraBono con atributos: ApellidoBono1, ApellidoBono2, CompraBonoId, FechaCompraBono, metodoPago, nBonos, NombreCliente, PrecioTotalBono
-        public CompraBono(int compraBonoId, ApplicationUser nombreCliente, ApplicationUser apellidoCliente1, ApplicationUser apellidoCliente2, DateTime fechaCompraBono, MetodoPago metodoPago, int nBonos, double precioTotalBono, IList<BonosComprados> bonosComprados)
+        public CompraBono(int compraBonoId, ApplicationUser cliente, DateTime fechaCompraBono, MetodoPago metodoPago, int nBonos, double precioTotalBono, IList<BonosComprados> bonosComprados)
         {
             CompraBonoId = compraBonoId;
-            NombreCliente = nombreCliente;
-            ApellidoCliente1 = apellidoCliente1;
-            ApellidoCliente2 = apellidoCliente2;
             FechaCompraBono = fechaCompraBono;
             MetodoPago = metodoPago;
             NBonos = nBonos;
             PrecioTotalBono = precioTotalBono;
+            Cliente = cliente;
         }
         
         [Key]
         public int CompraBonoId { get; set; }
-        [Required]
-        [StringLength(30, ErrorMessage = "No puedes introducir un nombre mayor a 30 caracteres")]
-        public ApplicationUser NombreCliente { get; set; }
-
-        [Required]
-        [StringLength(40, ErrorMessage = "No puedes introducir un apellido mayor a 40 caracteres")]
-        public ApplicationUser ApellidoCliente1 { get; set; }
-
-        [Required]
-        [StringLength(40, ErrorMessage = "No puedes introducir un apellido mayor a 40 caracteres")]
-        public ApplicationUser ApellidoCliente2 { get; set; }
 
         [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
 
@@ -46,6 +33,9 @@
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio total debe ser mayor que 0")]
         public double PrecioTotalBono { get; set; }
 
+        [DeleteBehavior(DeleteBehavior.NoAction)]
+        public ApplicationUser Cliente { get; set; }
+
         public IList<BonosComprados> bonosComprados { get; set; } = new List<BonosComprados>();
 
 
@@ -53,9 +43,6 @@
         {
             return obj is CompraBono bono &&
                    CompraBonoId == bono.CompraBonoId &&
-                   NombreCliente == bono.NombreCliente &&
-                   ApellidoCliente1 == bono.ApellidoCliente1 &&
-                   ApellidoCliente2 == bono.ApellidoCliente2 &&
                    FechaCompraBono == bono.FechaCompraBono &&
                    MetodoPago == bono.MetodoPago &&
                    NBonos == bono.NBonos &&
@@ -67,9 +54,6 @@
         {
             HashCode hash = new HashCode();
             hash.Add(CompraBonoId);
-            hash.Add(NombreCliente);
-            hash.Add(ApellidoCliente1);
-            hash.Add(ApellidoCliente2);
             hash.Add(FechaCompraBono);
             hash.Add(MetodoPago);
             hash.Add(NBonos);

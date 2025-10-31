@@ -36,9 +36,9 @@ namespace LosDelEspacio.API.Controllers
                  .Include(compra => compra.bonosComprados)
                     .ThenInclude(bonoItem => bonoItem.Bono)
                         .ThenInclude(bono => bono.TipoBocadillos)
-             .Select(comprabono => new CompraBonoDetallesDTO(comprabono.CompraBonoId, comprabono.NombreCliente, comprabono.ApellidoCliente1, comprabono.ApellidoCliente2,
-                                                             comprabono.MetodoPago, comprabono.FechaCompraBono, comprabono.PrecioTotalBono, comprabono.bonosComprados.Select(
-                                                             cb => new BonoItemDTO(cb.Bono.BonoId, cb.Bono.Nombre, cb.Bono.PVP, cb.Bono.NBocadillos, cb.Bono.TipoBocadillos))
+             .Select(comprabono => new CompraBonoDetallesDTO(comprabono.CompraBonoId, comprabono.Cliente,comprabono.MetodoPago, comprabono.FechaCompraBono, comprabono.PrecioTotalBono,
+                                                             comprabono.bonosComprados.Select(cb => new BonoItemForCreateDTO(cb.Bono.BonoId, cb.Cantidad, cb.Bono.Nombre, cb.Bono.PVP, cb.Bono.NBocadillos,
+                                                             cb.Bono.TipoBocadillos.NombreTipo))
                                                              .ToList())).FirstOrDefaultAsync();
 
 
@@ -56,73 +56,150 @@ namespace LosDelEspacio.API.Controllers
         [Route("[action]")]
         [ProducesResponseType(typeof(CompraBonoDetallesDTO), (int)HttpStatusCode.Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.Conflict)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Conflict)]
         public async Task<ActionResult> CrearCompra(CrearCompraDTO crearCompra)
         {
-
-
-            if (crearCompra.BonoItem.Count == 0)
+            // Validaciones iniciales
+            if (crearCompra == null)
             {
-                ModelState.AddModelError("bonos", "Error! Debes seleccionar algún libro");
+                ModelState.AddModelError("CrearCompra", "Error! El cuerpo de la petición no puede ser vacío");
                 return BadRequest(new ValidationProblemDetails(ModelState));
             }
 
-
-
-            // Corrección para CS7036: Se debe proporcionar todos los argumentos requeridos por el constructor de CompraBono.
-            // Además, simplificación de la expresión "new" para IDE0090.
-
-            CompraBono com = new(
-                crearCompra.CompraId,
-                crearCompra.NombreCliente,
-                crearCompra.ApellidoCliente1,
-                crearCompra.ApellidoCliente2,
-                crearCompra.FechaCompra,
-                crearCompra.Metodo,
-                crearCompra.BonoItem.Count, // NBonos, asumiendo que corresponde a la cantidad de bonos comprados
-                crearCompra.PrecioTotal,    // precioTotalBono
-                new List<BonosComprados>()  // bonosComprados, inicializado vacío
-            );
-
-            BonoBocadillo bono;
-            foreach (var item in crearCompra.BonoItem)
+            if (crearCompra.BonoItem == null || crearCompra.BonoItem.Count == 0)
             {
-                bono = await _context.BonosBocadillos.FindAsync(item.ID);
-                if (bono == null)
-                {
-                    ModelState.AddModelError("Bonos", $"Error, el bono {item.Nombre}no existe en nuestra tienda");
-
-                }
-                else
-                {
-                    if (bono.NBocadillos < item.NumeroDeBocadillos)
-                    {
-                        ModelState.AddModelError("Bonos", $"Error, la cantidad de bonos {item.Nombre} no puede ser mayor a 20 y has seleccionado {item.NumeroDeBocadillos}");
-                    }
-                    else
-                    {
-                        bono.NBocadillos -= item.NumeroDeBocadillos;
-                        com.bonosComprados.Add(new BonosComprados(item.ID, bono.BonoId, item.NumeroDeBocadillos, com.CompraBonoId, com.PrecioTotalBono, bono, com));
-                    }
-                }
-
+                ModelState.AddModelError("Bonos", "Error! Debes seleccionar algún bono");
             }
+
+            if (string.IsNullOrWhiteSpace(crearCompra.NombreCliente))
+                ModelState.AddModelError("NombreCliente", "Error! El nombre es obligatorio");
+
+            if (string.IsNullOrWhiteSpace(crearCompra.ApellidoCliente1) || string.IsNullOrWhiteSpace(crearCompra.ApellidoCliente2))
+                ModelState.AddModelError("Apellidos", "Error! Los apellidos son obligatorios");
+
+            // Buscar cliente existente por nombre y apellidos; si no existe, se creará uno nuevo
+            ApplicationUser cliente = null;
+            if (!ModelState.ContainsKey("NombreCliente") && !ModelState.ContainsKey("Apellidos"))
+            {
+                cliente = _context.ApplicationUsers
+                    .FirstOrDefault(u => u.NombreCliente == crearCompra.NombreCliente
+                                      && u.ApellidoCliente1 == crearCompra.ApellidoCliente1
+                                      && u.ApellidoCliente2 == crearCompra.ApellidoCliente2);
+            }
+
+            // Buscar método de pago por nombre (priorizamos el nombre en el DTO)
+            AppForSEII2526.API.Models.MetodoPago metodoPago = null;
+            if (!string.IsNullOrWhiteSpace(crearCompra.MetodoPagoName))
+            {
+                metodoPago = _context.Set<AppForSEII2526.API.Models.MetodoPago>()
+                                     .FirstOrDefault(m => m.metodoName == crearCompra.MetodoPagoName);
+            }
+
+            if (metodoPago == null)
+                ModelState.AddModelError("MetodoPago", "Error! Método de pago no existe o no fue proporcionado correctamente");
 
             if (ModelState.ErrorCount > 0)
-            {
                 return BadRequest(new ValidationProblemDetails(ModelState));
+
+            // Si no hay cliente en BD, crear uno nuevo (se guardará junto con la compra)
+            if (cliente == null)
+            {
+                cliente = new ApplicationUser()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    NombreCliente = crearCompra.NombreCliente,
+                    ApellidoCliente1 = crearCompra.ApellidoCliente1,
+                    ApellidoCliente2 = crearCompra.ApellidoCliente2,
+                    UserName = crearCompra.NombreCliente // valor provisional; ajusta según lógica de usuario real
+                };
+                _context.ApplicationUsers.Add(cliente);
             }
-            com.PrecioTotalBono = com.bonosComprados.Sum(pi => pi.Cantidad * pi.Bono.PVP);
+
+            // Crear la entidad CompraBono
+            var com = new CompraBono(0, cliente, crearCompra.FechaCompra, metodoPago, 0, 0.0, new List<BonosComprados>());
+
+            BonoBocadillo bonoEntity;
+            foreach (var item in crearCompra.BonoItem)
+            {
+                // Validar campos del item
+                if (item == null)
+                {
+                    ModelState.AddModelError("Bonos", "Error! Item de bono inválido");
+                    continue;
+                }
+
+                // Cargar bono con su tipo
+                bonoEntity = await _context.BonosBocadillos
+                    .Include(b => b.TipoBocadillos)
+                    .FirstOrDefaultAsync(b => b.BonoId == item.BonoId);
+
+                if (bonoEntity == null)
+                {
+                    ModelState.AddModelError("Bonos", $"Error, el bono '{item?.BonoId}' no existe en nuestra tienda");
+                    continue;
+                }
+
+                if (item.Cantidad <= 0)
+                {
+                    ModelState.AddModelError("Bonos", $"Error, la cantidad solicitada para '{bonoEntity.Nombre}' debe ser mayor que 0");
+                    continue;
+                }
+
+                if (bonoEntity.CantidadDisponible < item.Cantidad)
+                {
+                    ModelState.AddModelError("Bonos", $"Error, no hay suficiente stock del bono '{bonoEntity.Nombre}'. Disponibles: {bonoEntity.CantidadDisponible}, solicitados: {item.Cantidad}");
+                    continue;
+                }
+
+                // Actualizamos stock y añadimos el item a la compra
+                bonoEntity.CantidadDisponible -= item.Cantidad;
+
+                var precioUnidad = bonoEntity.PVP;
+
+                var bonosComprados = new BonosComprados(0, bonoEntity.BonoId, item.Cantidad, 0, precioUnidad, bonoEntity, com);
+                com.bonosComprados.Add(bonosComprados);
+            }
+
+            // Si hubo errores al procesar items, devolvemos BadRequest
+            if (ModelState.ErrorCount > 0)
+                return BadRequest(new ValidationProblemDetails(ModelState));
+
+            // Actualizamos totales
+            com.NBonos = com.bonosComprados.Sum(bc => bc.Cantidad);
+            com.PrecioTotalBono = com.bonosComprados.Sum(bc => bc.Cantidad * bc.PrecioBono);
 
             _context.ComprasBono.Add(com);
-            await _context.SaveChangesAsync();
 
-            var compraDetalles = new CompraBonoDetallesDTO(com.CompraBonoId, com.NombreCliente, com.ApellidoCliente1, com.ApellidoCliente2, com.MetodoPago
-                                                           ,com.FechaCompraBono, com.PrecioTotalBono, crearCompra.BonoItem);
+            try
+            {
+                // Guardamos compra, cliente nuevo (si se creó) y actualización de stock
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error guardando la compra");
+                ModelState.AddModelError("Compra", "Error! Ocurrió un error al guardar la compra, inténtalo más tarde");
+                return Conflict("Error: " + ex.Message);
+            }
+
+            // Construimos DTO de respuesta con los datos finales
+            var compraDetalles = new CompraBonoDetallesDTO(
+                com.CompraBonoId,
+                com.Cliente,
+                com.MetodoPago,
+                com.FechaCompraBono,
+                com.PrecioTotalBono,
+                com.bonosComprados.Select(bc => new BonoItemForCreateDTO(
+                    bc.Bono.BonoId,
+                    bc.Cantidad,
+                    bc.Bono.Nombre,
+                    bc.PrecioBono,
+                    bc.Bono.NBocadillos,
+                    bc.Bono.TipoBocadillos.NombreTipo
+                )).ToList()
+            );
 
             return CreatedAtAction("GetCompra", new { id = com.CompraBonoId }, compraDetalles);
         }
-
-
     }
 }
