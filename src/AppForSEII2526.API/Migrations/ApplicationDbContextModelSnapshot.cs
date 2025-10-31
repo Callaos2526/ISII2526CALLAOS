@@ -450,6 +450,9 @@ namespace AppForSEII2526.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Valoracion")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.ToTable("Resenyas");

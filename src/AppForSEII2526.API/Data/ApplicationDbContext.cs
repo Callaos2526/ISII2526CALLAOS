@@ -32,6 +32,13 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<MetodoPago>()
+        .HasDiscriminator<string>("Discriminator")
+        .HasValue<MetodoPago>("MetodoPago")
+        .HasValue<Tarjeta>("Tarjeta")
+        .HasValue<Paypal>("Paypal")
+        .HasValue<GooglePay>("GooglePay");
+
         builder.Entity<BonosComprados>()
              .HasAlternateKey(bc => new { bc.CompraId, bc.BonoId });
         builder.Entity<ResenyaBocadillo>()

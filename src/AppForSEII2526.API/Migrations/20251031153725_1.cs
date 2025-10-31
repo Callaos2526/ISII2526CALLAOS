@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AppForSEII2526.API.Migrations
 {
     /// <inheritdoc />
-    public partial class _0 : Migration
+    public partial class _1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -110,7 +110,8 @@ namespace AppForSEII2526.API.Migrations
                     Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FechaPublicacion = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NombreUsuario = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Titulo = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Titulo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Valoracion = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
