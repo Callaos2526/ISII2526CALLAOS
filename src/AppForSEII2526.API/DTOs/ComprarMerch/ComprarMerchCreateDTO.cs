@@ -11,8 +11,9 @@ namespace AppForSEII2526.API.DTOs.ComprarMerch
         //o Google pay). Siendo necesario rellenar todos los campos para poder continuar, salvo
         //el campo segundo apellido, ya que es opcional.Para cada producto, se pide indicar la
         //cantidad que se va a comprar.
-        public ComprarMerchCreateDTO(string nombre, string apellido_1, string? apellido_2, string direccionEnvio, MetodoPago metodo_Pago, int cantidad, IList<ComprarMerchItemDTO> merchItems)
+        public ComprarMerchCreateDTO(int compraId,string nombre, string apellido_1, string? apellido_2, string direccionEnvio, MetodoPago metodo_Pago, int cantidad, IList<ComprarMerchItemDTO> merchItems)
         {
+            CompraId = compraId;
             Nombre = nombre ?? throw new ArgumentNullException(nameof(nombre));
             Apellido_1 = apellido_1 ?? throw new ArgumentNullException(nameof(apellido_1));
             Apellido_2 = apellido_2; 
@@ -25,6 +26,7 @@ namespace AppForSEII2526.API.DTOs.ComprarMerch
         {
                        MerchItems = new List<ComprarMerchItemDTO>();
         }
+        public int CompraId { get; set; }
         [Required(AllowEmptyStrings = false, ErrorMessage = "Por favor, indica tu nombre")]
         [StringLength(50, MinimumLength = 2, ErrorMessage = "El nombre debe tener entre 2 y 50 caracteres")]
         public string Nombre { get; set; }

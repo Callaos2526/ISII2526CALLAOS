@@ -30,6 +30,14 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Apellido1")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Apellido2")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -47,7 +55,7 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -69,14 +77,6 @@ namespace AppForSEII2526.API.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Sruename2")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Surname1")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("TwoFactorEnabled")
@@ -319,13 +319,9 @@ namespace AppForSEII2526.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Compraid"));
 
-                    b.Property<string>("Apellido_1")
+                    b.Property<string>("ClienteId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Apellido_2")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("DireccionEnvio")
                         .IsRequired()
@@ -334,18 +330,17 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<DateTime>("FechaCompra")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Metodo_Pago")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Metodo_PagometodoPagoId")
+                        .HasColumnType("int");
 
                     b.Property<int>("PrecioFinal")
                         .HasColumnType("int");
 
                     b.HasKey("Compraid");
+
+                    b.HasIndex("ClienteId");
+
+                    b.HasIndex("Metodo_PagometodoPagoId");
 
                     b.ToTable("Compra_Producto");
                 });
@@ -384,12 +379,12 @@ namespace AppForSEII2526.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Productoid"));
 
-                    b.Property<string>("Nombre")
+                    b.Property<string>("NombreProducto")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("PVP")
-                        .HasColumnType("int");
+                    b.Property<double>("PVP")
+                        .HasColumnType("float");
 
                     b.Property<int>("Stock")
                         .HasColumnType("int");
@@ -401,16 +396,16 @@ namespace AppForSEII2526.API.Migrations
 
             modelBuilder.Entity("AppForSEII2526.API.Models.Producto_Compra", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("Compraid")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Compraid"));
 
                     b.Property<int>("Cantidad")
                         .HasColumnType("int");
 
-                    b.Property<int>("Compraid")
+                    b.Property<int>("Compraid1")
                         .HasColumnType("int");
 
                     b.Property<int>("PVP")
@@ -419,9 +414,9 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<int>("Productoid")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("Compraid");
 
-                    b.HasIndex("Compraid");
+                    b.HasIndex("Compraid1");
 
                     b.HasIndex("Productoid");
 
@@ -524,7 +519,7 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<int>("Productoid")
                         .HasColumnType("int");
 
-                    b.Property<string>("Nombre")
+                    b.Property<string>("NombreProducto")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -769,11 +764,30 @@ namespace AppForSEII2526.API.Migrations
                     b.Navigation("MetodoPago");
                 });
 
+            modelBuilder.Entity("AppForSEII2526.API.Models.Compra_Producto", b =>
+                {
+                    b.HasOne("AppForSEII2526.API.Models.ApplicationUser", "Cliente")
+                        .WithMany()
+                        .HasForeignKey("ClienteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppForSEII2526.API.Models.MetodoPago", "Metodo_Pago")
+                        .WithMany()
+                        .HasForeignKey("Metodo_PagometodoPagoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Cliente");
+
+                    b.Navigation("Metodo_Pago");
+                });
+
             modelBuilder.Entity("AppForSEII2526.API.Models.Producto_Compra", b =>
                 {
                     b.HasOne("AppForSEII2526.API.Models.Compra_Producto", "compra")
                         .WithMany()
-                        .HasForeignKey("Compraid")
+                        .HasForeignKey("Compraid1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

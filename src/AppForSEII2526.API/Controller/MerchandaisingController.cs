@@ -26,7 +26,7 @@ namespace AppForSEII2526.API.Controllers
                     .Include(tp => tp.producto_Compras)
                         .ThenInclude(c => c.compra)
                 .Where(producto => (filtroTipo == null || producto.TipoProducto.NombreProducto.Equals(filtroTipo)) &&
-                                (filtroPrecio == null || producto.PVP == filtroPrecio)) //Preguntar como hacer el tipo precio 
+                                (filtroPrecio == null || producto.PVP <= filtroPrecio)) //Preguntar como hacer el tipo precio 
                 .OrderBy(producto => producto.NombreProducto)
                 .Select(p => new ComprarMerchandaisingDTO(p.Productoid, p.NombreProducto, p.PVP, p.Stock, p.TipoProducto.NombreProducto))
                 .ToListAsync();

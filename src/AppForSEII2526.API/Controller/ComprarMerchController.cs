@@ -2,6 +2,7 @@
 using AppForSEII2526.API.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Net;
 
 namespace AppForSEII2526.API.Controllers
@@ -39,19 +40,17 @@ namespace AppForSEII2526.API.Controllers
                         .ThenInclude(p => p.TipoProducto)
                 .Select(compra => new ComprarMerchDetailDTO(
                 compra.Compraid,
-                compra.Nombre,
-                compra.Apellido_1,
-                compra.Apellido_2,
+                compra.Cliente,
                 compra.DireccionEnvio,
                 compra.Metodo_Pago,
-                compra.Cantidad,//Revisar donde va cantidad
+                compra.ListaCompra.Sum(pc => pc.Cantidad),
                 compra.ListaCompra.Select(pc => new ComprarMerchItemDTO(
                     pc.Productoid,
                     pc.producto.NombreProducto,
                     pc.PVP,
                     pc.producto.TipoProducto.NombreProducto,
                     pc.Cantidad
-            )).ToList())).FirstOrDefaultAsync();
+            )).ToList<ComprarMerchItemDTO>())).FirstOrDefaultAsync();
             if (compradto == null)
             {
                 _logger.LogError($"Error: Compra con id {id} no existe");
@@ -65,7 +64,7 @@ namespace AppForSEII2526.API.Controllers
         [Route("[action]")]
         [ProducesResponseType(typeof(ComprarMerchDetailDTO), (int)HttpStatusCode.Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.Conflict)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.Conflict)]
         public async Task<ActionResult> CrearCompraMerch(ComprarMerchCreateDTO compraMerch)
         {
             // Paso 1: comprobaciones: paso 5 del caso de uso 
@@ -96,27 +95,27 @@ namespace AppForSEII2526.API.Controllers
                 return BadRequest(new ValidationProblemDetails(ModelState));
             // Validar existencia y stock de productos
             var productosIds = compraMerch.MerchItems.Select(m => m.Id).ToList();
-            var productosBD = _context.Producto
-                .Where(p => productosIds.Contains(p.Productoid))
+            var productosBD = await _context.Producto
                 .Include(p => p.TipoProducto)
-                .ToList();
+                .Where(p => productosIds.Contains(p.Productoid))
+                .ToListAsync();
 
             double precioFinal = 0;
             List<Producto_Compra> lineasCompra = new();
-
-            for (int i = 0; i < compraMerch.MerchItems.Count; i++)
+            foreach (var item in compraMerch.MerchItems)
             {
-                var item = compraMerch.MerchItems[i];
                 var producto = productosBD.FirstOrDefault(p => p.Productoid == item.Id);
                 if (producto == null)
                 {
-                    ModelState.AddModelError($"MerchItems[{i}]", $"El producto con id {item.Id} no existe.");
+                    ModelState.AddModelError("MerchItems", $"El producto con id {item.Id} no existe.");
                     continue;
                 }
                 if (producto.Stock < item.Cantidad)
-                    ModelState.AddModelError($"MerchItems[{i}]", $"No hay suficiente stock para el producto {producto.NombreProducto}.");
-
+                {
+                    ModelState.AddModelError("MerchItems", $"No hay suficiente stock para {producto.NombreProducto}.");
+                }
                 precioFinal += producto.PVP * item.Cantidad;
+
                 lineasCompra.Add(new Producto_Compra
                 {
                     Productoid = producto.Productoid,
@@ -124,24 +123,24 @@ namespace AppForSEII2526.API.Controllers
                     PVP = (int)producto.PVP,
                     producto = producto
                 });
-                // Opcional: descontar stock aquí si es persistente
-                // producto.Stock -= item.Cantidad;
             }
-
             if (ModelState.ErrorCount > 0)
                 return BadRequest(new ValidationProblemDetails(ModelState));
 
-            // Crear la compra
-            var compra_entity = new Compra_Producto
+            var cliente = new ApplicationUser
             {
                 Nombre = compraMerch.Nombre,
-                Apellido_1 = compraMerch.Apellido_1,
-                Apellido_2 = compraMerch.Apellido_2,
+                Apellido1 = compraMerch.Apellido_1,
+                Apellido2 = compraMerch.Apellido_2 ?? string.Empty
+            };
+
+            var compra_entity = new Compra_Producto
+            {
+                Cliente = cliente,
                 DireccionEnvio = compraMerch.Direccion_Envio,
                 Metodo_Pago = compraMerch.Metodo_Pago,
                 FechaCompra = DateTime.Now,
                 PrecioFinal = (int)precioFinal,
-                ApplicationUser = User,
                 ListaCompra = lineasCompra
             };
 
@@ -154,26 +153,20 @@ namespace AppForSEII2526.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                ModelState.AddModelError("Compra", $"Error: Hubo un problema al guardar la compra.");
                 return Conflict("Error: " + ex.Message);
             }
 
-            // Construir respuesta DTO de detalle
             var itemsDTO = productosBD.Select(p => new ComprarMerchItemDTO(
                 p.Productoid,
                 p.NombreProducto,
                 p.PVP,
                 p.TipoProducto.NombreProducto,
                 lineasCompra.First(lc => lc.Productoid == p.Productoid).Cantidad
-
-            //Falta cantidad
             )).ToList();
 
             var compraDetailDTO = new ComprarMerchDetailDTO(
                 compra_entity.Compraid,
-                compra_entity.Nombre,
-                compra_entity.Apellido_1,
-                compra_entity.Apellido_2,
+                cliente,
                 compra_entity.DireccionEnvio,
                 compra_entity.Metodo_Pago,
                 lineasCompra.Sum(x => x.Cantidad),
@@ -181,6 +174,7 @@ namespace AppForSEII2526.API.Controllers
             );
 
             return CreatedAtAction("GetCompraDetail", new { id = compra_entity.Compraid }, compraDetailDTO);
+
         }
     }
 }
