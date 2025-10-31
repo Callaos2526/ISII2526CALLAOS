@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AppForSEII2526.API.Models;
 using AppForSEII2526.API.DTOs.ResenyaDTOs;
-using static AppForSEII2526.API.Models.ResenyaBocadillo;
 
 namespace AppForSEII2526.API.Controller
 {
@@ -20,6 +19,7 @@ namespace AppForSEII2526.API.Controller
             _logger = logger;
         }
 
+        // Paso 7 - GET detalle
         [HttpGet]
         [Route("[action]")]
         [ProducesResponseType(typeof(ResenyaDetailDTO), (int)HttpStatusCode.OK)]
@@ -34,9 +34,9 @@ namespace AppForSEII2526.API.Controller
 
             var resenya = await _context.Resenyas
                 .Where(r => r.Id == id)
-                    .Include(r => r.ResenyaBocadillo)                 
-                        .ThenInclude(rb => rb.Bocadillo)              
-                            .ThenInclude(b => b.tipopan)              
+                .Include(r => r.ResenyaBocadillo)
+                    .ThenInclude(rb => rb.Bocadillo)
+                        .ThenInclude(b => b.tipopan)
                 .Select(r => new ResenyaDetailDTO(
                     r.Id,
                     r.FechaPublicacion,
@@ -49,7 +49,8 @@ namespace AppForSEII2526.API.Controller
                             rb.BocadilloId,
                             rb.Bocadillo.Nombre,
                             rb.Bocadillo.Pvp,
-                            rb.Bocadillo.Tamano
+                            rb.Bocadillo.Tamano,
+                            rb.Puntuacion   // <- importante: ahora pasamos la puntuación del item
                         ))
                         .ToList()
                 ))
@@ -64,27 +65,32 @@ namespace AppForSEII2526.API.Controller
             return Ok(resenya);
         }
 
+        // Paso 5 - POST crear
         [HttpPost]
         [Route("[action]")]
         [ProducesResponseType(typeof(ResenyaDetailDTO), (int)HttpStatusCode.Created)]
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.Conflict)]
-        public async Task<ActionResult> CreateResenya(ResenyaForCreateDTO resenyaForCreate)
+        public async Task<ActionResult> CreateResenya(ResenyaForCreateDTO dto)
         {
-            if (resenyaForCreate.ResenyaBocadillo == null || resenyaForCreate.ResenyaBocadillo.Count == 0)
+            if (dto.ResenyaBocadillo == null || dto.ResenyaBocadillo.Count == 0)
                 ModelState.AddModelError("ResenyaBocadillo", "Error: Debes incluir al menos un bocadillo con su puntuación (1..10)");
 
-            if (resenyaForCreate.ResenyaBocadillo != null)
+            if (dto.ResenyaBocadillo != null &&
+                dto.ResenyaBocadillo.Any(i => i.Puntuacion < 1 || i.Puntuacion > 10))
+                ModelState.AddModelError("Puntuacion", "Error: La puntuación de cada bocadillo debe estar entre 1 y 10");
+
+            if (dto.ResenyaBocadillo != null)
             {
-                var ids = resenyaForCreate.ResenyaBocadillo.Select(i => i.BocadilloId).ToList();
+                var ids = dto.ResenyaBocadillo.Select(i => i.BocadilloId).ToList();
                 if (ids.Distinct().Count() != ids.Count)
                     ModelState.AddModelError("ResenyaBocadillo", "Error: No se permiten bocadillos duplicados en la reseña");
             }
 
-            if (ModelState.ErrorCount > 0)
+            if (!ModelState.IsValid)
                 return BadRequest(new ValidationProblemDetails(ModelState));
 
-            var idsSolicitados = resenyaForCreate.ResenyaBocadillo.Select(i => i.BocadilloId).ToList();
+            var idsSolicitados = dto.ResenyaBocadillo.Select(i => i.BocadilloId).ToList();
 
             var bocadillos = await _context.Bocadillos
                 .Include(b => b.tipopan)
@@ -94,8 +100,7 @@ namespace AppForSEII2526.API.Controller
                     b.Id,
                     b.Nombre,
                     b.Pvp,
-                    b.Tamano,
-                    TipoPanNombre = b.tipopan != null ? b.tipopan.Nombre : null
+                    b.Tamano
                 })
                 .ToListAsync();
 
@@ -105,24 +110,30 @@ namespace AppForSEII2526.API.Controller
                 return BadRequest(new ValidationProblemDetails(ModelState));
             }
 
+            // Crear entidad Resenya (tu constructor no pide Valoracion, se asigna después)
             var resenya = new Resenya(
                 id: 0,
-                descripcion: resenyaForCreate.Descripcion,
+                descripcion: dto.Descripcion,
                 fechaPublicacion: DateTime.Now,
-                nombreUsuario: resenyaForCreate.NombreUsuario ?? "Anónimo",
-                titulo: resenyaForCreate.Titulo
+                nombreUsuario: dto.NombreUsuario ?? "Anónimo",
+                titulo: dto.Titulo
             )
             {
                 ResenyaBocadillo = new List<ResenyaBocadillo>()
             };
 
-            foreach (var item in resenyaForCreate.ResenyaBocadillo)
+            // Asignar la valoración general
+            resenya.Valoracion = dto.Valoracion;
+
+            // Crear items de la reseña y enlazar la navegación (EF rellena ResenyaId)
+            foreach (var item in dto.ResenyaBocadillo)
             {
-                resenya.ResenyaBocadillo.Add(new ResenyaBocadillo(
-                    id: 0,
-                    bocadilloId: item.BocadilloId,
-                    resenyaId: 0
-                ));
+                resenya.ResenyaBocadillo.Add(new ResenyaBocadillo
+                {
+                    BocadilloId = item.BocadilloId,
+                    Puntuacion = item.Puntuacion,
+                    Resenya = resenya
+                });
             }
 
             _context.Add(resenya);
@@ -133,12 +144,12 @@ namespace AppForSEII2526.API.Controller
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
-                ModelState.AddModelError("Resenya", "Error: Ocurrió un problema al guardar tu reseña, por favor inténtalo más tarde.");
-                return Conflict("Error " + ex.Message);
+                _logger.LogError(ex, "Error guardando la reseña");
+                return Conflict("Error " + (ex.InnerException?.Message ?? ex.Message));
             }
 
-            var itemsDetalle = resenyaForCreate.ResenyaBocadillo
+            // Construir DTO de salida (detalle)
+            var itemsDetalle = dto.ResenyaBocadillo
                 .Join(bocadillos,
                       i => i.BocadilloId,
                       b => b.Id,
@@ -146,7 +157,8 @@ namespace AppForSEII2526.API.Controller
                           b.Id,
                           b.Nombre,
                           b.Pvp,
-                          b.Tamano
+                          b.Tamano,
+                          i.Puntuacion  // <- importante: viene del item enviado por el cliente
                       ))
                 .ToList();
 
@@ -156,14 +168,11 @@ namespace AppForSEII2526.API.Controller
                 nombreUsuario: resenya.NombreUsuario,
                 titulo: resenya.Titulo,
                 descripcion: resenya.Descripcion,
-                valoracion: resenyaForCreate.Valoracion,
+                valoracion: resenya.Valoracion,
                 resenyaBocadillo: itemsDetalle
             );
 
             return CreatedAtAction(nameof(GetResenya), new { id = resenya.Id }, resenyaDetail);
         }
-
-
     }
 }
-

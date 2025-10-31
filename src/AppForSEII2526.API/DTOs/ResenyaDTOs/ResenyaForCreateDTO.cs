@@ -1,9 +1,16 @@
 ﻿
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using static AppForSEII2526.API.Models.Resenya; 
 
 namespace AppForSEII2526.API.DTOs.ResenyaDTOs
 {
     public class ResenyaForCreateDTO
+        
+        // paso 5. le pide al cliente 
+//que introduzca su nombre(opcional), título de la reseña, descripción, valoración
+//general(una estrella, dos, tres, cuatro o cinco) y para cada bocadillo su respectiva
+//puntuación del 1-10, siendo todos datos obligatorios.
     {
         
         public ResenyaForCreateDTO(string? nombreUsuario,
@@ -17,12 +24,14 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
             Descripcion = descripcion ?? throw new ArgumentNullException(nameof(descripcion));
             Valoracion = valoracion;
             ResenyaBocadillo = resenyaBocadillo ?? throw new ArgumentNullException(nameof(resenyaBocadillo));
+            
         }
 
         
         public ResenyaForCreateDTO()
         {
             ResenyaBocadillo = new List<ResenyaItemDTO>();
+            
         }
 
         [StringLength(100, ErrorMessage = "El nombre de usuario no puede superar 100 caracteres")]
@@ -47,6 +56,8 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
         [Display(Name = "Número de bocadillos puntuados")]
         [JsonPropertyName("NumeroDeBocadillos")]
         public int NumeroDeBocadillos => ResenyaBocadillo?.Count ?? 0;
+        
+
 
         
 

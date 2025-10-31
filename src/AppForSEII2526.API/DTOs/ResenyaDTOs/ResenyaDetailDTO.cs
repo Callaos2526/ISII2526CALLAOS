@@ -1,5 +1,4 @@
 ﻿using static AppForSEII2526.API.Models.Resenya;
-using static AppForSEII2526.API.Models.ResenyaBocadillo;
 
 namespace AppForSEII2526.API.DTOs.ResenyaDTOs
 {
@@ -19,7 +18,7 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
            
         }
 
-
+        public ResenyaDetailDTO() { }
         public int Id { get; set; }
 
         [DataType(System.ComponentModel.DataAnnotations.DataType.Date)]
@@ -32,7 +31,6 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
             return obj is ResenyaDetailDTO dTO &&
                    base.Equals(obj) &&
                    NombreUsuario == dTO.NombreUsuario &&
-                   Puntuacion == dTO.Puntuacion &&
                    Titulo == dTO.Titulo &&
                    Descripcion == dTO.Descripcion &&
                    Valoracion == dTO.Valoracion &&
@@ -47,7 +45,6 @@ namespace AppForSEII2526.API.DTOs.ResenyaDTOs
             HashCode hash = new HashCode();
             hash.Add(base.GetHashCode());
             hash.Add(NombreUsuario);
-            hash.Add(Puntuacion);
             hash.Add(Titulo);
             hash.Add(Descripcion);
             hash.Add(Valoracion);
