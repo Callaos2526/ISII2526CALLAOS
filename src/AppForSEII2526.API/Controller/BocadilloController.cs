@@ -26,27 +26,60 @@ namespace AppForSEII2526.API
         [ProducesResponseType(typeof(IList<SelectBocadilloDTO>), (int)HttpStatusCode.OK)]
         //metodo que devuelve un ActionResult 
         public async Task<ActionResult> GetBocadilloParaPedir(string? filtroTamano, string? filtroTipoPan) //tipo Pan bien que sea String 
-        {
+        {/*
+            
             //Empiezas una consulta LINQ sobre tabla Movies en ApplicationDbContext
-            IList<SelectBocadilloDTO> bocadillos = await _context.Bocadillos
+            IList<SelectBocadilloDTO> bocadillos= await _context.Bocadillos
                 .Include(b => b.tipopan) //cuando cargue cada bocadillo, que incluya navegacion TipoPan
-                .Include(b => b.ComprasBocadillo) //igual con comprasBocadillo
-                    .ThenInclude(cb => cb.Compra) //para cada compraBocadillo incluye su compra
-                                                  //FILTROS: tamáño y tipo de pan (los 2 como string)
-                    .Where(bocadillo => (filtroTamano == null || bocadillo.Tamano.ToString().Equals(filtroTamano)) &&
-                (filtroTipoPan == null || bocadillo.tipopan.Nombre.Equals(filtroTipoPan)))
-                .OrderBy(bocadillo => bocadillo.Nombre)
+                .Include(b=> b.ComprasBocadillo) //igual con comprasBocadillo
+                    .ThenInclude(cb=>cb.Compra) //para cada compraBocadillo incluye su compra
+                     //FILTROS: tamáño y tipo de pan (los 2 como string)
+                    .Where(bocadillo=>(filtroTamano==null || bocadillo.Tamano.ToString().Equals(filtroTamano)) && 
+                (filtroTipoPan==null  || bocadillo.tipopan.Nombre.Equals(filtroTipoPan)))
+                .OrderBy(bocadillo=> bocadillo.Nombre)
 
                 //CREO EL DTO que voy a exponer al cliente: SelectBocadilloDTO
-                .Select(b => new SelectBocadilloDTO(b.Id, b.Nombre, b.Tamano, b.tipopan.Nombre, b.Pvp))
+                .Select(b=>new SelectBocadilloDTO(b.Id, b.Nombre, b.Tamano, b.tipopan.Nombre, b.Pvp))
                 .ToListAsync();
 
             //Comprobamos si hay resultados
-            if (!bocadillos.Any()) //no hace falta lo del null porque bocadillos nunca va a ser null despues de ToListAsync() (si puede ser [])
+            if ( !bocadillos.Any()) //no hace falta lo del null porque bocadillos nunca va a ser null despues de ToListAsync() (si puede ser [])
             {
                 return NotFound("No hay bocadillos que cumplan los requisitos");
             }
+            return Ok(bocadillos);*/
+
+            Tamaño? tamanoFiltrado = null;
+
+            if (!string.IsNullOrWhiteSpace(filtroTamano) &&
+                Enum.TryParse<Tamaño>(filtroTamano, ignoreCase: true, out var parsed))
+            {
+                tamanoFiltrado = parsed;
+            }
+
+            var query = _context.Bocadillos
+                .AsNoTracking()
+                .Include(b => b.tipopan)
+                .Include(b => b.ComprasBocadillo).ThenInclude(cb => cb.Compra)
+                .AsQueryable();
+
+            if (tamanoFiltrado.HasValue)
+                query = query.Where(b => b.Tamano == tamanoFiltrado.Value);
+
+            if (!string.IsNullOrWhiteSpace(filtroTipoPan))
+                query = query.Where(b => b.tipopan.Nombre == filtroTipoPan);
+
+            var bocadillos = await query
+                .OrderBy(b => b.Nombre)
+                .Select(b => new SelectBocadilloDTO(b.Id, b.Nombre, b.Tamano, b.tipopan.Nombre, b.Pvp))
+                .ToListAsync();
+
+            if (!bocadillos.Any())
+                return NotFound("No hay bocadillos que cumplan los requisitos");
+
             return Ok(bocadillos);
+
+
 
 
 
