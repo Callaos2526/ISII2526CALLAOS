@@ -110,9 +110,18 @@ namespace AppForSEII2526.API.Controllers
 
             //comprobacion del metodo de pago=> preguntar a noelia si esta bien
             var metodoName = crearPedido.Metodo.metodoName; //saco el nombre del metodo de pago que hayan introducido
+            
+            var existe_metodo = await _context.Paypals.AnyAsync(p => p.metodoName == metodoName)
+                || await _context.GooglePays.AnyAsync(g => g.metodoName == metodoName)
+                || await _context.Tarjetas.AnyAsync(t => t.metodoName == metodoName);
 
-            var paypal = _context.Paypals.FirstOrDefault(p => p.metodoName == metodoName);
+            if (!existe_metodo) {
+                ModelState.AddModelError("Metodo", "Error! Método de pago no registrado.");
+                return BadRequest(new ValidationProblemDetails(ModelState));
+            }
+            /*var paypal = _context.Paypals.FirstOrDefault(p => p.metodoName == metodoName);
             var googlepay = _context.GooglePays.FirstOrDefault(g => g.metodoName == metodoName);
+            var tarjeta = _context.Paypals.FirstOrDefault(t=>t.metodoName == metodoName);
             //
             if(paypal == null && googlepay == null)
             {
@@ -121,10 +130,8 @@ namespace AppForSEII2526.API.Controllers
 
             }
             MetodoPago metodoPagoEntidad = (MetodoPago?)paypal ?? googlepay!; //elijo el que haya => este es el que meto cuando hago la compra
-
-            //ERROR EN POST: El System.Text.Json no sabe deserializar un tipo abstracto (MetodoPago) directamente, porque no puede instanciarlo.
-
-
+            */
+           
 
 
             //******************************************************************************
@@ -149,7 +156,7 @@ namespace AppForSEII2526.API.Controllers
             //PASO3 . CREAR LA COMPRA en memoria y rellenarla 
             Compra compra = new Compra
             { //algunos paramtetros los saco del DTO que recibo
-                metodoPago = metodoPagoEntidad,
+                metodoPago = metodoName,
                 FechaCompra = DateTime.Now, //aqui pongo la fecha en el momento 
                 ApplicationUser = user,
                 BocadillosComprados = new List<CompraBocadillo>()

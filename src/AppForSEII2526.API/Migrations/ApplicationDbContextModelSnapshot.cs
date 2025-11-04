@@ -123,11 +123,7 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
-                    b.Property<string>("Tamano")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("tamaño")
+                    b.Property<int>("Tamano")
                         .HasColumnType("int");
 
                     b.Property<int>("tipopanPanId")
@@ -236,8 +232,11 @@ namespace AppForSEII2526.API.Migrations
 
             modelBuilder.Entity("AppForSEII2526.API.Models.CompraBocadillo", b =>
                 {
-                    b.Property<int>("CompraId")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("BocadilloId")
                         .HasColumnType("int");
@@ -245,7 +244,7 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<int>("Cantidad")
                         .HasColumnType("int");
 
-                    b.Property<int>("Id")
+                    b.Property<int>("CompraId")
                         .HasColumnType("int");
 
                     b.Property<string>("NombreBocadillo")
@@ -255,9 +254,12 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<float>("Precio")
                         .HasColumnType("real");
 
-                    b.HasKey("CompraId", "BocadilloId");
+                    b.HasKey("Id");
 
                     b.HasIndex("BocadilloId");
+
+                    b.HasIndex("CompraId", "BocadilloId")
+                        .IsUnique();
 
                     b.ToTable("ComprasBocadillos");
                 });
@@ -495,19 +497,11 @@ namespace AppForSEII2526.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PanId"));
 
-                    b.Property<int?>("CompraBocadilloBocadilloId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CompraBocadilloCompraId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("PanId");
-
-                    b.HasIndex("CompraBocadilloCompraId", "CompraBocadilloBocadilloId");
 
                     b.ToTable("TiposPan");
                 });
@@ -808,13 +802,6 @@ namespace AppForSEII2526.API.Migrations
                     b.Navigation("Resenya");
                 });
 
-            modelBuilder.Entity("AppForSEII2526.API.Models.TipoPan", b =>
-                {
-                    b.HasOne("AppForSEII2526.API.Models.CompraBocadillo", null)
-                        .WithMany("TipoPan")
-                        .HasForeignKey("CompraBocadilloCompraId", "CompraBocadilloBocadilloId");
-                });
-
             modelBuilder.Entity("AppForSEII2526.API.Models.TipoProducto", b =>
                 {
                     b.HasOne("AppForSEII2526.API.Models.Producto", null)
@@ -890,11 +877,6 @@ namespace AppForSEII2526.API.Migrations
             modelBuilder.Entity("AppForSEII2526.API.Models.Compra", b =>
                 {
                     b.Navigation("BocadillosComprados");
-                });
-
-            modelBuilder.Entity("AppForSEII2526.API.Models.CompraBocadillo", b =>
-                {
-                    b.Navigation("TipoPan");
                 });
 
             modelBuilder.Entity("AppForSEII2526.API.Models.CompraBono", b =>
