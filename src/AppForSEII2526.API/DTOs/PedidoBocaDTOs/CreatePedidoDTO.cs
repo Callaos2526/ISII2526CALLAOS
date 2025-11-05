@@ -16,7 +16,7 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
 
         
 
-        public CreatePedidoDTO( string nombreCliente, string apellidoCliente1, string? apellidosCliente2, MetodoPago metodo, IList<ItemPedidoDTO> bocadilloItem)
+        public CreatePedidoDTO( string nombreCliente, string apellidoCliente1, string? apellidosCliente2, string metodo, IList<ItemPedidoDTO> bocadilloItem)
         {  
            
             NombreCliente = nombreCliente ?? throw new ArgumentNullException(nameof(nombreCliente));
@@ -42,7 +42,9 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
         public string? ApellidoCliente2 { get; set; }
 
         [Required]
-        public MetodoPago Metodo { get; set; } //TARJETA O METALICO
+        public string Metodo { get; set; } //************antes esto era objeto tmb en constructor
+                                           
+
         public IList<ItemPedidoDTO> BocadilloItem { get; set; }
 
         public override bool Equals(object? obj)
@@ -51,7 +53,7 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
                    NombreCliente == dTO.NombreCliente &&
                    ApellidoCliente1 == dTO.ApellidoCliente1 &&
                    ApellidoCliente2 == dTO.ApellidoCliente2 &&
-                   EqualityComparer<MetodoPago>.Default.Equals(Metodo, dTO.Metodo) &&
+                   Metodo == dTO.Metodo &&
                    EqualityComparer<IList<ItemPedidoDTO>>.Default.Equals(BocadilloItem, dTO.BocadilloItem);
         }
     }

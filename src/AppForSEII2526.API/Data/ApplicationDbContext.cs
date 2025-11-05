@@ -26,6 +26,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<CompraBocadillo> ComprasBocadillos { get; set; }
     //esto lo acabo de añadir
     public DbSet<ApplicationUser> ApplicationUser { get; set; }
+    public DbSet<MetodoPago> MetodoPago { get; set; } //aqui he cambiado el nombre
 
 
 

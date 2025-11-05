@@ -3,7 +3,7 @@
     public class Compra //en esta clase preguntar a noelia si tengo que quitar la inicializacion de los string del usuario abajo
     {
         public Compra() { } //si me pide que añada direccion la gestiono con ns q
-        public Compra(int compraid, DateTime fechacompra, int nbocadillos, float preciototal, ApplicationUser applicationUser)
+        public Compra(int compraid, DateTime fechacompra, int nbocadillos, float preciototal, string metodoPago, ApplicationUser applicationUser)
         {
             CompraId = compraid;
             FechaCompra = fechacompra;
@@ -26,8 +26,10 @@
         public MetodoPago metodoPago { get; set; }
         
         public float PrecioTotal { get; set; }
+        //FK a ApNetUsers (Identity)
+        public string? ApplicationUserId { get; set; }
 
-        public ApplicationUser ApplicationUser { get; set; }
+        public ApplicationUser? ApplicationUser { get; set; }
         //Vector de relacion 1:N con CompraBocadillo
         
         public IList<CompraBocadillo> BocadillosComprados { get; set; } = new List<CompraBocadillo>();

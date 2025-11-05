@@ -9,5 +9,30 @@
         public IList<CompraBono> compraBonos { get; set; } = new List<CompraBono>();
 
     }
+
+}
+public class GooglePay : MetodoPago
+{
+    public GooglePay()
+    {
+        metodoName = "GooglePay";
+    }
+
+}
+public class Paypal : MetodoPago
+{
+    public Paypal()
+    {
+        metodoName = "Paypal";
+    }
+}
+public class Tarjeta : MetodoPago
+{
+    public Tarjeta()
+    {
+        metodoName = "Tarjeta";
+    }
+
+
 }
 

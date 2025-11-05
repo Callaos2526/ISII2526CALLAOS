@@ -38,7 +38,9 @@ namespace AppForSEII2526.API.Controllers
             //directamente a DetailsPedidoDTO
             var comprasdto = await _context.Compras //nombre del DBCONTEXT
              .Where(compra => compra.CompraId == id)
+                
                  .Include(compra => compra.BocadillosComprados) //relacion intermedia
+
                     .ThenInclude(bocadilloItem => bocadilloItem.Bocadillo) //relacion al bocadillo
                         .ThenInclude(Bocadillo => Bocadillo.tipopan)    //relacion al tipo de pan
 
@@ -48,7 +50,7 @@ namespace AppForSEII2526.API.Controllers
                  compra.ApplicationUser.Name, //esto antes tenia lo de los string
                  compra.ApplicationUser.Surname1,
                  compra.ApplicationUser.Surname2,
-                 compra.metodoPago,
+                 compra.metodoPago.metodoName,
                  compra.BocadillosComprados.Select(
                      cb => new ItemPedidoDTO( //parametros del constructor 
                          cb.BocadilloId,
@@ -70,7 +72,7 @@ namespace AppForSEII2526.API.Controllers
 
             return Ok(comprasdto);
         }
-
+        
 
         [HttpPost] //create y itemdto : envia datos al servidor para crear un nuevo elemento
         [Route("[action]")]
@@ -109,7 +111,7 @@ namespace AppForSEII2526.API.Controllers
                 ModelState.AddModelError("ApplicationUser", "Error! Apellido no registrado");
 
             //comprobacion del metodo de pago=> preguntar a noelia si esta bien
-            var metodoName = crearPedido.Metodo.metodoName; //saco el nombre del metodo de pago que hayan introducido
+            var metodoName = crearPedido.Metodo; //saco el nombre del metodo de pago que hayan introducido
             
             var existe_metodo = await _context.Paypals.AnyAsync(p => p.metodoName == metodoName)
                 || await _context.GooglePays.AnyAsync(g => g.metodoName == metodoName)
@@ -119,22 +121,11 @@ namespace AppForSEII2526.API.Controllers
                 ModelState.AddModelError("Metodo", "Error! Método de pago no registrado.");
                 return BadRequest(new ValidationProblemDetails(ModelState));
             }
-            /*var paypal = _context.Paypals.FirstOrDefault(p => p.metodoName == metodoName);
-            var googlepay = _context.GooglePays.FirstOrDefault(g => g.metodoName == metodoName);
-            var tarjeta = _context.Paypals.FirstOrDefault(t=>t.metodoName == metodoName);
-            //
-            if(paypal == null && googlepay == null)
+            if (ModelState.ErrorCount > 0)
             {
-                 ModelState.AddModelError("Metodo", "Error! Método de pago no registrado.");
                 return BadRequest(new ValidationProblemDetails(ModelState));
-
             }
-            MetodoPago metodoPagoEntidad = (MetodoPago?)paypal ?? googlepay!; //elijo el que haya => este es el que meto cuando hago la compra
-            */
-           
-
-
-            //******************************************************************************
+            
 
             //PASO 2. vamos recuperando objetos y rellenando el pedido 
 
@@ -152,11 +143,18 @@ namespace AppForSEII2526.API.Controllers
                 }).ToList();
 
             //ahora creo mi pedido (compra) <= ya tengo los datos del bocadillo 
-
+            var metodoPago = await _context.MetodoPago
+                .FirstOrDefaultAsync(m => m.metodoName.ToLower() == crearPedido.Metodo.ToLower());
+            if(metodoPago == null)
+            {
+                ModelState.AddModelError("Metodo_Pago", $"El método de pago '{crearPedido.Metodo}' no existe.");
+                return BadRequest(new ValidationProblemDetails(ModelState));
+            }
             //PASO3 . CREAR LA COMPRA en memoria y rellenarla 
+
             Compra compra = new Compra
             { //algunos paramtetros los saco del DTO que recibo
-                metodoPago = metodoName,
+                metodoPago = metodoPago,
                 FechaCompra = DateTime.Now, //aqui pongo la fecha en el momento 
                 ApplicationUser = user,
                 BocadillosComprados = new List<CompraBocadillo>()
@@ -183,8 +181,17 @@ namespace AppForSEII2526.API.Controllers
                 {
                     ModelState.AddModelError("CrearPedido", $"Error! se han pedido {unidad.Cantidad} bocadillos, pero no hay suficientes");
                 }
+
+                var cliente = new ApplicationUser
+                {
+                    Name = crearPedido.NombreCliente,
+                    Surname1=crearPedido.ApellidoCliente1,
+                    Surname2=crearPedido.ApellidoCliente2 ?? string.Empty,
+
+                };
                 //ahora que estoy recorriendo las lineas calculo el precio total
                 var subtotal = bocInfo.Pvp * unidad.Cantidad; //calculo precio total de esa linea
+
 
                 var linea = new CompraBocadillo  //creo la linea de esa unidad
                 {
@@ -228,12 +235,12 @@ namespace AppForSEII2526.API.Controllers
 
             //devuelvo el recurso DTO de detalles del pedido
             return CreatedAtAction("GetPedido",new { id = compra.CompraId },pedidoDetalles);
-
+        
 
 
         }
         
-
+        
 
     }
 }

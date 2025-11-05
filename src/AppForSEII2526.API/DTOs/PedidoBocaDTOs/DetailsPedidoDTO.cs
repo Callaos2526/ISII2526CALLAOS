@@ -11,7 +11,7 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
 
 
         public DetailsPedidoDTO(int id, DateTime fechaPedido, string nombreCliente, string apellidoCliente1, string? apellidoCliente2,
-            MetodoPago metodo, IList<ItemPedidoDTO> bocadilloItem)
+            string metodo, IList<ItemPedidoDTO> bocadilloItem)
                : base(nombreCliente, apellidoCliente1, apellidoCliente2, metodo, bocadilloItem) 
         {   //inicializo los atributos de la clase hija que no estan en la clase padre
             Id = id;
@@ -23,7 +23,7 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
         //Darle formato para que solo entre dia mes y año
          [Display(Name = "Fecha de pedido")]
         public DateTime FechaPedido { get; set; }
-        
+
         public override bool Equals(object? obj)
         {
             return obj is DetailsPedidoDTO dTO &&
@@ -31,7 +31,7 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
                    NombreCliente == dTO.NombreCliente &&
                    ApellidoCliente1 == dTO.ApellidoCliente1 &&
                    ApellidoCliente2 == dTO.ApellidoCliente2 &&
-                   EqualityComparer<MetodoPago>.Default.Equals(Metodo, dTO.Metodo) &&
+                   Metodo == dTO.Metodo &&
                    EqualityComparer<IList<ItemPedidoDTO>>.Default.Equals(BocadilloItem, dTO.BocadilloItem) &&
                    Id == dTO.Id &&
                    FechaPedido == dTO.FechaPedido;

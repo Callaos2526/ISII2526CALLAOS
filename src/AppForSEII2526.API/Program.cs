@@ -72,9 +72,9 @@ var app = builder.Build();
 
 
 
-//Map Identity routes
-//app.MapIdentityApi<IdentityUser>();
-var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    //Map Identity routes
+    //app.MapIdentityApi<IdentityUser>();
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 using (var scope = app.Services.CreateScope()) {
     try {
@@ -90,7 +90,7 @@ using (var scope = app.Services.CreateScope()) {
 
 
         //it sees the database
-        //SeedData.Initialize(db, scope.ServiceProvider, logger);
+       // SeedData.Initialize(db, scope.ServiceProvider, logger);
     }
     catch (Exception ex) {
         logger.LogError(ex, "An error occurred seeding the DB.");
