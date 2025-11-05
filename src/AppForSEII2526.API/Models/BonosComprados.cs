@@ -28,11 +28,9 @@ namespace AppForSEII2526.API.Models
         [ForeignKey("BonoId")]
         public int BonoId { get; set; }
 
-        [Required]
         [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser mayor que 0")]
         public int Cantidad { get; set; }
        
-        [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "El precio debe ser mayor que 0")]
         public double PrecioBono { get; set; }
 

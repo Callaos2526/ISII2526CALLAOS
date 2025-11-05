@@ -8,16 +8,16 @@ public class ApplicationUser : IdentityUser {
     {
     }
 
-    public ApplicationUser(int id, string nombre, string apellido1, string apellido2)
+    public ApplicationUser(int id, string nombreCliente, string apellidoCliente1, string apellidoCliente2)
     {
-        Id = id;
-        Nombre = nombre;
-        Apellido1 = apellido1;
-        Apellido2 = apellido2;
+        ID = id;
+        NombreCliente = nombreCliente;
+        ApellidoCliente1 = apellidoCliente1;
+        ApellidoCliente2 = apellidoCliente2;
     }
-
-    public int Id { get; set; }
-    public string Nombre { get; set; }
-    public string Apellido1 { get; set; }
-    public string Apellido2 { get; set; }
+    public int ID { get; set; }
+    public string NombreCliente { get; set; }
+    public string ApellidoCliente1 { get; set; }
+    public string ApellidoCliente2 { get; set; }
+    
 }

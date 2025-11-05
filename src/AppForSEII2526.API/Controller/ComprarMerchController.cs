@@ -138,9 +138,9 @@ namespace AppForSEII2526.API.Controllers
 
             var cliente = new ApplicationUser
             {
-                Nombre = compraMerch.Nombre,
-                Apellido1 = compraMerch.Apellido_1,
-                Apellido2 = compraMerch.Apellido_2 ?? string.Empty
+                NombreCliente = compraMerch.Nombre,
+                ApellidoCliente1 = compraMerch.Apellido_1,
+                ApellidoCliente2 = compraMerch.Apellido_2 ?? string.Empty
             };
 
             var compra_entity = new Compra_Producto
