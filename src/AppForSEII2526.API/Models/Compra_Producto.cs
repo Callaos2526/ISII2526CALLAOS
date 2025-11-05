@@ -3,47 +3,40 @@
     public class Compra_Producto
     {
         public Compra_Producto() { }
-        public Compra_Producto(string apellido_1, string apellido_2, int compraid, string direccionEnvio, DateTime fechaCompra, string metodo_Pago, string nombre, int precioFinal) 
+        public Compra_Producto( int id,int compraid, ApplicationUser cliente, string direccionEnvio, DateTime fechaCompra, MetodoPago metodo_Pago, int precioFinal) 
         {
-            Apellido_1 = apellido_1;
-            Apellido_2 = apellido_2;
-            Compraid = compraid;
+            CompraId = compraid;
+            Id = id;
+            Cliente = cliente;
             DireccionEnvio = direccionEnvio;
             FechaCompra = fechaCompra;
             Metodo_Pago = metodo_Pago;
-            Nombre = nombre;
-            PrecioFinal = precioFinal;
+            PrecioFinal = precioFinal;   
         }
-        [Key] // Foreing key?
-        public int Compraid { get; set; }
+        [Key] 
+        public int Id { get; set; }
+        public int CompraId { get; set; }
         [Required]
-        public string Nombre { get; set; }
+        public ApplicationUser Cliente { get; set; }
         [Required]
         public string DireccionEnvio { get; set; }
-        [Required]
         public DateTime FechaCompra { get; set; }
         [Required]
-        public string Metodo_Pago { get; set; }
+        public MetodoPago Metodo_Pago { get; set; }
         [Required]
         public int PrecioFinal { get; set; }
-        public string Apellido_1 { get; set; }
-        public string Apellido_2 { get; set; }
-        public IList<Producto_Compra> ListaCompra = new List<Producto_Compra>();
+        [Required]
+        public IList<Producto_Compra> ListaCompra { get; set; } = new List<Producto_Compra>();
+
         public override bool Equals(object? obj)
         {
-            return obj is Compra_Producto compra_producto &&
-                   Compraid == compra_producto.Compraid &&
-                   Nombre == compra_producto.Nombre &&
-                   DireccionEnvio == compra_producto.DireccionEnvio &&
-                   FechaCompra == compra_producto.FechaCompra &&
-                   Metodo_Pago == compra_producto.Metodo_Pago &&
-                   PrecioFinal == compra_producto.PrecioFinal &&
-                   Apellido_1 == compra_producto.Apellido_1 &&
-                   Apellido_2 == compra_producto.Apellido_2;
-        }
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Compraid, Nombre, DireccionEnvio, FechaCompra, Metodo_Pago, PrecioFinal, Apellido_1, Apellido_2);
+            return obj is Compra_Producto producto &&
+                   Id == producto.Id &&
+                   DireccionEnvio == producto.DireccionEnvio &&
+                   FechaCompra == producto.FechaCompra &&
+                   EqualityComparer<MetodoPago>.Default.Equals(Metodo_Pago, producto.Metodo_Pago) &&
+                   PrecioFinal == producto.PrecioFinal &&
+                   EqualityComparer<IList<Producto_Compra>>.Default.Equals(ListaCompra, producto.ListaCompra);
         }
     }
 }
