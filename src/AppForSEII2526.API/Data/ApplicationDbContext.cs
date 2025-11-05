@@ -59,10 +59,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         .HasValue<Tarjeta>("Tarjeta")
         .HasValue<Paypal>("Paypal")
         .HasValue<GooglePay>("GooglePay");
-
-        .HasIndex(cb => new { cb.CompraId, cb.BocadilloId })
-        .IsUnique();
     }
+
 
 }
     
