@@ -23,7 +23,7 @@ namespace AppForSEII2526.API
         [HttpGet] //Accion que responde a peticiones HTTP GET
         [Route("[action]")]
         //si todo va bien devolvemos una lista SelectBocadilloDTO
-        [ProducesResponseType(typeof(IList<SelectBocadilloDTO>),(int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IList<SelectBocadilloDTO>), (int)HttpStatusCode.OK)]
         //metodo que devuelve un ActionResult 
         public async Task<ActionResult> GetBocadilloParaPedir(string? filtroTamano, string? filtroTipoPan) //tipo Pan bien que sea String 
         {/*
@@ -49,37 +49,35 @@ namespace AppForSEII2526.API
             }
             return Ok(bocadillos);*/
             
-                Tamaño? tamanoFiltrado = null; // Variable nullable para almacenar el enum filtrado si se puede parsear
+            Tamaño? tamanoFiltrado = null;
 
-            if (!string.IsNullOrWhiteSpace(filtroTamano) && // Comprueba que el filtro de tamaño venga con algún valor.
-                    Enum.TryParse<Tamaño>(filtroTamano, ignoreCase: true, out var parsed)) // Intenta convertir el string al enum (ignorando mayúsculas/minúsculas)
+            if (!string.IsNullOrWhiteSpace(filtroTamano) &&
+                Enum.TryParse<Tamaño>(filtroTamano, ignoreCase: true, out var parsed))
             {
-                    tamanoFiltrado = parsed; // Si pudo parsear, guarda el valor convertido.
+                tamanoFiltrado = parsed;
                 }
 
                 var query = _context.Bocadillos
-                    .AsNoTracking() // No se hace seguimiento de cambios (más eficiente para solo lectura).
-                    .Include(b => b.tipopan)  // Carga la navegación TipoPan para cada bocadillo.
-                    .Include(b => b.ComprasBocadillo).ThenInclude(cb => cb.Compra) // Carga ComprasBocadillo y su Compra asociada.
-                    .AsQueryable();  // Asegura que seguimos trabajando con una consulta componible.
+                .AsNoTracking()
+                .Include(b => b.tipopan)
+                .Include(b => b.ComprasBocadillo).ThenInclude(cb => cb.Compra)
+                .AsQueryable();
 
+            if (tamanoFiltrado.HasValue)
+                query = query.Where(b => b.Tamano == tamanoFiltrado.Value);
 
-            //APLICAR FILTROS
-            if (tamanoFiltrado.HasValue) // Si el filtro de tamaño es válido...
-                query = query.Where(b => b.Tamano == tamanoFiltrado.Value); // ...aplica el filtro tipado por enum (sin ToString()).
+            if (!string.IsNullOrWhiteSpace(filtroTipoPan))
+                query = query.Where(b => b.tipopan.Nombre == filtroTipoPan);
 
-            if (!string.IsNullOrWhiteSpace(filtroTipoPan)) // Si llegó un filtro para el tipo de pan...
-                query = query.Where(b => b.tipopan.Nombre == filtroTipoPan); // ...filtra por coincidencia exacta del nombre de pan.
-
-            var bocadillos = await query  // Ejecuta la consulta construida...
-                    .OrderBy(b => b.Nombre)  // ...ordenando alfabéticamente por nombre.
+            var bocadillos = await query
+                .OrderBy(b => b.Nombre)
                     .Select(b => new SelectBocadilloDTO(b.Id, b.Nombre, b.Tamano, b.tipopan.Nombre, b.Pvp))
                     .ToListAsync();
 
-                if (!bocadillos.Any())  // Si la lista quedó vacía...
-                return NotFound("No hay bocadillos que cumplan los requisitos"); // ...devuelve 404 con un mensaje.
+            if (!bocadillos.Any())
+                return NotFound("No hay bocadillos que cumplan los requisitos");
 
-            return Ok(bocadillos);  // Si hay resultados, devuelve 200 con la lista de DTOs.
+            return Ok(bocadillos);
 
 
 

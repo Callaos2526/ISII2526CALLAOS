@@ -27,12 +27,20 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ApplicationUser> ApplicationUsers { get; set; }
     public DbSet<MetodoPago> MetodoPago { get; set; }
 
+    public DbSet<ApplicationUser> ApplicationUser { get; set; }
 
 
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        builder.Entity<MetodoPago>()
+        .HasDiscriminator<string>("Discriminator")
+        .HasValue<MetodoPago>("MetodoPago")
+        .HasValue<Tarjeta>("Tarjeta")
+        .HasValue<Paypal>("Paypal")
+        .HasValue<GooglePay>("GooglePay");
 
         builder.Entity<BonosComprados>()
              .HasAlternateKey(bc => new { bc.CompraId, bc.BonoId });
@@ -52,6 +60,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         .HasValue<Paypal>("Paypal")
         .HasValue<GooglePay>("GooglePay");
     }
+
 
 }
     

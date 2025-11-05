@@ -10,9 +10,9 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
 
       
         
-        public SelectBocadilloDTO(int bocadilloID,string nombreBocadillo, Tamaño tamano, string tipoPanNombre, float pvp)
+        public SelectBocadilloDTO(int bocadilloID, string nombreBocadillo, Tamaño tamano, string tipoPanNombre, float pvp)
         {   
-            BocadilloID= bocadilloID;
+            BocadilloID = bocadilloID;
             NombreBocadillo = nombreBocadillo;
             Tamano = tamano;
             TipoPanNombre = tipoPanNombre; 

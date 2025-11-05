@@ -23,25 +23,18 @@ namespace AppForSEII2526.API.Models
 
             
         }
-        
         public int ComprasDelBocadillo { get; set; }
         [Key]
         public int Id { get; set; }
-       
         public string Nombre { get; set; }
-        
         public float Pvp { get; set; }
-        
         public string Resenyabocadillo { get; set; }
-        
         public int Stock { get; set; }
-        
-       
-
+       // public string Tamano { get; set; }
 
         public Tamaño Tamano { get; set; }
 
-        
+   
         public TipoPan tipopan { get; set; }
         public IList<ResenyaBocadillo> ResenyaBocadillo { get; set; } = new List<ResenyaBocadillo>();
         public IList<CompraBocadillo> ComprasBocadillo { get; set; } = new List<CompraBocadillo>();
@@ -78,3 +71,4 @@ namespace AppForSEII2526.API.Models
         }
     }
 }
+   

@@ -14,9 +14,7 @@ namespace AppForSEII2526.API.Models
 
         [Key]
         public int PanId { get; set; }
-        
         public string Nombre { get; set; }
-        
         public IList<Bocadillo> Bocadillos { get; set; }=new List<Bocadillo>();
 
         public override bool Equals(object? obj)
