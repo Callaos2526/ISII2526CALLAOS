@@ -1,6 +1,5 @@
 ﻿using NuGet.Versioning;
 
-
 namespace AppForSEII2526.API.Models
 {
    
@@ -9,7 +8,7 @@ namespace AppForSEII2526.API.Models
         
         public Bocadillo() { }
         
-        public Bocadillo(int id, string nombre, float pvp, string resenyabocadillo, int stock, string tamano, int comprasDelBocadillo)
+        public Bocadillo(int id, string nombre, float pvp, string resenyabocadillo, int stock, Tamaño tamano, int comprasDelBocadillo)
         {
             ComprasDelBocadillo = comprasDelBocadillo;
             
@@ -20,30 +19,32 @@ namespace AppForSEII2526.API.Models
             Resenyabocadillo = resenyabocadillo;
             Stock = stock;
             Tamano = tamano;
+            //Tamano = tamano;
 
             
         }
-        [Required]
+        
         public int ComprasDelBocadillo { get; set; }
         [Key]
         public int Id { get; set; }
-        [Required]
+       
         public string Nombre { get; set; }
-        [Required]
+        
         public float Pvp { get; set; }
-        [Required]
+        
         public string Resenyabocadillo { get; set; }
-        [Required]
+        
         public int Stock { get; set; }
-        [Required]
-        public string Tamano { get; set; }
+        
+       
 
 
-        public Tamaño tamaño { get; set; }
+        public Tamaño Tamano { get; set; }
 
-   
+        
         public TipoPan tipopan { get; set; }
         public IList<ResenyaBocadillo> ResenyaBocadillo { get; set; } = new List<ResenyaBocadillo>();
+        public IList<CompraBocadillo> ComprasBocadillo { get; set; } = new List<CompraBocadillo>();
 
         public override bool Equals(object? obj)
         {
@@ -52,15 +53,28 @@ namespace AppForSEII2526.API.Models
                    Id == bocadillo.Id &&
                    Nombre == bocadillo.Nombre &&
                    Pvp == bocadillo.Pvp &&
-                   ResenyaBocadillo == bocadillo.ResenyaBocadillo &&
-                   Stock == bocadillo.Stock;
-                   
-                   
+                   Resenyabocadillo == bocadillo.Resenyabocadillo &&
+                   Stock == bocadillo.Stock &&
+                   Tamano == bocadillo.Tamano &&
+                   EqualityComparer<TipoPan>.Default.Equals(tipopan, bocadillo.tipopan) &&
+                   EqualityComparer<IList<ResenyaBocadillo>>.Default.Equals(ResenyaBocadillo, bocadillo.ResenyaBocadillo) &&
+                   EqualityComparer<IList<CompraBocadillo>>.Default.Equals(ComprasBocadillo, bocadillo.ComprasBocadillo);
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id, Nombre, Pvp, ResenyaBocadillo, Stock, Tamano, ComprasDelBocadillo);
+            HashCode hash = new HashCode();
+            hash.Add(ComprasDelBocadillo);
+            hash.Add(Id);
+            hash.Add(Nombre);
+            hash.Add(Pvp);
+            hash.Add(Resenyabocadillo);
+            hash.Add(Stock);
+            hash.Add(Tamano);
+            hash.Add(tipopan);
+            hash.Add(ResenyaBocadillo);
+            hash.Add(ComprasBocadillo);
+            return hash.ToHashCode();
         }
     }
 }

@@ -84,9 +84,9 @@ app.UseRouting();
 
 app.UseCors("AllowLocalDev");
 
-//Map Identity routes
-//app.MapIdentityApi<IdentityUser>();
-var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    //Map Identity routes
+    //app.MapIdentityApi<IdentityUser>();
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
 using (var scope = app.Services.CreateScope()) {
     try {
