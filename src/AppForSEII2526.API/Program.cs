@@ -53,7 +53,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options => {
     options.SwaggerDoc("v1",
     new OpenApiInfo {
-        Title = "AppForMovies.API",
+        Title = "AppForSEII2526.API",
         Version = "v1",
         Description = "This API provides services for renting and purchasing movies",
         License = new OpenApiLicense { Name = "MIT License", Url = new Uri("https://opensource.org/license/mit/") },
@@ -66,11 +66,23 @@ builder.Services.AddSwaggerGen(options => {
 
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowLocalDev", policy =>
+    {
+        policy
+            .WithOrigins("https://localhost:7067", "http://localhost:7067", "https://localhost:5001", "http://localhost:5000") // ajusta puertos según tu Swagger/API
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+            // .AllowCredentials() // no usar con AllowAnyOrigin
+    });
+});
 
 var app = builder.Build();
 
+app.UseRouting();
 
-
+app.UseCors("AllowLocalDev");
 
     //Map Identity routes
     //app.MapIdentityApi<IdentityUser>();
@@ -90,7 +102,7 @@ using (var scope = app.Services.CreateScope()) {
 
 
         //it sees the database
-       // SeedData.Initialize(db, scope.ServiceProvider, logger);
+        SeedData.Initialize(db, scope.ServiceProvider, logger);
     }
     catch (Exception ex) {
         logger.LogError(ex, "An error occurred seeding the DB.");

@@ -47,9 +47,9 @@ namespace AppForSEII2526.API.Controllers
              .Select(compra => new DetailsPedidoDTO(
                  compra.CompraId,
                  compra.FechaCompra,
-                 compra.ApplicationUser.Name, //esto antes tenia lo de los string
-                 compra.ApplicationUser.Surname1,
-                 compra.ApplicationUser.Surname2,
+                 compra.ApplicationUser.NombreCliente, //esto antes tenia lo de los string
+                 compra.ApplicationUser.ApellidoCliente1,
+                 compra.ApplicationUser.ApellidoCliente2,
                  compra.metodoPago.metodoName,
                  compra.BocadillosComprados.Select(
                      cb => new ItemPedidoDTO( //parametros del constructor 
@@ -102,11 +102,11 @@ namespace AppForSEII2526.API.Controllers
                 }
             }
             //Obligatorio nombre Usuario, Apellido1, metodo pago
-            var user = _context.ApplicationUser.FirstOrDefault(n => n.UserName == crearPedido.NombreCliente);
+            var user = _context.ApplicationUsers.FirstOrDefault(n => n.UserName == crearPedido.NombreCliente);
             if (user == null)
                 ModelState.AddModelError("ApplicationUser", "Error! Nombre no registrado");
 
-            var apellido = _context.ApplicationUser.FirstOrDefault(ap => ap.Surname1 == crearPedido.ApellidoCliente1);
+            var apellido = _context.ApplicationUsers.FirstOrDefault(ap => ap.ApellidoCliente1 == crearPedido.ApellidoCliente1);
             if (apellido == null)
                 ModelState.AddModelError("ApplicationUser", "Error! Apellido no registrado");
 
@@ -184,9 +184,9 @@ namespace AppForSEII2526.API.Controllers
 
                 var cliente = new ApplicationUser
                 {
-                    Name = crearPedido.NombreCliente,
-                    Surname1=crearPedido.ApellidoCliente1,
-                    Surname2=crearPedido.ApellidoCliente2 ?? string.Empty,
+                    NombreCliente = crearPedido.NombreCliente,
+                    ApellidoCliente1=crearPedido.ApellidoCliente1,
+                    ApellidoCliente2=crearPedido.ApellidoCliente2 ?? string.Empty,
 
                 };
                 //ahora que estoy recorriendo las lineas calculo el precio total
@@ -229,8 +229,8 @@ namespace AppForSEII2526.API.Controllers
             }
             //devuelvo PedidoDetails
             var pedidoDetalles = new DetailsPedidoDTO(compra.CompraId,
-                compra.FechaCompra, compra.ApplicationUser.Name, compra.ApplicationUser.Surname1,
-                compra.ApplicationUser.Surname2, crearPedido.Metodo,
+                compra.FechaCompra, compra.ApplicationUser.NombreCliente, compra.ApplicationUser.ApellidoCliente1,
+                compra.ApplicationUser.ApellidoCliente2, crearPedido.Metodo,
                 crearPedido.BocadilloItem);
 
             //devuelvo el recurso DTO de detalles del pedido
