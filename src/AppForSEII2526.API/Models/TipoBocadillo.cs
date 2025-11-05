@@ -17,7 +17,7 @@ namespace AppForSEII2526.API.Models
 
         [Key]
         public int IdTipo { get; set; }
-        [Required]
+        
         public string NombreTipo { get; set; }
         
         public IList<BonoBocadillo> Bonos { get; set ; } = new List<BonoBocadillo>();
