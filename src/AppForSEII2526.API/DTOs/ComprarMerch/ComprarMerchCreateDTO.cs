@@ -11,7 +11,7 @@ namespace AppForSEII2526.API.DTOs.ComprarMerch
         //o Google pay). Siendo necesario rellenar todos los campos para poder continuar, salvo
         //el campo segundo apellido, ya que es opcional.Para cada producto, se pide indicar la
         //cantidad que se va a comprar.
-        public ComprarMerchCreateDTO(int compraId,string nombre, string apellido_1, string? apellido_2, string direccionEnvio, MetodoPago metodo_Pago, int cantidad, IList<ComprarMerchItemDTO> merchItems)
+        public ComprarMerchCreateDTO(int compraId,string nombre, string apellido_1, string? apellido_2, string direccionEnvio, string metodo_Pago, int cantidad, IList<ComprarMerchItemDTO> merchItems)
         {
             CompraId = compraId;
             Nombre = nombre ?? throw new ArgumentNullException(nameof(nombre));
@@ -39,7 +39,7 @@ namespace AppForSEII2526.API.DTOs.ComprarMerch
         public string? Apellido_2 { get; set; }
 
         [Required]
-        public MetodoPago Metodo_Pago { get; set; }
+        public string Metodo_Pago { get; set; }
 
         [Required(AllowEmptyStrings = false, ErrorMessage = "Por favor, indica tu dirección de envío")]
         [StringLength(200, MinimumLength = 10, ErrorMessage = "La dirección debe tener entre 10 y 200 caracteres")]
@@ -51,10 +51,11 @@ namespace AppForSEII2526.API.DTOs.ComprarMerch
         public override bool Equals(object? obj)
         {
             return obj is ComprarMerchCreateDTO dTO &&
+                   CompraId == dTO.CompraId &&
                    Nombre == dTO.Nombre &&
                    Apellido_1 == dTO.Apellido_1 &&
                    Apellido_2 == dTO.Apellido_2 &&
-                   EqualityComparer<MetodoPago>.Default.Equals(Metodo_Pago, dTO.Metodo_Pago) &&
+                   Metodo_Pago == dTO.Metodo_Pago &&
                    Direccion_Envio == dTO.Direccion_Envio &&
                    Cantidad == dTO.Cantidad &&
                    EqualityComparer<IList<ComprarMerchItemDTO>>.Default.Equals(MerchItems, dTO.MerchItems);

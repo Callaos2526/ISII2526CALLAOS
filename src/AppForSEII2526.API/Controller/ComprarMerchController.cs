@@ -34,21 +34,22 @@ namespace AppForSEII2526.API.Controllers
             }
             //Buscamos la commpra con ese id            
             var compradto = await _context.Compra_Producto
-                .Where(c => c.Compraid == id)
+                .Where(c => c.Id == id)
                 .Include(c => c.ListaCompra)
-                    .ThenInclude(pc => pc.producto)
+                    .ThenInclude(pc => pc.Producto)
                         .ThenInclude(p => p.TipoProducto)
                 .Select(compra => new ComprarMerchDetailDTO(
-                compra.Compraid,
+                compra.CompraId,
+                compra.Id,
                 compra.Cliente,
                 compra.DireccionEnvio,
-                compra.Metodo_Pago,
+                compra.Metodo_Pago.metodoName,
                 compra.ListaCompra.Sum(pc => pc.Cantidad),
                 compra.ListaCompra.Select(pc => new ComprarMerchItemDTO(
                     pc.Productoid,
-                    pc.producto.NombreProducto,
+                    pc.Producto.NombreProducto,
                     pc.PVP,
-                    pc.producto.TipoProducto.NombreProducto,
+                    pc.Producto.TipoProducto.NombreProducto,
                     pc.Cantidad
             )).ToList<ComprarMerchItemDTO>())).FirstOrDefaultAsync();
             if (compradto == null)
@@ -79,8 +80,7 @@ namespace AppForSEII2526.API.Controllers
                 ModelState.AddModelError("Apellido_1", "El primer apellido es obligatorio");
             if (string.IsNullOrWhiteSpace(compraMerch.Direccion_Envio))
                 ModelState.AddModelError("Direccion_Envio", "La dirección de envío es obligatoria");
-            if (!Enum.IsDefined(typeof(MetodoPago), compraMerch.Metodo_Pago))
-                ModelState.AddModelError("Metodo_Pago", "Método de pago inválido");
+            
 
             // Validar cantidad en cada producto seleccionado
             for (int i = 0; i < compraMerch.MerchItems.Count; i++)
@@ -99,7 +99,7 @@ namespace AppForSEII2526.API.Controllers
                 .Include(p => p.TipoProducto)
                 .Where(p => productosIds.Contains(p.Productoid))
                 .ToListAsync();
-
+            
             double precioFinal = 0;
             List<Producto_Compra> lineasCompra = new();
             foreach (var item in compraMerch.MerchItems)
@@ -121,11 +121,20 @@ namespace AppForSEII2526.API.Controllers
                     Productoid = producto.Productoid,
                     Cantidad = item.Cantidad,
                     PVP = (int)producto.PVP,
-                    producto = producto
+                    Producto = producto
                 });
             }
             if (ModelState.ErrorCount > 0)
                 return BadRequest(new ValidationProblemDetails(ModelState));
+            // 🔹 Buscar método de pago
+            var metodoPago = await _context.MetodoPago
+                .FirstOrDefaultAsync(m => m.metodoName.ToLower() == compraMerch.Metodo_Pago.ToLower());
+
+            if (metodoPago == null)
+            {
+                ModelState.AddModelError("Metodo_Pago", $"El método de pago '{compraMerch.Metodo_Pago}' no existe.");
+                return BadRequest(new ValidationProblemDetails(ModelState));
+            }
 
             var cliente = new ApplicationUser
             {
@@ -138,7 +147,7 @@ namespace AppForSEII2526.API.Controllers
             {
                 Cliente = cliente,
                 DireccionEnvio = compraMerch.Direccion_Envio,
-                Metodo_Pago = compraMerch.Metodo_Pago,
+                Metodo_Pago = metodoPago,
                 FechaCompra = DateTime.Now,
                 PrecioFinal = (int)precioFinal,
                 ListaCompra = lineasCompra
@@ -165,15 +174,16 @@ namespace AppForSEII2526.API.Controllers
             )).ToList();
 
             var compraDetailDTO = new ComprarMerchDetailDTO(
-                compra_entity.Compraid,
+                compra_entity.Id,
+                compra_entity.CompraId,
                 cliente,
                 compra_entity.DireccionEnvio,
-                compra_entity.Metodo_Pago,
+                metodoPago.metodoName,
                 lineasCompra.Sum(x => x.Cantidad),
                 itemsDTO
             );
 
-            return CreatedAtAction("GetCompraDetail", new { id = compra_entity.Compraid }, compraDetailDTO);
+            return CreatedAtAction("GetCompraDetail", new { id = compra_entity.Id }, compraDetailDTO);
 
         }
     }

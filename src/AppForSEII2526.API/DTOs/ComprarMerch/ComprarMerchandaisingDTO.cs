@@ -5,20 +5,19 @@
         //Paso 2. El sistema muestra un listado con todos los productos de merchandising disponibles
         //(que tengan stock) indicando su nombre, precio, tipo y el stock.
 
-        public ComprarMerchandaisingDTO(int productoId, string nombreProducto, double pvp, int stock, string tipo)
+        public ComprarMerchandaisingDTO(int productoId, string nombreProducto, double pvp, int stock, string tipoProducto)
         {
             ProductoId = productoId;
             NombreProducto = nombreProducto;
             PVP = pvp;
             Stock = stock;
-            Tipo = tipo;
+            TipoProducto = tipoProducto;
         }
-        [Key]
         public int ProductoId { get; set; }
         public string NombreProducto { get; set; }
         public double PVP { get; set; }
         public int Stock { get; set; }
-        public string Tipo { get; set; }
+        public string TipoProducto { get; set; }
 
         public override bool Equals(object? obj)
         {
@@ -27,7 +26,7 @@
                    NombreProducto == dTO.NombreProducto &&
                    PVP == dTO.PVP &&
                    Stock == dTO.Stock &&
-                   Tipo == dTO.Tipo;
+                   TipoProducto == dTO.TipoProducto;
         }
     }
 }

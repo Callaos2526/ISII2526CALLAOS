@@ -12,7 +12,7 @@ namespace AppForSEII2526.API.Models
         [Key]
         public int Productoid { get; set; }
         public string NombreProducto { get; set; }
-        public IList<Producto> Productos = new List<Producto>();
+        public IList<Producto> Productos { get; set; } = new List<Producto>();
         public override bool Equals(object? obj)
         {
             return obj is TipoProducto producto &&

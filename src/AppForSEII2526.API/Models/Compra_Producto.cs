@@ -3,9 +3,10 @@
     public class Compra_Producto
     {
         public Compra_Producto() { }
-        public Compra_Producto( int compraid, ApplicationUser cliente, string direccionEnvio, DateTime fechaCompra, MetodoPago metodo_Pago, int precioFinal) 
+        public Compra_Producto( int id,int compraid, ApplicationUser cliente, string direccionEnvio, DateTime fechaCompra, MetodoPago metodo_Pago, int precioFinal) 
         {
-            Compraid = compraid;
+            CompraId = compraid;
+            Id = id;
             Cliente = cliente;
             DireccionEnvio = direccionEnvio;
             FechaCompra = fechaCompra;
@@ -13,7 +14,8 @@
             PrecioFinal = precioFinal;   
         }
         [Key] 
-        public int Compraid { get; set; }
+        public int Id { get; set; }
+        public int CompraId { get; set; }
         [Required]
         public ApplicationUser Cliente { get; set; }
         [Required]
@@ -24,12 +26,12 @@
         [Required]
         public int PrecioFinal { get; set; }
         [Required]
-        public IList<Producto_Compra> ListaCompra = new List<Producto_Compra>();
+        public IList<Producto_Compra> ListaCompra { get; set; } = new List<Producto_Compra>();
 
         public override bool Equals(object? obj)
         {
             return obj is Compra_Producto producto &&
-                   Compraid == producto.Compraid &&
+                   Id == producto.Id &&
                    DireccionEnvio == producto.DireccionEnvio &&
                    FechaCompra == producto.FechaCompra &&
                    EqualityComparer<MetodoPago>.Default.Equals(Metodo_Pago, producto.Metodo_Pago) &&

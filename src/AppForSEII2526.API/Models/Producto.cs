@@ -17,7 +17,7 @@
         public double PVP { get; set; }
         public int Stock { get; set; }
         public TipoProducto TipoProducto { get; set; }
-        public IList<Producto_Compra> producto_Compras = new List<Producto_Compra>();
+        public IList<Producto_Compra> producto_Compras { get; set; } = new List<Producto_Compra>();
         public override bool Equals(object? obj)
         {
             return obj is Producto producto &&
@@ -25,6 +25,7 @@
                    NombreProducto == producto.NombreProducto &&
                    PVP == producto.PVP &&
                    Stock == producto.Stock;
+
         }
         public override int GetHashCode()
         {

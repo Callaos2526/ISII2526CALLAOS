@@ -313,15 +313,18 @@ namespace AppForSEII2526.API.Migrations
 
             modelBuilder.Entity("AppForSEII2526.API.Models.Compra_Producto", b =>
                 {
-                    b.Property<int>("Compraid")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Compraid"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClienteId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("CompraId")
+                        .HasColumnType("int");
 
                     b.Property<string>("DireccionEnvio")
                         .IsRequired()
@@ -336,7 +339,7 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<int>("PrecioFinal")
                         .HasColumnType("int");
 
-                    b.HasKey("Compraid");
+                    b.HasKey("Id");
 
                     b.HasIndex("ClienteId");
 
@@ -389,7 +392,12 @@ namespace AppForSEII2526.API.Migrations
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
+                    b.Property<int>("TipoProductoProductoid")
+                        .HasColumnType("int");
+
                     b.HasKey("Productoid");
+
+                    b.HasIndex("TipoProductoProductoid");
 
                     b.ToTable("Producto");
                 });
@@ -397,26 +405,21 @@ namespace AppForSEII2526.API.Migrations
             modelBuilder.Entity("AppForSEII2526.API.Models.Producto_Compra", b =>
                 {
                     b.Property<int>("Compraid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Compraid"));
-
-                    b.Property<int>("Cantidad")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Compraid1")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PVP")
                         .HasColumnType("int");
 
                     b.Property<int>("Productoid")
                         .HasColumnType("int");
 
-                    b.HasKey("Compraid");
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
 
-                    b.HasIndex("Compraid1");
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<double>("PVP")
+                        .HasColumnType("float");
+
+                    b.HasKey("Compraid", "Productoid");
 
                     b.HasIndex("Productoid");
 
@@ -517,7 +520,10 @@ namespace AppForSEII2526.API.Migrations
             modelBuilder.Entity("AppForSEII2526.API.Models.TipoProducto", b =>
                 {
                     b.Property<int>("Productoid")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Productoid"));
 
                     b.Property<string>("NombreProducto")
                         .IsRequired()
@@ -783,23 +789,34 @@ namespace AppForSEII2526.API.Migrations
                     b.Navigation("Metodo_Pago");
                 });
 
-            modelBuilder.Entity("AppForSEII2526.API.Models.Producto_Compra", b =>
+            modelBuilder.Entity("AppForSEII2526.API.Models.Producto", b =>
                 {
-                    b.HasOne("AppForSEII2526.API.Models.Compra_Producto", "compra")
-                        .WithMany()
-                        .HasForeignKey("Compraid1")
+                    b.HasOne("AppForSEII2526.API.Models.TipoProducto", "TipoProducto")
+                        .WithMany("Productos")
+                        .HasForeignKey("TipoProductoProductoid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppForSEII2526.API.Models.Producto", "producto")
-                        .WithMany()
+                    b.Navigation("TipoProducto");
+                });
+
+            modelBuilder.Entity("AppForSEII2526.API.Models.Producto_Compra", b =>
+                {
+                    b.HasOne("AppForSEII2526.API.Models.Compra_Producto", "Compra")
+                        .WithMany("ListaCompra")
+                        .HasForeignKey("Compraid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AppForSEII2526.API.Models.Producto", "Producto")
+                        .WithMany("producto_Compras")
                         .HasForeignKey("Productoid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("compra");
+                    b.Navigation("Compra");
 
-                    b.Navigation("producto");
+                    b.Navigation("Producto");
                 });
 
             modelBuilder.Entity("AppForSEII2526.API.Models.ResenyaBocadillo", b =>
@@ -826,15 +843,6 @@ namespace AppForSEII2526.API.Migrations
                     b.HasOne("AppForSEII2526.API.Models.CompraBocadillo", null)
                         .WithMany("TipoPan")
                         .HasForeignKey("CompraBocadilloCompraId", "CompraBocadilloBocadilloId");
-                });
-
-            modelBuilder.Entity("AppForSEII2526.API.Models.TipoProducto", b =>
-                {
-                    b.HasOne("AppForSEII2526.API.Models.Producto", null)
-                        .WithOne("TipoProducto")
-                        .HasForeignKey("AppForSEII2526.API.Models.TipoProducto", "Productoid")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -913,6 +921,11 @@ namespace AppForSEII2526.API.Migrations
                     b.Navigation("bonosComprados");
                 });
 
+            modelBuilder.Entity("AppForSEII2526.API.Models.Compra_Producto", b =>
+                {
+                    b.Navigation("ListaCompra");
+                });
+
             modelBuilder.Entity("AppForSEII2526.API.Models.MetodoPago", b =>
                 {
                     b.Navigation("compraBonos");
@@ -920,8 +933,7 @@ namespace AppForSEII2526.API.Migrations
 
             modelBuilder.Entity("AppForSEII2526.API.Models.Producto", b =>
                 {
-                    b.Navigation("TipoProducto")
-                        .IsRequired();
+                    b.Navigation("producto_Compras");
                 });
 
             modelBuilder.Entity("AppForSEII2526.API.Models.Resenya", b =>
@@ -937,6 +949,11 @@ namespace AppForSEII2526.API.Migrations
             modelBuilder.Entity("AppForSEII2526.API.Models.TipoPan", b =>
                 {
                     b.Navigation("Bocadillos");
+                });
+
+            modelBuilder.Entity("AppForSEII2526.API.Models.TipoProducto", b =>
+                {
+                    b.Navigation("Productos");
                 });
 #pragma warning restore 612, 618
         }

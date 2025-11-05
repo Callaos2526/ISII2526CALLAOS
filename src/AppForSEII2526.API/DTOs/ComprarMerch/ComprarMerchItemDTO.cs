@@ -5,19 +5,18 @@ namespace AppForSEII2526.API.DTOs.ComprarMerch
     {
         //Paso 5 El sistema muestra al cliente un listado con todos los artículos incluyendo su nombre,
         //precio, tipo.
-        public ComprarMerchItemDTO(int id, string nombreProducto, double pvp, string tipo, int cantidad)
+        public ComprarMerchItemDTO(int id, string nombreProducto, double pvp, string tipoProducto, int cantidad)
         {
             Id = id;
             NombreProducto = nombreProducto;
             PVP = pvp;
-            Tipo = tipo;
+            TipoProducto = tipoProducto;
             Cantidad = cantidad;
         }
-        [Key]
         public int Id { get; set; }
         public string NombreProducto { get; set; }
         public double PVP { get; set; }
-        public string Tipo { get; set; }
+        public string TipoProducto { get; set; }
         public int Cantidad { get; set; }
 
         public override bool Equals(object? obj)
@@ -26,13 +25,13 @@ namespace AppForSEII2526.API.DTOs.ComprarMerch
                    Id == dTO.Id &&
                    NombreProducto == dTO.NombreProducto &&
                    PVP == dTO.PVP &&
-                   Tipo == dTO.Tipo &&
+                   TipoProducto == dTO.TipoProducto &&
                    Cantidad == dTO.Cantidad;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Id, NombreProducto, PVP, Tipo);
+            return HashCode.Combine(Id, NombreProducto, PVP, TipoProducto);
         }
     }
 }

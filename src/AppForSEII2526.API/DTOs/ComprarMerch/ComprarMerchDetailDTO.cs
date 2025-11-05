@@ -8,7 +8,7 @@ namespace AppForSEII2526.API.DTOs.ComprarMerch
     //(cada uno con su nombre, tipo, precio y cantidad).
     public class ComprarMerchDetailDTO : ComprarMerchCreateDTO
     {
-        public ComprarMerchDetailDTO(int id, ApplicationUser cliente, string direccionEnvio, MetodoPago metodoPago,int cantidad, IList<ComprarMerchItemDTO> merchItems)
+        public ComprarMerchDetailDTO(int id, int compraId,ApplicationUser cliente, string direccionEnvio, string metodoPago,int cantidad, IList<ComprarMerchItemDTO> merchItems)
             : base(cliente.Id,cliente.Nombre, cliente.Apellido1, cliente.Apellido2, direccionEnvio, metodoPago, cantidad, merchItems)
         {
             Id = id;
@@ -20,10 +20,11 @@ namespace AppForSEII2526.API.DTOs.ComprarMerch
         {
             return obj is ComprarMerchDetailDTO dTO &&
                    base.Equals(obj) &&
+                   CompraId == dTO.CompraId &&
                    Nombre == dTO.Nombre &&
                    Apellido_1 == dTO.Apellido_1 &&
                    Apellido_2 == dTO.Apellido_2 &&
-                   EqualityComparer<MetodoPago>.Default.Equals(Metodo_Pago, dTO.Metodo_Pago) &&
+                   Metodo_Pago == dTO.Metodo_Pago &&
                    Direccion_Envio == dTO.Direccion_Envio &&
                    Cantidad == dTO.Cantidad &&
                    EqualityComparer<IList<ComprarMerchItemDTO>>.Default.Equals(MerchItems, dTO.MerchItems) &&
