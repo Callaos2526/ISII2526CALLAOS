@@ -4,27 +4,23 @@ namespace AppForSEII2526.API.Models
     public class TipoProducto
     {
         public TipoProducto() { }
-        public TipoProducto(string nombre, int productoid)
+        public TipoProducto(string nombreProducto, int productoid)
         {
-            Nombre = nombre;
+            NombreProducto = nombreProducto;
             Productoid = productoid;
         }
         [Key]
         public int Productoid { get; set; }
-        [Required]
-        public string Nombre { get; set; }
-        public IList<Producto> Productos = new List<Producto>();
+        public string NombreProducto { get; set; }
+        public IList<Producto> Productos { get; set; } = new List<Producto>();
         public override bool Equals(object? obj)
         {
             return obj is TipoProducto producto &&
                    Productoid == producto.Productoid &&
-                   Nombre == producto.Nombre;
+                   NombreProducto == producto.NombreProducto;
         }
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Productoid, Nombre);
-        }
+        
     }
 
 }

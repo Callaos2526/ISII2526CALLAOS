@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppForSEII2526.API
-{
-
+{       
+      
     [Route("api/[controller]")]
     [ApiController]
     public class BocadilloController : ControllerBase
@@ -12,7 +12,7 @@ namespace AppForSEII2526.API
         private readonly ApplicationDbContext _context;
         private readonly ILogger<BocadilloController> _logger;
 
-        public BocadilloController(ApplicationDbContext context,
+        public BocadilloController(ApplicationDbContext context, 
             ILogger<BocadilloController> logger)
         {
             _context = context;
@@ -48,16 +48,16 @@ namespace AppForSEII2526.API
                 return NotFound("No hay bocadillos que cumplan los requisitos");
             }
             return Ok(bocadillos);*/
-
+            
             Tamaño? tamanoFiltrado = null;
 
             if (!string.IsNullOrWhiteSpace(filtroTamano) &&
                 Enum.TryParse<Tamaño>(filtroTamano, ignoreCase: true, out var parsed))
             {
                 tamanoFiltrado = parsed;
-            }
+                }
 
-            var query = _context.Bocadillos
+                var query = _context.Bocadillos
                 .AsNoTracking()
                 .Include(b => b.tipopan)
                 .Include(b => b.ComprasBocadillo).ThenInclude(cb => cb.Compra)
@@ -71,8 +71,8 @@ namespace AppForSEII2526.API
 
             var bocadillos = await query
                 .OrderBy(b => b.Nombre)
-                .Select(b => new SelectBocadilloDTO(b.Id, b.Nombre, b.Tamano, b.tipopan.Nombre, b.Pvp))
-                .ToListAsync();
+                    .Select(b => new SelectBocadilloDTO(b.Id, b.Nombre, b.Tamano, b.tipopan.Nombre, b.Pvp))
+                    .ToListAsync();
 
             if (!bocadillos.Any())
                 return NotFound("No hay bocadillos que cumplan los requisitos");

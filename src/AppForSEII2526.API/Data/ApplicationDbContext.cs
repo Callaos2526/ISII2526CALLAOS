@@ -22,7 +22,10 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ResenyaBocadillo> ResenyasBocadillo { get; set; }
     public DbSet<Resenya> Resenyas { get; set; }
     public DbSet<Compra> Compras { get; set; }
+
     public DbSet<CompraBocadillo> ComprasBocadillos { get; set; }
+    public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+    public DbSet<MetodoPago> MetodoPago { get; set; }
 
     public DbSet<ApplicationUser> ApplicationUser { get; set; }
 
@@ -43,13 +46,24 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
              .HasAlternateKey(bc => new { bc.CompraId, bc.BonoId });
         builder.Entity<ResenyaBocadillo>()
             .HasKey(rb => new { rb.BocadilloId, rb.ResenyaId });
-        //builder.Entity<CompraBocadillo>()
-        // .HasKey(cb => new { cb.CompraId, cb.BocadilloId });
-
+        // builder.Entity<CompraBocadillo>()
+        //  .HasKey(cb => new { cb.CompraId, cb.BocadilloId });
         builder.Entity<CompraBocadillo>()
-       .HasIndex(cb => new { cb.CompraId, cb.BocadilloId })
-       .IsUnique();
+         .HasIndex(cb => new { cb.CompraId, cb.BocadilloId })
+      .IsUnique();
+        builder.Entity<Producto_Compra>()
+           .HasKey(pc => new { pc.Compraid, pc.Productoid});
+        builder.Entity<MetodoPago>()
+        .HasDiscriminator<string>("Discriminator")
+        .HasValue<MetodoPago>("MetodoPago")
+        .HasValue<Tarjeta>("Tarjeta")
+        .HasValue<Paypal>("Paypal")
+        .HasValue<GooglePay>("GooglePay");
+
+        .HasIndex(cb => new { cb.CompraId, cb.BocadilloId })
+        .IsUnique();
     }
+
 }
     
 

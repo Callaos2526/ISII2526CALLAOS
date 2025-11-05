@@ -34,8 +34,9 @@
   <Class Name="AppForSEII2526.API.Models.MetodoPago">
     <Position X="12" Y="1.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAAAABAAIgAAAAAAAAA=</HashCode>
-      <FileName>Models\Metodo_Pago.cs</FileName>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAAAABAAIAAAAAAAAAA=</HashCode>
+      <FileName>Models\MetodoPago.cs</FileName>
+      <NewMemberFileName>Models\Metodo_Pago.cs</NewMemberFileName>
     </TypeIdentifier>
   </Class>
   <Class Name="AppForSEII2526.API.Models.Paypal">
@@ -65,12 +66,15 @@
   <Class Name="AppForSEII2526.API.Models.Bocadillo">
     <Position X="3" Y="1" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>gAACADAAAAAAAAAAgAAggAAAgAAAAIAAIBAAAAAAAEA=</HashCode>
+      <HashCode>gAACADAAAAAAAAAAgAAggAAAgAAAAIAAIBAIAAAAAEA=</HashCode>
       <FileName>Models\Bocadillo.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
       <Property Name="tipopan" />
     </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="ComprasBocadillo" />
+    </ShowAsCollectionAssociation>
   </Class>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

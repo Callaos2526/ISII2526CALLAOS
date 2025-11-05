@@ -19,6 +19,7 @@ namespace AppForSEII2526.API.Models
             Resenyabocadillo = resenyabocadillo;
             Stock = stock;
             Tamano = tamano;
+            //Tamano = tamano;
 
             
         }
