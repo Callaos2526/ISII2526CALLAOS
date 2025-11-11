@@ -34,4 +34,9 @@
     <ProjectReference Include="..\..\src\AppForSEII2526.API\AppForSEII2526.API.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="BocadilloController_test\" />
+    <Folder Include="PedidoController_test\" />
+  </ItemGroup>
+
 </Project>
