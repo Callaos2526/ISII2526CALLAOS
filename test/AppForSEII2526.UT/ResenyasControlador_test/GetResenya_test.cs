@@ -1,14 +1,7 @@
 ﻿using AppForSEII2526.API.Controller;
 using AppForSEII2526.API.DTOs.ResenyaDTOs;
-using AppForSEII2526.API.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Xunit;
+
+
 
 namespace AppForSEII2526.UT.ResenyasControlador_test
 {
@@ -21,7 +14,8 @@ namespace AppForSEII2526.UT.ResenyasControlador_test
         {
             // Seed mínimo: tipo de pan y bocadillo
             var tipoPan = new TipoPan { Nombre = "Barra" };
-            _boc = new Bocadillo { Nombre = "Atún", Pvp = 3.5F, Tamano = Tamaño.normal, tipopan = tipoPan };
+            // <- IMPORTANTE: inicializar la propiedad no anulable Resenyabocadillo
+            _boc = new Bocadillo { Nombre = "Atún", Pvp = 3.5F, Tamano = Tamaño.normal, tipopan = tipoPan, Resenyabocadillo = string.Empty };
 
             _context.AddRange(tipoPan, _boc);
             _context.SaveChanges();

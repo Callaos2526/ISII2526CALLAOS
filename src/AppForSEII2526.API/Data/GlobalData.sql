@@ -17,9 +17,9 @@ INSERT INTO [dbo].[BonosBocadillos] ([BonoId], [CantidadDisponible], [NBocadillo
 SET IDENTITY_INSERT [dbo].[BonosBocadillos] OFF
 
 SET IDENTITY_INSERT [dbo].[MetodoPago] ON
-INSERT INTO [dbo].[MetodoPago] ([metodoPagoId], [metodoName], [Discriminator]) VALUES (1, N'Tarjeta', N'1')
-INSERT INTO [dbo].[MetodoPago] ([metodoPagoId], [metodoName], [Discriminator]) VALUES (2, N'GooglePay', N'2')
-INSERT INTO [dbo].[MetodoPago] ([metodoPagoId], [metodoName], [Discriminator]) VALUES (4, N'Paypal', N'3')
+INSERT INTO [dbo].[MetodoPago] ([metodoPagoId], [metodoName], [Discriminator]) VALUES (1, N'Tarjeta', N'Tarjeta')
+INSERT INTO [dbo].[MetodoPago] ([metodoPagoId], [metodoName], [Discriminator]) VALUES (2, N'GooglePay', N'GooglePay')
+INSERT INTO [dbo].[MetodoPago] ([metodoPagoId], [metodoName], [Discriminator]) VALUES (4, N'Paypal', N'Paypal')
 SET IDENTITY_INSERT [dbo].[MetodoPago] OFF
 
 SET IDENTITY_INSERT [dbo].[ComprasBono] ON
