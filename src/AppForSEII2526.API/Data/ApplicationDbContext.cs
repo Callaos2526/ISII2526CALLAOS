@@ -27,7 +27,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ApplicationUser> ApplicationUsers { get; set; }
     public DbSet<MetodoPago> MetodoPago { get; set; }
 
-    public DbSet<ApplicationUser> ApplicationUser { get; set; }
 
 
 
@@ -53,12 +52,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
       .IsUnique();
         builder.Entity<Producto_Compra>()
            .HasKey(pc => new { pc.Compraid, pc.Productoid});
-        builder.Entity<MetodoPago>()
-        .HasDiscriminator<string>("Discriminator")
-        .HasValue<MetodoPago>("MetodoPago")
-        .HasValue<Tarjeta>("Tarjeta")
-        .HasValue<Paypal>("Paypal")
-        .HasValue<GooglePay>("GooglePay");
     }
 
 

@@ -51,7 +51,7 @@ namespace AppForSEII2526.API.Data
             //first, it checks the user does not already exist in the DB
             if (userManager.FindByNameAsync("elena@uclm.es").Result == null)
             {
-                ApplicationUser user = new ApplicationUser(2,"Elena", "Navarro", "Martínez");
+                ApplicationUser user = new ApplicationUser("Elena", "Navarro", "Martínez");
                 user.EmailConfirmed = true;
 
                 var result = userManager.CreateAsync(user, "Password1234%");
@@ -66,7 +66,7 @@ namespace AppForSEII2526.API.Data
 
             if (userManager.FindByNameAsync("gregorio@uclm.es").Result == null)
             {
-                ApplicationUser user = new ApplicationUser(3 , "Gregorio", "Diaz", "Descalzo");
+                ApplicationUser user = new ApplicationUser("Gregorio", "Diaz", "Descalzo");
                 user.EmailConfirmed = true;
 
                 var result = userManager.CreateAsync(user, "APassword1234%");
@@ -82,7 +82,7 @@ namespace AppForSEII2526.API.Data
             if (userManager.FindByNameAsync("peter@uclm.es").Result == null)
             {
                 //A customer class has been defined because it has different attributes (purchase, rental, etc.)
-                ApplicationUser user = new ApplicationUser(1, "Peter", "Jackson", "Rodriguez");
+                ApplicationUser user = new ApplicationUser("Peter", "Jackson", "Rodriguez");
                 user.EmailConfirmed = true;
 
                 var result = userManager.CreateAsync(user, "OtherPass12$");
