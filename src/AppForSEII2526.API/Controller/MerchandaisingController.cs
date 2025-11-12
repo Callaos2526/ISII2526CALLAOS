@@ -23,8 +23,8 @@ namespace AppForSEII2526.API.Controllers
         {
             IList<ComprarMerchandaisingDTO> productos = await _context.Producto
             .Where(producto => (filtroTipo == null || producto.TipoProducto.NombreProducto.Contains(filtroTipo)) &&
-                               (filtroPrecio == null || producto.PVP <= filtroPrecio)
-                               && producto.Stock > 0)
+                               (filtroPrecio == null || producto.PVP <= filtroPrecio) && 
+             producto.Stock > 0)
             .OrderBy(producto => producto.NombreProducto)
             .Select(p => new ComprarMerchandaisingDTO(
                 p.Productoid,

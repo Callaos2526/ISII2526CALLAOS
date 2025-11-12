@@ -8,8 +8,8 @@ namespace AppForSEII2526.API.DTOs.ComprarMerch
     //(cada uno con su nombre, tipo, precio y cantidad).
     public class ComprarMerchDetailDTO : ComprarMerchCreateDTO
     {
-        public ComprarMerchDetailDTO(int id, int compraId,ApplicationUser cliente, string direccionEnvio, string metodoPago,int cantidad, IList<ComprarMerchItemDTO> merchItems)
-            : base(cliente.ID,cliente.NombreCliente, cliente.ApellidoCliente1, cliente.ApellidoCliente2, direccionEnvio, metodoPago, cantidad, merchItems)
+        public ComprarMerchDetailDTO(int compraId, ApplicationUser cliente, string direccionEnvio, string metodoPago, int cantidad, IList<ComprarMerchItemDTO> merchItems, int id)
+            : base(compraId, cliente.NombreCliente, cliente.ApellidoCliente1, cliente.ApellidoCliente2, direccionEnvio, metodoPago, cantidad, merchItems)
         {
             Id = id;
         }
