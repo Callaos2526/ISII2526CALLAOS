@@ -12,6 +12,7 @@ namespace AppForSEII2526.API.Models
         public IList<CompraBono> compraBonos { get; set; } = new List<CompraBono>();
 
     }
+    /*
         public class MetodoPagoTarjeta : MetodoPago
         {
             public MetodoPagoTarjeta()
@@ -35,6 +36,7 @@ namespace AppForSEII2526.API.Models
                 metodoName = "GooglePay";
             }
         }
+    */
 }
 
 

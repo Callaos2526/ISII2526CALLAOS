@@ -15,7 +15,7 @@ public class ApplicationUser : IdentityUser {
         ApellidoCliente1 = apellidoCliente1;
         ApellidoCliente2 = apellidoCliente2;
     }
-    public int ID { get; set; }
+    int ID { get; set; }
     public string NombreCliente { get; set; }
     public string ApellidoCliente1 { get; set; }
     public string ApellidoCliente2 { get; set; }
