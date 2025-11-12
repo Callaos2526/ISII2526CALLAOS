@@ -16,7 +16,7 @@ using Xunit;
 namespace AppForSEII2526.UT.BocadilloController_test
 {
     
-    public class GetBocadillo_test : AppForMovies.UT.AppForSEII25264SqliteUT
+    public class GetBocadillo_test : AppForMovies.UT.AppForMovies4SqliteUT
     {
         public GetBocadillo_test()
         {
