@@ -8,7 +8,7 @@ public class ApplicationUser : IdentityUser {
     {
     }
 
-    public ApplicationUser(int id, string nombreCliente, string apellidoCliente1, string apellidoCliente2)
+    public ApplicationUser(string nombreCliente, string apellidoCliente1, string apellidoCliente2)
     {
         //ID = id;
         NombreCliente = nombreCliente;
