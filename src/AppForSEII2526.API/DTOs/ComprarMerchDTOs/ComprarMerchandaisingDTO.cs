@@ -4,7 +4,7 @@
     {
         //Paso 2. El sistema muestra un listado con todos los productos de merchandising disponibles
         //(que tengan stock) indicando su nombre, precio, tipo y el stock.
-
+        public ComprarMerchandaisingDTO() { }
         public ComprarMerchandaisingDTO(int productoId, string nombreProducto, double pvp, int stock, string tipoProducto)
         {
             ProductoId = productoId;

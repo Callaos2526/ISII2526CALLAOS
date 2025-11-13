@@ -3,6 +3,8 @@ namespace AppForSEII2526.API.DTOs.ComprarMerch
 {
     public class ComprarMerchItemDTO
     {
+        public ComprarMerchItemDTO() { }
+        
         //Paso 5 El sistema muestra al cliente un listado con todos los artículos incluyendo su nombre,
         //precio, tipo.
         public ComprarMerchItemDTO(int id, string nombreProducto, double pvp, string tipoProducto, int cantidad)

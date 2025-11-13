@@ -48,6 +48,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
       .IsUnique();
         builder.Entity<Producto_Compra>()
            .HasKey(pc => new { pc.Compraid, pc.Productoid});
+        builder.Entity<MetodoPago>()
+        .HasDiscriminator<string>("Discriminator")
+        .HasValue<MetodoPago>("MetodoPago")
+        .HasValue<Tarjeta>("Tarjeta")
+        .HasValue<Paypal>("Paypal")
+        .HasValue<GooglePay>("GooglePay");
     }
 
 
