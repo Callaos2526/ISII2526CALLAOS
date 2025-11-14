@@ -1,5 +1,4 @@
-﻿using AppForMovies.UT;
-using AppForSEII2526.API;
+﻿using AppForSEII2526.API;
 using AppForSEII2526.UT;
 using AppForSEII2526.API.Models;
 using AppForSEII2526.API.DTOs.PedidoBocaDTOs;
@@ -15,6 +14,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Xunit;
+using AppForMovies.UT;
 
 namespace AppForSEII2526.UT.BocadilloController_test
 {
@@ -98,6 +98,18 @@ namespace AppForSEII2526.UT.BocadilloController_test
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var bocadilloDTOsActual = Assert.IsType<List<SelectBocadilloDTO>>(okResult.Value);
+            var dtoList = Assert.IsType<List<SelectBocadilloDTO>>(okResult.Value);
+
+            // Comparación por propiedades relevantes evitando fragilidad por IDs y por float precision
+            var expectedProjection = expectedBocadillos
+                .Select(b => new
+                {
+                    b.NombreBocadillo,
+                    b.Tamano,
+                    b.TipoPanNombre,
+                    Pvp = Math.Round(b.Pvp, 2)
+                })
+                .ToList();
             Assert.Equal(expectedBocadillos, bocadilloDTOsActual);
 
             var actualProjection = dtoList

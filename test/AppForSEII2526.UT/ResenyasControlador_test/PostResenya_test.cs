@@ -87,10 +87,10 @@ namespace AppForSEII2526.UT.ResenyasControlador_test
             // Duplicado: mismo BocadilloId dos veces
             var items = new List<ResenyaItemDTO>
             {
-                new ResenyaItemDTO(_b1.Id, 5),
-                new ResenyaItemDTO(_b1.Id, 7)
+                new ResenyaItemDTO(_bocadillo.Id, 5),
+                new ResenyaItemDTO(_bocadillo.Id, 7)
             };
-            var dto = new ResenyaForCreateDTO("u", "T", "D", Resenya.ValoracionGeneral.Cuatro, items);
+            //var dto = new ResenyaForCreateDTO("u", "T", "D", Resenya.ValoracionGeneral.Cuatro, items);
 
             var result = await controller.CreateResenya(dto);
 

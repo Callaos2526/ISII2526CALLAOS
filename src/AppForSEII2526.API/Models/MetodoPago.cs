@@ -12,8 +12,31 @@ namespace AppForSEII2526.API.Models
         public IList<CompraBono> compraBonos { get; set; } = new List<CompraBono>();
 
     }
-        
-        
+    /*
+        public class MetodoPagoTarjeta : MetodoPago
+        {
+            public MetodoPagoTarjeta()
+            {
+                metodoName = "Tarjeta";
+            }
+        }
+
+        public class MetodoPagoPayPal : MetodoPago
+        {
+            public MetodoPagoPayPal()
+            {
+                metodoName = "Paypal";
+            }
+        }
+
+        public class MetodoPagoGooglePay : MetodoPago
+        {
+            public MetodoPagoGooglePay()
+            {
+                metodoName = "GooglePay";
+            }
+        }
+    */
 }
 
 

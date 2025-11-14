@@ -18,5 +18,19 @@ namespace AppForSEII2526.API.DTOs.CompraBonoDTOs
         [Key]
         public int ID { get; set; }
         public double PrecioTotal { get; set; }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is not CompraBonoDetallesDTO dTO) return false;
+
+            return base.Equals(dTO) &&
+                   ID == dTO.ID &&
+                   Math.Abs(PrecioTotal - dTO.PrecioTotal) < 0.01; // Comparación con tolerancia para double
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(base.GetHashCode(), ID, PrecioTotal);
+        }
     }
 }

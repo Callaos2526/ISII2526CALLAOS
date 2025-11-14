@@ -50,6 +50,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             .IsUnique();
 
         builder.Entity<Producto_Compra>()
-           .HasKey(pc => new { pc.Compraid, pc.Productoid });
+           .HasKey(pc => new { pc.Compraid, pc.Productoid});
     }
 }

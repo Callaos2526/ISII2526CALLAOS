@@ -8,12 +8,12 @@ namespace LosDelEspacio.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ComprasController : ControllerBase
+    public class ComprarBonoControlador : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<ComprasController> _logger;
+        private readonly ILogger<ComprarBonoControlador> _logger;
 
-        public ComprasController(ApplicationDbContext context, ILogger<ComprasController> logger)
+        public ComprarBonoControlador(ApplicationDbContext context, ILogger<ComprarBonoControlador> logger)
         {
             _context = context;
             _logger = logger;
