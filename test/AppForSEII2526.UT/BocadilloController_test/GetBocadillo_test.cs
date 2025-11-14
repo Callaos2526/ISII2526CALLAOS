@@ -1,17 +1,6 @@
 ﻿using AppForSEII2526.API;
-using AppForSEII2526.UT;
-using AppForSEII2526.API.Models;
 using AppForSEII2526.API.DTOs.PedidoBocaDTOs;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
-using Xunit;
 using AppForMovies.UT;
 
 namespace AppForSEII2526.UT.BocadilloController_test

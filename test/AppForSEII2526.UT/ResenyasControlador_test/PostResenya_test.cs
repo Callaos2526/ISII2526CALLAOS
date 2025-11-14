@@ -1,15 +1,6 @@
 ﻿using AppForMovies.UT;
 using AppForSEII2526.API.Controller;
 using AppForSEII2526.API.DTOs.ResenyaDTOs;
-using AppForSEII2526.API.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace AppForSEII2526.UT.ResenyasControlador_test
 {
