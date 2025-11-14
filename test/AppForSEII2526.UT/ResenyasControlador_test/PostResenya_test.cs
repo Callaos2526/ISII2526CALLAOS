@@ -2,6 +2,8 @@
 using AppForSEII2526.API.Controller;
 using AppForSEII2526.API.DTOs.ResenyaDTOs;
 
+
+
 namespace AppForSEII2526.UT.ResenyasControlador_test
 {
     /*
@@ -62,7 +64,7 @@ namespace AppForSEII2526.UT.ResenyasControlador_test
                 resenyaBocadillo: new List<ResenyaItemDTO> { new ResenyaItemDTO(999, 9) });
 
             var allTests = new List<object[]>
-            {
+        {
                 new object[] { emptyItems, "Error: Debes incluir al menos un bocadillo con su puntuación (1..10)" },
                 new object[] { puntuacionFuera, "Error: La puntuación de cada bocadillo debe estar entre 1 y 10" },
                 new object[] { duplicados, "Error: No se permiten bocadillos duplicados en la reseña" },
@@ -81,6 +83,14 @@ namespace AppForSEII2526.UT.ResenyasControlador_test
             var mock = new Mock<ILogger<ResenyasControlador>>();
             ILogger<ResenyasControlador> logger = mock.Object;
             var controller = new ResenyasControlador(_context, logger);
+
+            // Duplicado: mismo BocadilloId dos veces
+            var items = new List<ResenyaItemDTO>
+            {
+                new ResenyaItemDTO(_b1.Id, 5),
+                new ResenyaItemDTO(_b1.Id, 7)
+            };
+            var dto = new ResenyaForCreateDTO("u", "T", "D", Resenya.ValoracionGeneral.Cuatro, items);
 
             var result = await controller.CreateResenya(dto);
 

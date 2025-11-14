@@ -1,9 +1,4 @@
 ﻿using AppForSEII2526.API.DTOs.ComprarMerch;
-using AppForSEII2526.API.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Net;
 
 namespace AppForSEII2526.API.Controllers
 {
@@ -21,7 +16,7 @@ namespace AppForSEII2526.API.Controllers
         }
 
         //GET Details: muestra los datos detallados de una compra
-        [HttpGet]  
+        [HttpGet]
         [Route("[action]")]
         [ProducesResponseType(typeof(ComprarMerchDetailDTO), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -39,19 +34,20 @@ namespace AppForSEII2526.API.Controllers
                     .ThenInclude(pc => pc.Producto)
                         .ThenInclude(p => p.TipoProducto)
                 .Select(compra => new ComprarMerchDetailDTO(
-                compra.CompraId,
-                compra.Id,
-                compra.Cliente,
-                compra.DireccionEnvio,
-                compra.Metodo_Pago.metodoName,
-                compra.ListaCompra.Sum(pc => pc.Cantidad),
-                compra.ListaCompra.Select(pc => new ComprarMerchItemDTO(
-                    pc.Productoid,
-                    pc.Producto.NombreProducto,
-                    pc.PVP,
-                    pc.Producto.TipoProducto.NombreProducto,
-                    pc.Cantidad
-            )).ToList<ComprarMerchItemDTO>())).FirstOrDefaultAsync();
+                    compra.Id, // id
+                    compra.Cliente, // ApplicationUser
+                    compra.DireccionEnvio, // string
+                    compra.Metodo_Pago.metodoName, // string
+                    compra.ListaCompra.Sum(pc => pc.Cantidad), // int
+                    compra.ListaCompra.Select(pc => new ComprarMerchItemDTO(
+                        pc.Productoid,
+                        pc.Producto.NombreProducto,
+                        pc.PVP,
+                        pc.Producto.TipoProducto.NombreProducto,
+                        pc.Cantidad
+                    )).ToList<ComprarMerchItemDTO>(), // IList<ComprarMerchItemDTO>
+                    compra.CompraId // int
+                )).FirstOrDefaultAsync();
             if (compradto == null)
             {
                 _logger.LogError($"Error: Compra con id {id} no existe");
@@ -80,7 +76,7 @@ namespace AppForSEII2526.API.Controllers
                 ModelState.AddModelError("Apellido_1", "El primer apellido es obligatorio");
             if (string.IsNullOrWhiteSpace(compraMerch.Direccion_Envio))
                 ModelState.AddModelError("Direccion_Envio", "La dirección de envío es obligatoria");
-            
+
 
             // Validar cantidad en cada producto seleccionado
             for (int i = 0; i < compraMerch.MerchItems.Count; i++)
@@ -99,7 +95,7 @@ namespace AppForSEII2526.API.Controllers
                 .Include(p => p.TipoProducto)
                 .Where(p => productosIds.Contains(p.Productoid))
                 .ToListAsync();
-            
+
             double precioFinal = 0;
             List<Producto_Compra> lineasCompra = new();
             foreach (var item in compraMerch.MerchItems)
@@ -127,6 +123,7 @@ namespace AppForSEII2526.API.Controllers
             if (ModelState.ErrorCount > 0)
                 return BadRequest(new ValidationProblemDetails(ModelState));
             // 🔹 Buscar método de pago
+
             var metodoPago = await _context.MetodoPago
                 .FirstOrDefaultAsync(m => m.metodoName.ToLower() == compraMerch.Metodo_Pago.ToLower());
 
@@ -175,12 +172,12 @@ namespace AppForSEII2526.API.Controllers
 
             var compraDetailDTO = new ComprarMerchDetailDTO(
                 compra_entity.Id,
-                compra_entity.CompraId,
                 cliente,
                 compra_entity.DireccionEnvio,
                 metodoPago.metodoName,
                 lineasCompra.Sum(x => x.Cantidad),
-                itemsDTO
+                itemsDTO,
+                compra_entity.CompraId
             );
 
             return CreatedAtAction("GetCompraDetail", new { id = compra_entity.Id }, compraDetailDTO);

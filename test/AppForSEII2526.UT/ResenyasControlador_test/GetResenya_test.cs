@@ -2,12 +2,17 @@
 using AppForSEII2526.API.Controller;
 using AppForSEII2526.API.DTOs.ResenyaDTOs;
 
+
+
 namespace AppForSEII2526.UT.ResenyasControlador_test
 {
     // Pruebas para el Get (detalle) del controlador ResenyasControlador.
     // Sigue el patrón de la profesora: datos en el constructor, tests claros y comparaciones por Equals.
     public class GetResenya_test : AppForMovies4SqliteUT
     {
+        private readonly Bocadillo _boc;
+        private readonly Resenya _seedResenya;
+
         public GetResenya_test()
         {
             // Preparamos datos mínimos en la BD en memoria:
