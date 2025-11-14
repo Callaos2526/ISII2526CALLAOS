@@ -12,10 +12,11 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Xunit;
+using AppForMovies.UT;
 
 namespace AppForSEII2526.UT.BocadilloController_test
 {
-    public class GetBocadillo_test : AppForMovies.UT.AppForMovies4SqliteUT
+    public class GetBocadillo_test : AppForMovies4SqliteUT
     {
         public GetBocadillo_test()
         {

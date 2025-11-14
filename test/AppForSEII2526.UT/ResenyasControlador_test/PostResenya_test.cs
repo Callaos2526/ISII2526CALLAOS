@@ -1,4 +1,5 @@
-﻿using AppForSEII2526.API.Controller;
+﻿using AppForMovies.UT;
+using AppForSEII2526.API.Controller;
 using AppForSEII2526.API.DTOs.ResenyaDTOs;
 using AppForSEII2526.API.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,7 @@ namespace AppForSEII2526.UT.ResenyasControlador_test
      Clase de pruebas unitarias para el endpoint CreateResenya del controlador
      ResenyasControlador.
     */
-    public class PostResenya_test : AppForMovies.UT.AppForMovies4SqliteUT
+    public class PostResenya_test : AppForMovies4SqliteUT
     {
         private readonly TipoPan _tipoPan;
         private readonly Bocadillo _bocadillo;

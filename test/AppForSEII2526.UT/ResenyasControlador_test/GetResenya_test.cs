@@ -1,4 +1,5 @@
-﻿using AppForSEII2526.API.Controller;
+﻿using AppForMovies.UT;
+using AppForSEII2526.API.Controller;
 using AppForSEII2526.API.DTOs.ResenyaDTOs;
 using AppForSEII2526.API.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,7 @@ namespace AppForSEII2526.UT.ResenyasControlador_test
 {
     // Pruebas para el Get (detalle) del controlador ResenyasControlador.
     // Sigue el patrón de la profesora: datos en el constructor, tests claros y comparaciones por Equals.
-    public class GetResenya_test : AppForMovies.UT.AppForMovies4SqliteUT
+    public class GetResenya_test : AppForMovies4SqliteUT
     {
         public GetResenya_test()
         {
