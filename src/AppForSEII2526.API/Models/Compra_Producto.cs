@@ -3,7 +3,7 @@
     public class Compra_Producto
     {
         public Compra_Producto() { }
-        public Compra_Producto( int id,int compraid, ApplicationUser cliente, string direccionEnvio, DateTime fechaCompra, MetodoPago metodo_Pago, int precioFinal) 
+        public Compra_Producto(int id,int compraid, ApplicationUser cliente, string direccionEnvio, DateTime fechaCompra, MetodoPago metodo_Pago, int precioFinal) 
         {
             CompraId = compraid;
             Id = id;

@@ -15,7 +15,7 @@ public class ApplicationUser : IdentityUser {
         ApellidoCliente1 = apellidoCliente1;
         ApellidoCliente2 = apellidoCliente2;
     }
-    // public int ID { get; set; } // Miguel que cambie lo del id por compraid en su clase
+   // public int ID { get; set; }
     public string NombreCliente { get; set; }
     public string ApellidoCliente1 { get; set; }
     public string ApellidoCliente2 { get; set; }

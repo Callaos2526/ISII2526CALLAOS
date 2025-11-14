@@ -1,5 +1,7 @@
 ﻿using AppForMovies.UT;
 using AppForSEII2526.API;
+using AppForSEII2526.UT;
+using AppForSEII2526.API.Models;
 using AppForSEII2526.API.DTOs.PedidoBocaDTOs;
 using AppForSEII2526.API.Models;
 using AppForSEII2526.UT;
@@ -46,11 +48,11 @@ namespace AppForSEII2526.UT.BocadilloController_test
             // Creamos la lista base en el mismo orden de inserción en el constructor
             // (IDs asignados por EF en ese orden)
             var BocadillosDTOs = new List<SelectBocadilloDTO>
-    {
-        new SelectBocadilloDTO(1, "Atún con tomate", Tamaño.normal, "Barra", 3.0F),
-        new SelectBocadilloDTO(2, "Jamón y queso",   Tamaño.normal, "Integral", 4.0F),
+            {
+                new SelectBocadilloDTO(1, "Atún con tomate", Tamaño.normal, "Barra", 3.0F),
+                new SelectBocadilloDTO(2, "Jamón y queso",   Tamaño.normal, "Integral", 4.0F),
         new SelectBocadilloDTO(3, "Vegetal",         Tamaño.pequeño,"Chapata", 3.5F),
-        new SelectBocadilloDTO(4, "Pollo asado",     Tamaño.normal, "Barra", 3.0F),
+                new SelectBocadilloDTO(4, "Pollo asado",     Tamaño.normal, "Barra", 3.0F),
         new SelectBocadilloDTO(5, "Lomo con queso",  Tamaño.normal, "Chapata", 3.0F),
     };
 
@@ -59,11 +61,11 @@ namespace AppForSEII2526.UT.BocadilloController_test
 
             // pequeño -> "Vegetal" (baseList[2])
             var tc2 = new List<SelectBocadilloDTO> { BocadillosDTOs[2] }
-                      .OrderBy(b => b.NombreBocadillo).ToList();
+            .OrderBy(b => b.NombreBocadillo).ToList();
 
             // Chapata -> "Vegetal" (baseList[2]) y "Lomo con queso" (baseList[4])
             var tc3 = new List<SelectBocadilloDTO> { BocadillosDTOs[2], BocadillosDTOs[4] }
-                      .OrderBy(b => b.NombreBocadillo).ToList();
+                         .OrderBy(b => b.NombreBocadillo).ToList();
 
             // normal + Integral -> "Jamón y queso" (baseList[1])
             var tc4 = new List<SelectBocadilloDTO> { BocadillosDTOs[1] }
@@ -71,12 +73,12 @@ namespace AppForSEII2526.UT.BocadilloController_test
 
             // IMPORTANTE: pasar las cadenas que coincidan con los nombres del enum Tamaño
             var allTests = new List<object[]>
-    {
-        new object[] { null,                         null,      tc1 },
-        new object[] { Tamaño.pequeño.ToString(),    null,      tc2 }, // filtro por tamaño pequeño
-        new object[] { null,                         "Chapata", tc3 },
-        new object[] { Tamaño.normal.ToString(),     "Integral",tc4 }, // filtro por tamaño normal + Integral
-    };
+            {
+                new object[] { null,                         null,      tc1 },
+                new object[] { Tamaño.pequeño.ToString(),    null,      tc2 }, // filtro por tamaño pequeño
+                new object[] { null,                         "Chapata", tc3 },
+                new object[] { Tamaño.normal.ToString(),     "Integral",tc4 }, // filtro por tamaño normal + Integral
+            };
             return allTests;
         }
 
@@ -98,7 +100,17 @@ namespace AppForSEII2526.UT.BocadilloController_test
             var bocadilloDTOsActual = Assert.IsType<List<SelectBocadilloDTO>>(okResult.Value);
             Assert.Equal(expectedBocadillos, bocadilloDTOsActual);
 
-            
+            var actualProjection = dtoList
+                .Select(b => new
+                {
+                    b.NombreBocadillo,
+                    b.Tamano,
+                    b.TipoPanNombre,
+                    Pvp = Math.Round(b.Pvp, 2)
+                })
+                .ToList();
+
+            Assert.Equal(expectedProjection, actualProjection);
         }
 
         [Fact]

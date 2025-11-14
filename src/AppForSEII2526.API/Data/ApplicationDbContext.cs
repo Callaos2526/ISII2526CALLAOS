@@ -44,6 +44,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<ResenyaBocadillo>()
             .HasKey(rb => new { rb.BocadilloId, rb.ResenyaId });
 
+        //  .HasKey(cb => new { cb.CompraId, cb.BocadilloId });
         builder.Entity<CompraBocadillo>()
             .HasIndex(cb => new { cb.CompraId, cb.BocadilloId })
             .IsUnique();

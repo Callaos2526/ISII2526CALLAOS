@@ -42,7 +42,7 @@ namespace AppForSEII2526.API
                 .AsQueryable();
 
             if (tamanoFiltrado.HasValue)
-                query = query.Where(b => b.Tamano == tamanoFiltrado.Value);
+                query = query.Where(b => b.Tamano == tamanoFiltrado.Value);  //filtro por string
 
             if (!string.IsNullOrWhiteSpace(filtroTipoPan))
                 query = query.Where(b => b.tipopan.Nombre == filtroTipoPan);
