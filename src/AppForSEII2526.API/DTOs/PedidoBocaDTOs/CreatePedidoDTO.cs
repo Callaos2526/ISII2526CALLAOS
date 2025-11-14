@@ -41,7 +41,7 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
         [StringLength(50, ErrorMessage = "El campo no puede tener más de 50 caracteres")]
         public string? ApellidoCliente2 { get; set; }
 
-        [Required]
+       [Required]
         public string Metodo { get; set; } //************antes esto era objeto tmb en constructor
                                            
 

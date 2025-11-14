@@ -34,35 +34,27 @@ namespace AppForSEII2526.API.Controllers
                 _logger.LogError("Error: No hay compras disponibles");
                 return NotFound();
             }
-            //buscar compra con ese id, incluyendo las lineas y proyectarla 
-            //directamente a DetailsPedidoDTO
-            var comprasdto = await _context.Compras //nombre del DBCONTEXT
-             .Where(compra => compra.CompraId == id)
-                
-                 .Include(compra => compra.BocadillosComprados) //relacion intermedia
-
-                    .ThenInclude(bocadilloItem => bocadilloItem.Bocadillo) //relacion al bocadillo
-                        .ThenInclude(Bocadillo => Bocadillo.tipopan)    //relacion al tipo de pan
-
+            //buscar compra con ese id, incluyendo las lineas y proyectarla
+            var comprasdto = await _context.Compras 
+             .Where(compra => compra.CompraId == id)                
+             .Include(compra => compra.BocadillosComprados) 
+                .ThenInclude(bocadilloItem => bocadilloItem.Bocadillo) 
+                     .ThenInclude(Bocadillo => Bocadillo.tipopan)    
              .Select(compra => new DetailsPedidoDTO(
                  compra.CompraId,
                  compra.FechaCompra,
-                 compra.ApplicationUser.NombreCliente, //esto antes tenia lo de los string
+                 compra.ApplicationUser.NombreCliente, 
                  compra.ApplicationUser.ApellidoCliente1,
                  compra.ApplicationUser.ApellidoCliente2,
                  compra.metodoPago.metodoName,
                  compra.BocadillosComprados.Select(
-                     cb => new ItemPedidoDTO( //parametros del constructor 
+                     cb => new ItemPedidoDTO(  
                          cb.BocadilloId,
                          cb.Bocadillo.Nombre,
-                         cb.Bocadillo.tipopan.Nombre, //porque es string
+                         cb.Bocadillo.tipopan.Nombre, 
                          cb.Cantidad,
                          cb.Bocadillo.Pvp
                      )).ToList())).FirstOrDefaultAsync();
-
-
-
-
 
             if (comprasdto == null)
             {
@@ -71,8 +63,7 @@ namespace AppForSEII2526.API.Controllers
             }
 
             return Ok(comprasdto);
-        }
-        
+        }        
 
         [HttpPost] //create y itemdto : envia datos al servidor para crear un nuevo elemento
         [Route("[action]")]
@@ -101,31 +92,55 @@ namespace AppForSEII2526.API.Controllers
                     }
                 }
             }
-            //Obligatorio nombre Usuario, Apellido1, metodo pago
-            var user = _context.ApplicationUsers.FirstOrDefault(n => n.UserName == crearPedido.NombreCliente);
-            if (user == null)
-                ModelState.AddModelError("ApplicationUser", "Error! Nombre no registrado");
 
-            var apellido = _context.ApplicationUsers.FirstOrDefault(ap => ap.ApellidoCliente1 == crearPedido.ApellidoCliente1);
-            if (apellido == null)
-                ModelState.AddModelError("ApplicationUser", "Error! Apellido no registrado");
+            if (string.IsNullOrWhiteSpace(crearPedido.NombreCliente))
+                ModelState.AddModelError("Nombre", "El nombre es obligatorio");
+            if (string.IsNullOrWhiteSpace(crearPedido.ApellidoCliente1))
+                ModelState.AddModelError("Apellido_1", "El primer apellido es obligatorio");
 
-            //comprobacion del metodo de pago=> preguntar a noelia si esta bien
-            var metodoName = crearPedido.Metodo; //saco el nombre del metodo de pago que hayan introducido
-            
-            var existe_metodo = await _context.Paypals.AnyAsync(p => p.metodoName == metodoName)
-                || await _context.GooglePays.AnyAsync(g => g.metodoName == metodoName)
-                || await _context.Tarjetas.AnyAsync(t => t.metodoName == metodoName);
+            // Buscar usuario existente (case-insensitive)
+            var nombre = crearPedido.NombreCliente?.Trim();
+            var apellido1 = crearPedido.ApellidoCliente1?.Trim();
+            var apellido2 = crearPedido.ApellidoCliente2?.Trim();
 
-            if (!existe_metodo) {
-                ModelState.AddModelError("Metodo", "Error! Método de pago no registrado.");
-                return BadRequest(new ValidationProblemDetails(ModelState));
-            }
             if (ModelState.ErrorCount > 0)
+                return BadRequest(new ValidationProblemDetails(ModelState));
+
+            var usersQuery = _context.Users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(nombre) && !string.IsNullOrWhiteSpace(apellido1))
             {
+                var nombreLower = nombre.ToLower();
+                var apellido1Lower = apellido1.ToLower();
+                usersQuery = usersQuery.Where(u =>
+                    u.NombreCliente.ToLower() == nombreLower &&
+                    u.ApellidoCliente1.ToLower() == apellido1Lower);
+
+                if (!string.IsNullOrWhiteSpace(apellido2))
+                {
+                    var apellido2Lower = apellido2.ToLower();
+                    usersQuery = usersQuery.Where(u => u.ApellidoCliente2.ToLower() == apellido2Lower);
+                }
+            }
+
+            var user = await usersQuery.FirstOrDefaultAsync();
+            if (user == null)
+            {
+                ModelState.AddModelError("ApplicationUser", "Error! Nombre y/o apellidos no registrados.");
                 return BadRequest(new ValidationProblemDetails(ModelState));
             }
-            
+
+
+            //comprobacion del metodo de pago
+            // 3. Obtener método de pago 
+            var metodo_Pago = await _context.Set<MetodoPago>()
+                .FirstOrDefaultAsync(m => m.metodoName == crearPedido.Metodo);
+
+            if (metodo_Pago == null)
+            {
+                ModelState.AddModelError("Metodo",
+                    $"El método de pago '{crearPedido.Metodo}' no está registrado.");
+            }                           
 
             //PASO 2. vamos recuperando objetos y rellenando el pedido 
 
@@ -133,38 +148,26 @@ namespace AppForSEII2526.API.Controllers
             var bocadilloNombres = crearPedido.BocadilloItem.Select(bi => bi.ID).ToList();
             //cargamos bocadillos desde la BD con la info que necesitamos 
             var bocadillosBD = _context.Bocadillos
-                .Where(bi => bocadilloNombres.Contains(bi.Id))
-                .Select(b => new
+                .Where(b => bocadilloNombres.Contains(b.Id))
+                .Select(b=> new 
                 {
-                    b.Id,
-                    b.Nombre,
-                    b.Pvp,
-                    b.Stock
+                     b.Id,
+                     b.Nombre,
+                     b.Pvp,
+                     b.Stock
                 }).ToList();
 
-            //ahora creo mi pedido (compra) <= ya tengo los datos del bocadillo 
-            var metodoPago = await _context.MetodoPago
-                .FirstOrDefaultAsync(m => m.metodoName.ToLower() == crearPedido.Metodo.ToLower());
-            if(metodoPago == null)
-            {
-                ModelState.AddModelError("Metodo_Pago", $"El método de pago '{crearPedido.Metodo}' no existe.");
-                return BadRequest(new ValidationProblemDetails(ModelState));
-            }
-            //PASO3 . CREAR LA COMPRA en memoria y rellenarla 
-
-            Compra compra = new Compra
-            { //algunos paramtetros los saco del DTO que recibo
-                metodoPago = metodoPago,
+           
+           //crear compra usando usuario recuperado
+            var compra = new Compra             //algunos paramtetros los saco del DTO que recibo
+            { 
+                metodoPago = metodo_Pago,
                 FechaCompra = DateTime.Now, //aqui pongo la fecha en el momento 
                 ApplicationUser = user,
-                BocadillosComprados = new List<CompraBocadillo>()
-
+                BocadillosComprados = new List<CompraBocadillo>(),
+                PrecioTotal = 0,
+                nBoadillos = 0
             };
-            //Inicializamos totales. Para inicializarlo a 0 y luego en el bucle donde vas añadiendo cada bocadillo vas sumando (se eliminan valores basura)
-            //no los conozco hasta que recorro los items del pedido por eso los inicializo a 0 
-            compra.PrecioTotal = 0;
-            compra.nBoadillos = 0;
-
             //por cada bocadillo pedido, creamos la linea y actualizamos totales y stock
             foreach (var unidad in crearPedido.BocadilloItem)
             {
@@ -181,14 +184,7 @@ namespace AppForSEII2526.API.Controllers
                 {
                     ModelState.AddModelError("CrearPedido", $"Error! se han pedido {unidad.Cantidad} bocadillos, pero no hay suficientes");
                 }
-
-                var cliente = new ApplicationUser
-                {
-                    NombreCliente = crearPedido.NombreCliente,
-                    ApellidoCliente1=crearPedido.ApellidoCliente1,
-                    ApellidoCliente2=crearPedido.ApellidoCliente2 ?? string.Empty,
-
-                };
+                
                 //ahora que estoy recorriendo las lineas calculo el precio total
                 var subtotal = bocInfo.Pvp * unidad.Cantidad; //calculo precio total de esa linea
 
@@ -223,14 +219,14 @@ namespace AppForSEII2526.API.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
-                ModelState.AddModelError("Compra", $"Error! There was an error while saving your rental, plese, try again later");
+                ModelState.AddModelError("Compra", "Error interno guardando la compra.");
                 return Conflict("Error" + ex.Message);
 
             }
             //devuelvo PedidoDetails
             var pedidoDetalles = new DetailsPedidoDTO(compra.CompraId,
                 compra.FechaCompra, compra.ApplicationUser.NombreCliente, compra.ApplicationUser.ApellidoCliente1,
-                compra.ApplicationUser.ApellidoCliente2, crearPedido.Metodo,
+                compra.ApplicationUser.ApellidoCliente2, metodo_Pago.metodoName,
                 crearPedido.BocadilloItem);
 
             //devuelvo el recurso DTO de detalles del pedido
