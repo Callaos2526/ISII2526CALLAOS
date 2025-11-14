@@ -91,12 +91,18 @@ namespace AppForSEII2526.UT.BonoControlador_test
             var mock = new Mock<ILogger<BonoControlador>>();
             var controller = new BonoControlador(_context, mock.Object);
 
+            // Primero forzamos que no haya bonos en la BD para cubrir la rama donde la lista queda vacía
+            _context.BonosBocadillos.RemoveRange(_context.BonosBocadillos);
+            _context.SaveChanges();
+
             // Act
-            var result = await controller.GetBonoParaCompra("NoExiste", null);
+            var result = await controller.GetBonoParaCompra(null, null);
 
             // Assert
             var notFound = Assert.IsType<NotFoundObjectResult>(result);
-            Assert.Contains("No hay bonos", notFound.Value?.ToString() ?? string.Empty);
+
+            // Comprobar que el mensaje exacto devuelto por el controlador está presente
+            Assert.Equal("No hay bonos que cumplan los requisitos", notFound.Value);
         }
     }
 }

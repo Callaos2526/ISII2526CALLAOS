@@ -114,14 +114,7 @@ namespace AppForSEII2526.UT.CompraBonoControlador_test
             var controller = new ComprarBonoControlador(_context, mock.Object);
 
             // Construimos un DTO esperado sencillo (estilo "details" simple)
-            var expected = new CompraBonoDetallesDTO(
-                _existingCompraId,
-                _cliente,
-                _metodoPago,
-                _fechaCompra,
-                _expectedPrecioTotal,
-                _expectedItems
-            );
+            var expected = new CompraBonoDetallesDTO(_existingCompraId, _cliente, _metodoPago, _fechaCompra, _expectedPrecioTotal, _expectedItems);
 
             // Act
             var result = await controller.GetCompra(_existingCompraId);
@@ -129,16 +122,6 @@ namespace AppForSEII2526.UT.CompraBonoControlador_test
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
             var actual = Assert.IsType<CompraBonoDetallesDTO>(okResult.Value);
-
-            // Sincronizar los campos que la persistencia puede alterar (Id/UserName/fechas)
-            expected.ID = actual.ID;
-            expected.CompraId = actual.CompraId;
-            if (expected.NombreCliente != null && actual.NombreCliente!= null)
-            {
-                expected.ApellidoCliente1 = actual.ApellidoCliente1;
-                expected.ApellidoCliente1 = actual.ApellidoCliente1;
-            }
-            expected.FechaCompra = actual.FechaCompra;
 
             // Comparación directa como en el ejemplo simplificado solicitado
             Assert.Equal(expected, actual);
