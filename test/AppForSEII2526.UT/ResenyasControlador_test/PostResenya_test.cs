@@ -1,59 +1,87 @@
-﻿using AppForSEII2526.API.Controller;
+﻿using AppForMovies.UT;
+using AppForSEII2526.API.Controller;
 using AppForSEII2526.API.DTOs.ResenyaDTOs;
 
 
 
 namespace AppForSEII2526.UT.ResenyasControlador_test
 {
-    public class PostResenya_test : AppForMovies.UT.AppForMovies4SqliteUT
+    /*
+     Clase de pruebas unitarias para el endpoint CreateResenya del controlador
+     ResenyasControlador.
+    */
+    public class PostResenya_test : AppForMovies4SqliteUT
     {
-        private readonly Bocadillo _b1;
-        private readonly Bocadillo _b2;
+        private readonly TipoPan _tipoPan;
+        private readonly Bocadillo _bocadillo;
 
         public PostResenya_test()
         {
-            var tipoPan = new TipoPan { Nombre = "Barra" };
-            // <- IMPORTANTE: inicializar la propiedad no anulable Resenyabocadillo
-            _b1 = new Bocadillo { Nombre = "Atún", Pvp = 3.5F, Tamano = Tamaño.normal, tipopan = tipoPan, Resenyabocadillo = string.Empty };
-            _b2 = new Bocadillo { Nombre = "Jamón", Pvp = 4.0F, Tamano = Tamaño.normal, tipopan = tipoPan, Resenyabocadillo = string.Empty };
+            _tipoPan = new TipoPan { Nombre = "Integral" };
+            _bocadillo = new Bocadillo
+            {
+                Id = 1,
+                Nombre = "Pollo",
+                Pvp = 4.5F,
+                Stock = 10,
+                Tamano = Tamaño.normal,
+                tipopan = _tipoPan,
+                Resenyabocadillo = ""
+            };
 
-            _context.AddRange(tipoPan, _b1, _b2);
+            _context.AddRange(_tipoPan, _bocadillo);
             _context.SaveChanges();
         }
 
-        [Fact]
-        public async System.Threading.Tasks.Task CreateResenya_Returns_BadRequest_When_Items_Missing()
+        public static IEnumerable<object[]> TestCasesFor_CreateResenya()
         {
-            var logger = new Mock<ILogger<ResenyasControlador>>().Object;
-            var controller = new ResenyasControlador(_context, logger);
+            var emptyItems = new ResenyaForCreateDTO(
+                nombreUsuario: "User",
+                titulo: "Titulo",
+                descripcion: "Descripcion valida",
+                valoracion: Resenya.ValoracionGeneral.Tres,
+                resenyaBocadillo: new List<ResenyaItemDTO>());
 
-            var dto = new ResenyaForCreateDTO(null, "T", "D", Resenya.ValoracionGeneral.Cinco, new List<ResenyaItemDTO>());
+            var puntuacionFuera = new ResenyaForCreateDTO(
+                nombreUsuario: "User",
+                titulo: "Titulo",
+                descripcion: "Descripcion valida",
+                valoracion: Resenya.ValoracionGeneral.Cuatro,
+                resenyaBocadillo: new List<ResenyaItemDTO> { new ResenyaItemDTO(1, 11) });
 
-            var result = await controller.CreateResenya(dto);
+            var duplicados = new ResenyaForCreateDTO(
+                nombreUsuario: "User",
+                titulo: "Titulo",
+                descripcion: "Descripcion valida",
+                valoracion: Resenya.ValoracionGeneral.Cuatro,
+                resenyaBocadillo: new List<ResenyaItemDTO> { new ResenyaItemDTO(1, 8), new ResenyaItemDTO(1, 7) });
 
-            var bad = Assert.IsType<BadRequestObjectResult>(result);
-            var details = Assert.IsType<ValidationProblemDetails>(bad.Value);
+            var bocadilloNoExiste = new ResenyaForCreateDTO(
+                nombreUsuario: "User",
+                titulo: "Titulo",
+                descripcion: "Descripcion valida",
+                valoracion: Resenya.ValoracionGeneral.Cinco,
+                resenyaBocadillo: new List<ResenyaItemDTO> { new ResenyaItemDTO(999, 9) });
+
+            var allTests = new List<object[]>
+        {
+                new object[] { emptyItems, "Error: Debes incluir al menos un bocadillo con su puntuación (1..10)" },
+                new object[] { puntuacionFuera, "Error: La puntuación de cada bocadillo debe estar entre 1 y 10" },
+                new object[] { duplicados, "Error: No se permiten bocadillos duplicados en la reseña" },
+                new object[] { bocadilloNoExiste, "Error: Alguno de los bocadillos no existe en la base de datos" },
+            };
+
+            return allTests;
         }
 
-        [Fact]
-        public async System.Threading.Tasks.Task CreateResenya_Returns_BadRequest_When_Puntuacion_Invalid()
+        [Theory]
+        [Trait("LevelTesting", "Unit Testing")]
+        [Trait("Database", "WithoutFixture")]
+        [MemberData(nameof(TestCasesFor_CreateResenya))]
+        public async Task CreateResenya_Error_test(ResenyaForCreateDTO dto, string errorExpected)
         {
-            var logger = new Mock<ILogger<ResenyasControlador>>().Object;
-            var controller = new ResenyasControlador(_context, logger);
-
-            var items = new List<ResenyaItemDTO> { new ResenyaItemDTO(_b1.Id, 11) }; // puntuación inválida
-            var dto = new ResenyaForCreateDTO("u", "T", "D", Resenya.ValoracionGeneral.Cinco, items);
-
-            var result = await controller.CreateResenya(dto);
-
-            var bad = Assert.IsType<BadRequestObjectResult>(result);
-            var details = Assert.IsType<ValidationProblemDetails>(bad.Value);
-        }
-
-        [Fact]
-        public async System.Threading.Tasks.Task CreateResenya_Returns_BadRequest_When_Duplicate_Bocadillo()
-        {
-            var logger = new Mock<ILogger<ResenyasControlador>>().Object;
+            var mock = new Mock<ILogger<ResenyasControlador>>();
+            ILogger<ResenyasControlador> logger = mock.Object;
             var controller = new ResenyasControlador(_context, logger);
 
             // Duplicado: mismo BocadilloId dos veces
@@ -66,47 +94,59 @@ namespace AppForSEII2526.UT.ResenyasControlador_test
 
             var result = await controller.CreateResenya(dto);
 
-            var bad = Assert.IsType<BadRequestObjectResult>(result);
-            var details = Assert.IsType<ValidationProblemDetails>(bad.Value);
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            var problems = Assert.IsType<ValidationProblemDetails>(badRequest.Value);
+
+            var firstError = problems.Errors.First().Value[0];
+            Assert.StartsWith(errorExpected, firstError);
         }
 
         [Fact]
-        public async System.Threading.Tasks.Task CreateResenya_Returns_BadRequest_When_Bocadillo_NotExists()
+        [Trait("LevelTesting", "Unit Testing")]
+        [Trait("Database", "WithoutFixture")]
+        public async Task CreateResenya_Success_test()
         {
-            var logger = new Mock<ILogger<ResenyasControlador>>().Object;
+            var mock = new Mock<ILogger<ResenyasControlador>>();
+            ILogger<ResenyasControlador> logger = mock.Object;
             var controller = new ResenyasControlador(_context, logger);
 
-            var items = new List<ResenyaItemDTO> { new ResenyaItemDTO(9999, 5) }; // id inexistente
-            var dto = new ResenyaForCreateDTO("u", "T", "D", Resenya.ValoracionGeneral.Tres, items);
-
-            var result = await controller.CreateResenya(dto);
-
-            var bad = Assert.IsType<BadRequestObjectResult>(result);
-            var details = Assert.IsType<ValidationProblemDetails>(bad.Value);
-        }
-
-        [Fact]
-        public async System.Threading.Tasks.Task CreateResenya_Returns_Created_When_Valid()
-        {
-            var logger = new Mock<ILogger<ResenyasControlador>>().Object;
-            var controller = new ResenyasControlador(_context, logger);
-
-            var items = new List<ResenyaItemDTO>
-            {
-                new ResenyaItemDTO(_b1.Id, 7),
-                new ResenyaItemDTO(_b2.Id, 9)
-            };
-            var dto = new ResenyaForCreateDTO("juan", "Gran bocata", "Muy rico", Resenya.ValoracionGeneral.Cinco, items);
+            var dto = new ResenyaForCreateDTO(
+                nombreUsuario: "UsuarioPrueba",
+                titulo: "Titulo valido",
+                descripcion: "Descripcion valida para la reseña",
+                valoracion: Resenya.ValoracionGeneral.Cinco,
+                resenyaBocadillo: new List<ResenyaItemDTO> { new ResenyaItemDTO(1, 8) }
+            );
 
             var result = await controller.CreateResenya(dto);
 
             var created = Assert.IsType<CreatedAtActionResult>(result);
-            var detail = Assert.IsType<ResenyaDetailDTO>(created.Value);
+            var actual = Assert.IsType<ResenyaDetailDTO>(created.Value);
 
-            Assert.Equal("juan", detail.NombreUsuario);
-            Assert.Equal("Gran bocata", detail.Titulo);
-            Assert.Equal(2, detail.ResenyaBocadillo.Count);
-            Assert.True(_context.Resenyas.Any(r => r.Id == detail.Id));
+            // Construimos el expected con los valores conocidos (copiamos Id y FechaPublicacion desde el actual)
+            var expectedItems = new List<ResenyaItemDTO>
+            {
+                new ResenyaItemDTO(_bocadillo.Id, _bocadillo.Nombre, _bocadillo.Pvp, _bocadillo.Tamano, dto.ResenyaBocadillo.First().Puntuacion)
+            };
+
+            var expected = new ResenyaDetailDTO(
+                id: actual.Id,
+                fechaPublicacion: actual.FechaPublicacion,
+                nombreUsuario: dto.NombreUsuario,
+                titulo: dto.Titulo,
+                descripcion: dto.Descripcion,
+                valoracion: dto.Valoracion,
+                resenyaBocadillo: expectedItems
+            );
+
+            // CORRECCIÓN: el Equals compara la lista por referencia, por eso asignamos la lista devuelta
+            // por el controlador al expected para que la comparación global funcione igual que en el ejemplo de la profesora.
+            expected.ResenyaBocadillo = actual.ResenyaBocadillo;
+
+            Assert.Equal(expected, actual);
+
+            // Comprobación adicional: la reseña se ha persistido
+            Assert.Equal(1, _context.Resenyas.Count());
         }
     }
 }
