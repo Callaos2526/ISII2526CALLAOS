@@ -26,8 +26,7 @@ namespace AppForSEII2526.API
         [ProducesResponseType(typeof(IList<SelectBocadilloDTO>), (int)HttpStatusCode.OK)]
         //metodo que devuelve un ActionResult 
         public async Task<ActionResult> GetBocadilloParaPedir(string? filtroTamano, string? filtroTipoPan) //tipo Pan bien que sea String 
-        {
-            
+        {            
             Tamaño? tamanoFiltrado = null;
 
             if (!string.IsNullOrWhiteSpace(filtroTamano) &&
@@ -57,11 +56,6 @@ namespace AppForSEII2526.API
                 return NotFound("No hay bocadillos que cumplan los requisitos");
 
             return Ok(bocadillos);
-
-
-
-
-
 
         }
 
