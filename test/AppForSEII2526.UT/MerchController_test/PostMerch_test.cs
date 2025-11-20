@@ -97,6 +97,17 @@ namespace AppForSEII2526.UT.MerchController_test
                     new ComprarMerchItemDTO(1, "Camiseta", 10, "Camiseta", 1)
                 }
             };
+            var dtoDireccionInvalida = new ComprarMerchCreateDTO()
+            {
+                Nombre = _nombre,
+                Apellido_1 = _apellido1,
+                Direccion_Envio = "C/ Rosario",
+                Metodo_Pago = _metodoValido,
+                MerchItems = new List<ComprarMerchItemDTO>()
+                {
+                    new ComprarMerchItemDTO(1, "Camiseta", 10, "Camiseta", 1)
+                }
+            };
 
             return new List<object[]>
             {
@@ -104,7 +115,8 @@ namespace AppForSEII2526.UT.MerchController_test
                 new object[] { dtoCantidad0, "La cantidad debe ser mayor que 0." },
                 new object[] { dtoProductoNoExiste, "El producto con id 999 no existe." },
                 new object[] { dtoInsuficienteStock, "No hay suficiente stock para Pantalon." },
-                new object[] { dtoMetodoInvalido, "El método de pago 'Bitcoin' no existe." }
+                new object[] { dtoMetodoInvalido, "El método de pago 'Bitcoin' no existe." },
+                new object[] { dtoDireccionInvalida, "Error! por favor introduce una dirección de envío válido" }
             };
         }
 
