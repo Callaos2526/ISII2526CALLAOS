@@ -38,5 +38,6 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
         {
             return HashCode.Combine(ID, NombreBocadillo, TipoPan, Cantidad, Pvp);
         }
+        //**
     }
 }
