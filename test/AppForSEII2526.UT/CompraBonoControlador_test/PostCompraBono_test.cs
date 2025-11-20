@@ -62,15 +62,25 @@ namespace AppForSEII2526.UT.CompraBonoControlador_test
 
             var compraBonoNoDisponible = new CrearCompraDTO(0, _clienteNombre, _clienteApellido1, _clienteApellido2,
                 DateTime.Today, _metodoPago,
-                new List<BonoItemForCreateDTO>() { new BonoItemForCreateDTO(2, 5, _bono2Nombre, 10.0, 2, _tipo2Nombre) });
+                new List<BonoItemForCreateDTO>() { new BonoItemForCreateDTO(2, 5, _bono2Nombre, 10.0, 1, _tipo2Nombre) });
+            //Examen Sprint2
+            var compraMenorPVP = new CrearCompraDTO(0, _clienteNombre, _clienteApellido1, _clienteApellido2,
+                DateTime.Today, _metodoPago,
+                new List<BonoItemForCreateDTO>() { new BonoItemForCreateDTO(2, 5, _bono2Nombre, 0.0, 2, _tipo2Nombre) });
+            //Fin
 
             var allTests = new List<object[]>
             {
+                
                 new object[] { compraSinBonos, "Error! Debes seleccionar algún bono" },
                 new object[] { compraNombreVacio, "Error! El nombre es obligatorio" },
                 new object[] { compraApellidosVacios, "Error! Los apellidos son obligatorios" },
                 new object[] { compraMetodoPagoInvalido, "Error! Método de pago no existe" },
                 new object[] { compraBonoNoDisponible, "Error, no hay suficiente stock del bono" },
+                //Examen Sprint2
+                new object[] { compraMenorPVP, "Error, El precio unitario tiene que ser mayor que 3" },
+                //FIN
+
             };
 
             return allTests;

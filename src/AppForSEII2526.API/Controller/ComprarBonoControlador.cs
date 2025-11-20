@@ -145,16 +145,25 @@ namespace LosDelEspacio.API.Controllers
                     continue;
                 }
 
+                if (item.Precio < 3 || item.Precio == null)
+                {
+                    ModelState.AddModelError("Bonos", $"Error, El precio unitario tiene que ser mayor que 3");
+                    continue;
+                }
+
                 if (bonoEntity.CantidadDisponible < item.Cantidad)
                 {
                     ModelState.AddModelError("Bonos", $"Error, no hay suficiente stock del bono '{bonoEntity.Nombre}'. Disponibles: {bonoEntity.CantidadDisponible}, solicitados: {item.Cantidad}");
                     continue;
                 }
+                
+
 
                 // Actualizamos stock y añadimos el item a la compra
                 bonoEntity.CantidadDisponible -= item.Cantidad;
 
                 var precioUnidad = bonoEntity.PVP;
+
 
                 var bonosComprados = new BonosComprados(0, bonoEntity.BonoId, item.Cantidad, 0, precioUnidad, bonoEntity, com);
                 com.bonosComprados.Add(bonosComprados);
