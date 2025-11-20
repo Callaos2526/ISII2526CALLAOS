@@ -116,7 +116,7 @@ namespace AppForSEII2526.UT.MerchController_test
                 new object[] { dtoProductoNoExiste, "El producto con id 999 no existe." },
                 new object[] { dtoInsuficienteStock, "No hay suficiente stock para Pantalon." },
                 new object[] { dtoMetodoInvalido, "El método de pago 'Bitcoin' no existe." },
-                new object[] { dtoDireccionInvalida, "La dirección es erronea, no contiene Calle."}
+                new object[] { dtoDireccionInvalida, "Error! por favor introduce una dirección de envío válido" }
             };
         }
 
@@ -124,7 +124,7 @@ namespace AppForSEII2526.UT.MerchController_test
         [Trait("LevelTesting", "Unit Testing")]
         [Trait("Database", "WithoutFixture")]
         [MemberData(nameof(TestCasesFor_CreateCompraMerch))]
-        public async Task CreateCompraMerch_Error_test(ComprarMerchCreateDTO dto, string? errorExpected)
+        public async Task CreateCompraMerch_Error_test(ComprarMerchCreateDTO dto, string errorExpected)
         {
             // Arrange
             var mock = new Mock<ILogger<CompraMerchController>>();

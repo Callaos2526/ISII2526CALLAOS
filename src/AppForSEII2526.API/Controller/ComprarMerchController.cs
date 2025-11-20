@@ -76,7 +76,7 @@ namespace AppForSEII2526.API.Controllers
                 ModelState.AddModelError("Apellido_1", "El primer apellido es obligatorio");
             if (string.IsNullOrWhiteSpace(compraMerch.Direccion_Envio) || !compraMerch.Direccion_Envio.Contains("Calle"))
             {
-                ModelState.AddModelError("Direccion_Envio", " Error! por favor introduce una dirección de envío válido");
+                ModelState.AddModelError("Direccion_Envio", "Error! por favor introduce una dirección de envío válido");
                 return BadRequest(new ValidationProblemDetails(ModelState));
             }
 
