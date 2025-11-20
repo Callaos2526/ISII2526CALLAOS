@@ -74,9 +74,11 @@ namespace AppForSEII2526.API.Controllers
                 ModelState.AddModelError("Nombre", "El nombre es obligatorio");
             if (string.IsNullOrWhiteSpace(compraMerch.Apellido_1))
                 ModelState.AddModelError("Apellido_1", "El primer apellido es obligatorio");
-            if (string.IsNullOrWhiteSpace(compraMerch.Direccion_Envio))
-                ModelState.AddModelError("Direccion_Envio", "La dirección de envío es obligatoria");
-
+            if (string.IsNullOrWhiteSpace(compraMerch.Direccion_Envio) || !compraMerch.Direccion_Envio.Contains("Calle"))
+            {
+                ModelState.AddModelError("Direccion_Envio", " Error! por favor introduce una dirección de envío válido");
+                return BadRequest(new ValidationProblemDetails(ModelState));
+            }
 
             // Validar cantidad en cada producto seleccionado
             for (int i = 0; i < compraMerch.MerchItems.Count; i++)
@@ -122,7 +124,7 @@ namespace AppForSEII2526.API.Controllers
             }
             if (ModelState.ErrorCount > 0)
                 return BadRequest(new ValidationProblemDetails(ModelState));
-            // 🔹 Buscar método de pago
+            //  Buscar método de pago
 
             var metodoPago = await _context.MetodoPago
                 .FirstOrDefaultAsync(m => m.metodoName.ToLower() == compraMerch.Metodo_Pago.ToLower());
