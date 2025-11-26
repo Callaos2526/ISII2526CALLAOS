@@ -86,5 +86,17 @@ namespace AppForSEII2526.UT.PedidoController_test
             // Assert: comprobar el IActionResult contenido en result.Result
             Assert.IsType<NotFoundResult>(result.Result);
         }
+    
+        [Fact]
+        public async Task GetPedido_Returns_NotFound_IdInexistente()
+        {
+            var logger = new Mock<ILogger<PedidoController>>().Object;
+            var controller = new PedidoController(_context, logger);
+            var idInvalido = -2;
+            var result = await controller.GetPedido(idInvalido);
+            Assert.IsType<NotFoundResult>(result.Result);
+        }
+
+
     }
 }
