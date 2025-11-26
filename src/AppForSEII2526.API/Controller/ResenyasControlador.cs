@@ -26,6 +26,11 @@ namespace AppForSEII2526.API.Controller
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult> GetResenya(int id)
         {
+            if (id != null && id <= 0)
+            {
+                _logger.LogError("Error:");
+                return NotFound("Error: Id menor o igual a cero");
+            }
             if (_context.Resenyas == null)
             {
                 _logger.LogError("Error: Resenyas table does not exist");
