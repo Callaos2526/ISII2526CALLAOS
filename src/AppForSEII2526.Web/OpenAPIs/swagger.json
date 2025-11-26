@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "AppForMovies.API",
+    "title": "AppForSEII2526.API",
     "description": "This API provides services for renting and purchasing movies",
     "contact": {
       "name": "Software Engineering II Team",
