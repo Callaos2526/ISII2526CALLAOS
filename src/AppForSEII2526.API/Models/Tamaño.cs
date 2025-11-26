@@ -1,8 +1,8 @@
-namespace AppForSEII2526.API.Models
+ï»¿namespace AppForSEII2526.API.Models
 {
-    public enum Tamaño
+    public enum TamaÃ±o
     {
-        pequeño,
+        pequeÃ±o,
         normal
     }
 }
