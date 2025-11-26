@@ -1,0 +1,57 @@
+﻿@using AppForSEII2526.Web.API
+@inject AppForMoviesAPIClient apiclient
+@inject ILogger<SelectReseña> logger
+
+
+<h3>SelectReseña</h3>
+@page "/Reseña/SelectReseña"
+<h3>Select Reseña</h3>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <p>aqui muestra los errores</p>
+    </div>
+    <div class="row">
+        <div class="col-8">
+            <div class="row">
+                <p>aqui muestra los filtros</p>
+                <div class="col">
+                    <button type="button" class="btn btn-primary" @onclick=@SearchMovies id="searchMovies">Search movies</button>
+                </div>
+            </div>
+            <div class="row">
+                <p>hola</p>
+            </div>
+        </div>
+        <div class="col-2">
+            <p>hola</p>
+        </div>
+
+    </div>
+
+</div>
+
+@code {
+    private ICollection<MovieForRentalDTO> movies;
+    private bool hideErrors { get { return errors.Length == 0; } }
+    private string errors = "";
+    private string movieTitle { get; set; }
+    private string movieGenre { get; set; }
+
+    public async void SearchMovies()
+    {
+        try
+        {
+            movies = await apiclient.GetMoviesForRentingAsync(movieTitle, movieGenre, null, null);
+
+        }
+        catch (ApiException ex)
+        {
+            logger.LogError($"{DateTime.Now} Error: {ex}");
+            errors = "Error while connecting to the system";
+        }
+        StateHasChanged();
+    }
+
+}
