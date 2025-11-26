@@ -6,7 +6,7 @@ using AppForSEII2526.Web.Components;
 using AppForSEII2526.Web.Components.Account;
 using AppForSEII2526.Web.Data;
 using AppForSEII2526.Web.API;
-
+using Microsoft.Build.Framework;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,6 +40,10 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
     .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+string? URI2API = builder.Configuration.GetValue(typeof(string), "AppForSEII2526APIClient") as string;
+
+builder.Services.AddScoped<AppForSEII2526APIClient>(sp => new AppForSEII2526APIClient(URI2API, new HttpClient()));
 
 var app = builder.Build();
 

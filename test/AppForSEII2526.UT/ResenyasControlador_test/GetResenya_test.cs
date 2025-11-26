@@ -80,6 +80,21 @@ namespace AppForSEII2526.UT.ResenyasControlador_test
             // Assert
             Assert.IsType<NotFoundResult>(result);
         }
+        [Fact]
+        [Trait("LevelTesting", "Unit Testing")]
+        [Trait("Database", "WithoutFixture")]
+        public async Task GetResenya_Returns_NotFound_When_IdCero()
+        {
+            // Arrange
+            var logger = new Mock<ILogger<ResenyasControlador>>().Object;
+            var controller = new ResenyasControlador(_context, logger);
+
+            // Act
+            var result = await controller.GetResenya(-2); // id negativo
+
+            // Assert
+            Assert.Equal("Error: Id menor o igual a cero", (result as NotFoundObjectResult).Value);
+        }
 
         [Fact]
         [Trait("LevelTesting", "Unit Testing")]
