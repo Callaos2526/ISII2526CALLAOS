@@ -1,0 +1,36 @@
+﻿<h3>SelectPedirBocadillo</h3>
+
+@page "/PedirBocadillo/SelectPedirBocadillo"
+
+@using AppForSEII2526.Web.API
+@inject AppForSEII2526APIClient apiclient
+@inject ILogger<SelectMoviesForRental> logger
+
+<h3>Select Movies For Rental</h3>
+<div class="container-fluid">
+    <div class="row">
+        <div class="row" hidden="@hideErrors">
+        <p>here i will show the errors</p>
+    </div>
+    <div class="row">
+        <div class="col-8">
+            <div class="row">
+                <p>here i will show the filters</p>
+                    <div class="col">
+                        <button type="button" class="btn btn-primary" @onclick=@BuscarPedido id="BuscarPedido">Search movies</button>
+                    </div>
+            </div>
+            <div class="row">
+                <p>here i will show the list of movies</p>
+            </div>
+        </div>
+        <div class="col-2">
+            <p>here i will show the renting cart</p>
+        </div>
+
+    </div>
+
+</div>
+@code {
+
+}

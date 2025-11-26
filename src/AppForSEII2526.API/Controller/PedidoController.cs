@@ -34,11 +34,13 @@ namespace AppForSEII2526.API.Controllers
                 _logger.LogError("Error: No hay compras disponibles");
                 return NotFound();
             }
-            if(id < 0)
+            
+            if (id <= 0)
             {
-                _logger.LogError("Error: Id negativo, no valido");
+                _logger.LogError("Error: Id de compra no valido");
                 return NotFound();
             }
+
             //buscar compra con ese id, incluyendo las lineas y proyectarla
             var comprasdto = await _context.Compras 
              .Where(compra => compra.CompraId == id)                
@@ -61,7 +63,7 @@ namespace AppForSEII2526.API.Controllers
                          cb.Bocadillo.Pvp
                      )).ToList())).FirstOrDefaultAsync();
 
-            if (comprasdto == null)
+            if (comprasdto == null )
             {
                 _logger.LogError($"Error: Compra con {id} no existe");
                 return NotFound();

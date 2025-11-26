@@ -86,17 +86,48 @@ namespace AppForSEII2526.UT.PedidoController_test
             // Assert: comprobar el IActionResult contenido en result.Result
             Assert.IsType<NotFoundResult>(result.Result);
         }
-    
-        [Fact]
-        public async Task GetPedido_Returns_NotFound_IdInexistente()
+
+        // Nueva prueba: id inválido (negativo o 0) debe devolver NotFound según la nueva regla
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public async Task GetPedido_Returns_NotFound_For_InvalidId(int invalidId)
         {
+            // Arrange
             var logger = new Mock<ILogger<PedidoController>>().Object;
             var controller = new PedidoController(_context, logger);
-            var idInvalido = -2;
-            var result = await controller.GetPedido(idInvalido);
+
+            // Act
+            var result = await controller.GetPedido(invalidId);
+
+            // Assert
             Assert.IsType<NotFoundResult>(result.Result);
         }
 
+        // Opcional: si el controlador ahora incluye Stock en ItemPedidoDTO, comprobamos que se devuelve correctamente.
+        // Si no has añadido Stock al DTO o la proyección, borra esta prueba.
+        [Fact]
+        public async Task GetPedido_Includes_Stock_In_Item()
+        {
+            // Arrange
+            var logger = new Mock<ILogger<PedidoController>>().Object;
+            var controller = new PedidoController(_context, logger);
 
+            // Act
+            var result = await controller.GetPedido(_compraSeed.CompraId);
+
+            // Assert
+            var ok = Assert.IsType<OkObjectResult>(result.Result);
+            var dto = Assert.IsType<DetailsPedidoDTO>(ok.Value);
+
+            // Aseguramos que hay exactamente una línea y comparamos el stock con el seed
+            Assert.Single(dto.BocadilloItem);
+            var itemDto = dto.BocadilloItem.Single();
+            var seedItem = _compraSeed.BocadillosComprados.Single();
+
+            // Si ItemPedidoDTO tiene la propiedad Stock, esta aserción sirve.
+            // Si no existe Stock en ItemPedidoDTO, esta línea causará error y debes eliminarla.
+            Assert.Equal(seedItem.Bocadillo.Stock, itemDto.Stock);
+        }
     }
 }
