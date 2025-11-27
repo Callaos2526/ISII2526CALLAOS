@@ -11,6 +11,7 @@ using Microsoft.Build.Framework;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<CompraMerchStateContainer>();
+builder.Services.AddScoped<ResenyaStateContainer>();
 
 
 // Add services to the container.
