@@ -1,4 +1,5 @@
-﻿using AppForSEII2526.API.DTOs.ResenyaDTOs;
+﻿using AppForSEII2526.Web.API;
+
 
 namespace AppForSEII2526.Web
 {
@@ -9,6 +10,7 @@ namespace AppForSEII2526.Web
         {
             ResenyaBocadillo = new List<ResenyaItemDTO>()
         };
+
 
         public event Action? OnChange;
         private void NotifyStateChanged() => OnChange?.Invoke();
@@ -29,11 +31,12 @@ namespace AppForSEII2526.Web
             }
             else
             {
-                // Si no existe, se añade uno nuevo
-                Resenya.ResenyaBocadillo.Add(new ResenyaItemDTO(
-                    bocadilloId,
-                    puntuacion
-                ));
+                Resenya.ResenyaBocadillo.Add(new ResenyaItemDTO()
+                {
+                    BocadilloId = bocadilloId,
+                    Puntuacion = puntuacion
+                });
+
             }
 
             NotifyStateChanged();
