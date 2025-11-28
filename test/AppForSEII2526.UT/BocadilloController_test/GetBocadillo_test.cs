@@ -51,9 +51,9 @@ namespace AppForSEII2526.UT.BocadilloController_test
             {
                 new SelectBocadilloDTO(1, "Atún con tomate", Tamaño.normal, "Barra", 3.0F),
                 new SelectBocadilloDTO(2, "Jamón y queso",   Tamaño.normal, "Integral", 4.0F),
-                new SelectBocadilloDTO(3, "Vegetal",         Tamaño.pequeño,"Chapata", 3.5F),
+        new SelectBocadilloDTO(3, "Vegetal",         Tamaño.pequeño,"Chapata", 3.5F),
                 new SelectBocadilloDTO(4, "Pollo asado",     Tamaño.normal, "Barra", 3.0F),
-                new SelectBocadilloDTO(5, "Lomo con queso",  Tamaño.normal, "Chapata", 3.0F),
+        new SelectBocadilloDTO(5, "Lomo con queso",  Tamaño.normal, "Chapata", 3.0F),
     };
 
             // Construimos explícitamente los casos esperados (como hace la profesora)
@@ -67,26 +67,17 @@ namespace AppForSEII2526.UT.BocadilloController_test
             var tc3 = new List<SelectBocadilloDTO> { BocadillosDTOs[2], BocadillosDTOs[4] }
                          .OrderBy(b => b.NombreBocadillo).ToList();
 
-
             // normal + Integral -> "Jamón y queso" (baseList[1])
             var tc4 = new List<SelectBocadilloDTO> { BocadillosDTOs[1] }
                       .OrderBy(b => b.NombreBocadillo).ToList();
-            //filtro min(4)
-            var tc_min=new List<SelectBocadilloDTO> { BocadillosDTOs[1] }.OrderBy(b => b.NombreBocadillo).ToList();
-            //filtro max(4)
-            var tc_max=new List<SelectBocadilloDTO> { BocadillosDTOs[0],BocadillosDTOs[1],BocadillosDTOs[2] ,BocadillosDTOs[3], BocadillosDTOs[4] }.OrderBy(b => b.NombreBocadillo).ToList();
-            //todos los casos de prueba
-            var tc_todo = new List<SelectBocadilloDTO> { BocadillosDTOs[2] }.OrderBy(b => b.NombreBocadillo).ToList();
+
             // IMPORTANTE: pasar las cadenas que coincidan con los nombres del enum Tamaño
             var allTests = new List<object[]>
             {
-                new object[] { null,                         null,   null, null,   tc1 },
-                new object[] { Tamaño.pequeño.ToString(),    null,    null, null  ,tc2 }, // filtro por tamaño pequeño
-                new object[] { null,                         "Chapata", null , null,  tc3 },
-                new object[] { Tamaño.normal.ToString(),     "Integral", null, null, tc4 }, // filtro por tamaño normal + Integral
-                new object[] { null,                         null,  4.0F, null,    tc_min }, // filtro min
-                new object[] { null,                         null,  null, 4.0F,    tc_max }, // filtro max
-                new object[] { Tamaño.pequeño.ToString(),    "Chapata", 3.0F, 4.0F, tc_todo }, // filtro por tamaño pequeño + tipo pan chapata
+                new object[] { null,                         null,      tc1 },
+                new object[] { Tamaño.pequeño.ToString(),    null,      tc2 }, // filtro por tamaño pequeño
+                new object[] { null,                         "Chapata", tc3 },
+                new object[] { Tamaño.normal.ToString(),     "Integral",tc4 }, // filtro por tamaño normal + Integral
             };
             return allTests;
         }
@@ -95,14 +86,14 @@ namespace AppForSEII2526.UT.BocadilloController_test
         [MemberData(nameof(TestCasesFor_GetBocadilloParaPedir_OK))]
         [Trait("Database", "WithoutFixture")]
         [Trait("LevelTesting", "Unit Testing")]
-        public async Task GetBocadilloParaPedir_OK_test(string? filtroTamano, string? filtroTipoPan, float? filtromin, float? filtromax,
+        public async Task GetBocadilloParaPedir_OK_test(string? filtroTamano, string? filtroTipoPan,
             IList<SelectBocadilloDTO> expectedBocadillos)
         {
             // Arrange
             var controller = new BocadilloController(_context, null);
 
             // Act
-            var result = await controller.GetBocadilloParaPedir(filtroTamano, filtroTipoPan, filtromin, filtromax);
+            var result = await controller.GetBocadilloParaPedir(filtroTamano, filtroTipoPan);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
@@ -148,11 +139,9 @@ namespace AppForSEII2526.UT.BocadilloController_test
             // filtroTipoPan sí se aplica y con este valor garantizamos 0 resultados
             var filtroTamanoInvalido = "Grande";
             var filtroTipoPanInexistente = "PanInexistente";
-            var filtromin = -2;
-            var filtromax = 0;
 
             // Act: llamamos al método bajo prueba
-            var result = await controller.GetBocadilloParaPedir(filtroTamanoInvalido, filtroTipoPanInexistente, filtromin, filtromax);
+            var result = await controller.GetBocadilloParaPedir(filtroTamanoInvalido, filtroTipoPanInexistente);
 
             // Assert: comprobamos que el controlador responde NotFound con el mensaje esperado
             var notFound = Assert.IsType<NotFoundObjectResult>(result);
