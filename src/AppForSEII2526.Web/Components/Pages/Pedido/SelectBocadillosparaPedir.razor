@@ -1,0 +1,268 @@
+﻿@page "/Pedido/SelectBocadillosParaPedir"
+
+@using Microsoft.AspNetCore.Authorization
+@using AppForSEII2526.Web.API
+
+@inject AppForSEII2526APIClient apiclient
+@inject ILogger<SelectBocadillosparaPedir> logger
+@inject PedidoStateContainer pedidoState
+@inject NavigationManager navigation
+
+
+@attribute [Authorize]
+<h3>Seleccionar Bocadillos Para Pedir</h3>
+
+<div class="container-fluid">
+    <div class="row alert alert-danger" role="alert" hidden="@hideErrors">
+        <p id="ErrorsShown">Errors: @errors</p>
+    </div>
+
+    <div class="row">
+        <!-- Col principal: filtros + tabla -->
+        <div class="col-8">
+            <!-- Filtros -->
+            <div class="row">
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">Nombre</span>
+                        <input type="text" id="inputNombre" @bind="bocadilloNombre" class="form-control"
+                               placeholder="Nombre" aria-label="Nombre" aria-describedby="basic-addon1" />
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">Tamaño</span>
+                        <select class="form-select" aria-label="Default select" @bind="filtroTamano" id="selectTamano">
+                            <option value="">(Todos)</option>
+                            @foreach (var name in Enum.GetNames(typeof(Tamaño)))
+                            {
+                                <option value="@name">@name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon2">Tipo Pan</span>
+                        <input type="text" id="inputTipoPan" @bind="filtroTipoPan" class="form-control"
+                               placeholder="TipoPan" aria-label="TipoPan" aria-describedby="basic-addon2" />
+                    </div>
+                </div>
+
+                <div class="col-auto d-flex align-items-center">
+                    <button type="button" class="btn btn-primary" @onclick="BuscarBocadillos" id="BuscarBocadillos">
+                        Buscar bocadillos
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla de resultados -->
+            <div class="row">
+                @if (bocadillos == null)
+                {
+                    <p>Cargando bocadillos....</p>
+                }
+                else
+                {
+                    <div class="mh-100 table-responsive">
+                        <table class="table table-condensed table-hover" id="TablaOfBocadillos">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Tamaño</th>
+                                    <th>Tipo de Pan</th>
+                                    <th>Precio</th>
+                                    <th>Pedir</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var b in bocadillos)
+                                {
+                                    <tr id="BocadilloData_@b.BocadilloID">
+                                        <td>@b.NombreBocadillo</td>
+                                        <td>@b.Tamano</td>
+                                        <td>@b.TipoPanNombre</td>
+                                        <td>@b.Pvp.ToString("F2") €</td>
+                                        <td>
+                                            <button class="btn btn-outline-secondary"
+                                                    id="bocadilloAPedir_@b.BocadilloID"
+                                                    @onclick="@(() => AddBocadillo(b))">
+                                                Añadir
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Col carrito -->
+        <div class="col-2" hidden="@hideCarritoPedido">
+            <div class="row">
+                <h3>Carrito del Pedido</h3>
+            </div>
+
+            @if (pedidoState?.Pedido?.BocadilloItem == null || !pedidoState.Pedido.BocadilloItem.Any())
+            {
+                <div class="row">
+                    <p>Carrito vacío</p>
+                </div>
+            }
+            else
+            {
+                @foreach (ItemPedidoDTO item in pedido.BocadilloItem)
+                {
+                    <div class="row">
+                       
+                            <button type="button" class="btn btn-light"
+                                    id="removeBocadillo_@item.Id"
+                                    @onclick="() => pedidoState.RemoveItem(item)">
+                                x @item.NombreBocadillo — @item.Pvp.ToString("F2") € — Cantidad: @item.Cantidad
+                            </button>
+                       
+                    </div>
+                }
+
+                <div class="row">
+                    
+                        <button type="button" class="btn btn-primary" id="placePedidoButton" @onclick="RealizarPedido">
+                            Realizar pedido
+                        </button>
+                  
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code{
+        //datos de la UI
+    private ICollection<SelectBocadilloDTO>? bocadillos;
+    private bool hideErrors { get { return errors.Length == 0; } }
+    private string errors = string.Empty;
+
+    //bindings de filtros /busqueda
+    private string? bocadilloNombre { get; set; }
+    private string? _filtroTamano;
+    private string? filtroTamano
+    {
+        get => _filtroTamano;
+        set
+        {
+            if (_filtroTamano != value)
+            {
+                _filtroTamano = value;
+                // Asegura que el carrito sólo contiene ítems válidos para los filtros actuales
+                pedidoState.ClearCart();
+            }
+        }
+    }
+    private string? _filtroTipoPan;
+    private string? filtroTipoPan
+    {
+        get => _filtroTipoPan;
+        set
+        {
+            if (_filtroTipoPan != value)
+            {
+                _filtroTipoPan = value;
+                // Igual que arriba: limpiar carrito si cambia el filtro de tipo de pan
+                pedidoState.ClearCart();
+            }
+        }
+    }
+    //carrito /estado pedido
+    private CreatePedidoDTO pedido => pedidoState.Pedido;
+    //Ocultar carrito cuando esta vacio
+    private bool hideCarritoPedido = true;
+
+    //Metodos para añadir y quitar bocadillos del carrito
+    private void AddBocadillo(SelectBocadilloDTO b)
+    {
+        if (b == null) return;
+        pedidoState.AddBocadilloToPedido(b);
+        // Notificar y actualizar visibilidad del carrito
+        pedidoState.NotifyStateChanged();
+        hideCarritoPedido = !(pedido?.BocadilloItem?.Any() ?? false);
+    }
+
+    private void RemoveBocadillo(ItemPedidoDTO item)
+    {
+        if (item == null) return;
+        pedidoState.RemoveItem(item);
+        pedidoState.NotifyStateChanged();
+        hideCarritoPedido = !(pedido?.BocadilloItem?.Any() ?? false);
+    }
+    //Metodo para buscar bocadillos con los filtros
+    private async Task BuscarBocadillos()
+    {
+        string? tamano = string.IsNullOrWhiteSpace(filtroTamano) ? null : filtroTamano;
+
+        try
+        {
+            bocadillos = await apiclient.GetBocadilloParaPedirAsync(tamano, filtroTipoPan);
+            errors = string.Empty;
+        }
+        catch (ApiException ex)
+        {
+            logger.LogError($"{DateTime.Now} Error: {ex}");
+            errors = "Error al conectar con el sistema";
+            bocadillos = new List<SelectBocadilloDTO>();
+        }
+
+        StateHasChanged();
+    }
+    //hace que componente se actualice automaticamente cuando el estado del pedido cambie
+    //llama a buscarBocadillos() para iniciar carga de bocadillos
+    //detecta errores al invocar la busqueda=>si ocurre deja lista vacia y muestra mensaje de error
+    //calcula si hay que ocultar o mostrar el carrito (hideCarritoPedido)
+    //Finaliza devolviendo tarea completada
+    protected override async Task OnInitializedAsync()
+    {
+        // Suscribimos el componente al contenedor (la UI se actualizará cuando el contenedor notifique)
+        pedidoState.OnChange += PedidoState_OnChange;
+
+        try
+        {
+            // La profesora invoca el método de búsqueda sin await; reproducimos su estilo
+            BuscarBocadillos();
+            errors = string.Empty;
+        }
+        catch (ApiException ex)
+        {
+            // Manejo de error al estilo de la profesora: log y datos por defecto
+            logger.LogError($"{DateTime.Now} Error: {ex}");
+            if (bocadillos == null) bocadillos = new List<SelectBocadilloDTO>();
+            errors = "Error al conectar con el servicio de bocadillos";
+        }
+
+        // Ocultar/mostrar carrito según contenido inicial
+        hideCarritoPedido = !(pedido?.BocadilloItem?.Any() ?? false);
+
+        // No devolvemos base.OnInitializedAsync() (estilo de la profesora)
+        await Task.CompletedTask;
+    }
+
+    // Handler para actualizar la UI cuando el contenedor emita OnChange
+    private void PedidoState_OnChange()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    // Opcional: si el componente se desecha, anula la suscripción
+    public void Dispose()
+    {
+        pedidoState.OnChange -= PedidoState_OnChange;
+    }
+    //navegacion al confirmar el pedido
+    private void RealizarPedido()
+    {
+        // Navega a la página de confirmar/crear pedido del proyecto
+        navigation.NavigateTo("/Pedido/RealizarPedido");
+    }
+}

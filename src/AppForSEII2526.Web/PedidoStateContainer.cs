@@ -1,125 +1,111 @@
-﻿using AppForSEII2526.API.DTOs.PedidoBocaDTOs;
+﻿using AppForSEII2526.Web.API;
 
 namespace AppForSEII2526.Web
 {
+    // Versión con la misma estructura/estilo que usa tu profesora:
+    // - usa los DTO generados por el cliente (AppForSEII2526.Web.API)
+    // - expone la propiedad CreatePedidoDTO `Pedido`
+    // - expone `OnChange` pero NO lo invoca internamente (igual que tu profesora)
     public class PedidoStateContainer
     {
-        //Contenedor de estado para el carrito de pedidos (pedido de bocadillos).
-        // Mantiene el DTO que se enviará al servidor y expone operaciones comunes (añadir, actualizar, eliminar, vaciar y resetear tras procesar).
-        // También expone un evento <see cref="OnChange"/> para que componentes Blazor puedan suscribirse y reaccionar a cambios en el carrito.
         public CreatePedidoDTO Pedido { get; private set; } = new CreatePedidoDTO()
         {
-            //DTO que representa el pedido en creación. Se utiliza directamente porque
-            // coincide con el contrato que el servidor espera al crear un pedido.
-            // Contiene datos del cliente y la lista de "ItemPedidoDTO">.
             BocadilloItem = new List<ItemPedidoDTO>()
         };
 
-        // Precio total del pedido calculado a partir de las líneas (Pvp * Cantidad).
-        // Se calcula bajo demanda para reflejar siempre el estado actual de la lista.
         public decimal TotalPrice
         {
             get
             {
-                // Convert.ToDecimal se usa para convertir el float Pvp a decimal antes de multiplicar
-                return Pedido.BocadilloItem.Sum(i => Convert.ToDecimal(i.Pvp) * i.Cantidad);
+                // Protección contra null y conversión explícita a decimal
+                return Pedido?.BocadilloItem?.Sum(i => Convert.ToDecimal(i.Pvp) * i.Cantidad) ?? 0m;
             }
         }
 
-        // Evento que notifica a los suscriptores que el estado del pedido ha cambiado.
-        // Suscribir componentes Blazor para forzar renderizados o actualizaciones.
+        // Evento público, igual que en el ejemplo de la profesora (no se dispara automáticamente aquí)
         public event Action? OnChange;
-        // Método auxiliar para invocar el evento de cambio de estado.
-        private void NotifyStateChanged() => OnChange?.Invoke();
-        // Añade un bocadillo al pedido a partir de su DTO de selección.
-        // - Si el bocadillo ya existe en la lista, incrementa su cantidad en 1.
-        // - Si no existe, crea una nueva línea con cantidad inicial 1.
-        // Llama a "NotifyStateChanged" al finalizar.
+        // Método helper para disparar el evento cuando la UI/servicio lo desee
+        public void NotifyStateChanged() => OnChange?.Invoke();
 
-        // Añade un bocadillo a partir del DTO de selección (añade 1 si ya existe)-> DTO con los datos del bocadillo seleccionado
-        // <param name="bocadillo">DTO con los datos del bocadillo seleccionado.</param>
+        // Añade un bocadillo (si ya existe incrementa cantidad en 1)
         public void AddBocadilloToPedido(SelectBocadilloDTO bocadillo)
         {
             if (bocadillo == null) return;
-
-            var existing = Pedido.BocadilloItem.FirstOrDefault(i => i.ID == bocadillo.BocadilloID);
+        
+            var existing = Pedido.BocadilloItem.FirstOrDefault(i => i.Id == bocadillo.BocadilloID);
             if (existing != null)
             {
-                //incrementa cantidad si ya estaba en el carrito
                 existing.Cantidad += 1;
             }
             else
             {
-                // Añade una nueva línea de pedido con cantidad 1
-                Pedido.BocadilloItem.Add(new ItemPedidoDTO(
-                    bocadillo.BocadilloID,
-                    bocadillo.NombreBocadillo,
-                    bocadillo.TipoPanNombre,
-                    1,
-                    bocadillo.Pvp
-                ));
+                Pedido.BocadilloItem ??= new List<ItemPedidoDTO>();
+                // Uso inicializador de objeto para evitar dependencias de constructores concretos del DTO cliente
+                Pedido.BocadilloItem.Add(new ItemPedidoDTO
+                {
+                    Id = bocadillo.BocadilloID,
+                    NombreBocadillo = bocadillo.NombreBocadillo,
+                    TipoPan = bocadillo.TipoPanNombre,
+                    Cantidad = 1,
+                    Pvp = bocadillo.Pvp
+                });
             }
-            //Añade o actualiza un item en el pedido.
-            // - Si ya existe, suma la cantidad proporcionada (útil cuando la UI envía cantidades).
-            // - Si no existe, añade una copia del <paramref name="item"/> para evitar aliasing.
 
-            NotifyStateChanged();
+            // Igual que la profesora: no invocar OnChange/NotifyStateChanged aquí.
         }
 
-        // Añade o incrementa a partir de un ItemPedidoDTO (útil si la UI envía cantidades)
-        // <param name="item">Línea de pedido con la cantidad a añadir.</param>
+        // Añade o actualiza una línea (la UI puede usar esto para añadir cantidades específicas)
         public void AddOrUpdateItem(ItemPedidoDTO item)
         {
             if (item == null) return;
 
-            var existing = Pedido.BocadilloItem.FirstOrDefault(i => i.ID == item.ID);
+            Pedido.BocadilloItem ??= new List<ItemPedidoDTO>();
+            var existing = Pedido.BocadilloItem.FirstOrDefault(i => i.Id == item.Id);
             if (existing != null)
             {
-                // Suma la cantidad indicada (permite añadir >1 unidades a la vez)
                 existing.Cantidad += item.Cantidad;
             }
             else
             {
-                // Creamos una nueva instancia para no compartir la referencia del DTO entrante
-                Pedido.BocadilloItem.Add(new ItemPedidoDTO(
-                    item.ID,
-                    item.NombreBocadillo,
-                    item.TipoPan,
-                    item.Cantidad,
-                    item.Pvp
-                ));
-            }
-
-            NotifyStateChanged();
+                Pedido.BocadilloItem.Add(new ItemPedidoDTO
+                {
+                    Id = item.Id,
+                    NombreBocadillo = item.NombreBocadillo,
+                    TipoPan = item.TipoPan,
+                    Cantidad = item.Cantidad,
+                    Pvp = item.Pvp
+                });
+            }            
         }
 
-        // Eliminar un item concreto
-        // Se basa en la referencia/igualdad del objeto <see cref="ItemPedidoDTO"/>.
-        // <param name="item">Item a eliminar del pedido.</param>
+        // Eliminar un item concreto (método público usado por la UI)
         public void RemoveItem(ItemPedidoDTO item)
         {
-            if (item == null) return;
+            if (item == null || Pedido?.BocadilloItem == null) return;
 
-            Pedido.BocadilloItem.Remove(item);
-            NotifyStateChanged();
+            // Eliminar por Id (más robusto que por referencia)
+            var existing = Pedido.BocadilloItem.FirstOrDefault(i => i.Id == item.Id);
+            if (existing != null)
+            {
+                Pedido.BocadilloItem.Remove(existing);
+            }
         }
 
-        // Vaciar el carrito de bocadillos 
+        // Vaciar el carrito
         public void ClearCart()
         {
             Pedido.BocadilloItem.Clear();
-            NotifyStateChanged();
+  
         }
 
-        // Reinicia el estado del pedido una vez que se ha procesado (compra realizada).
-        // Crea un nuevo DTO vacío para empezar un nuevo pedido.
+        // Reset cuando el pedido se ha procesado
         public void PedidoProcessed()
         {
             Pedido = new CreatePedidoDTO()
             {
                 BocadilloItem = new List<ItemPedidoDTO>()
             };
-            NotifyStateChanged();
+            
         }
     }
 }
