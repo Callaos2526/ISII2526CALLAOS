@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AppForSEII2526.API
-{       
-      
+{
+
     [Route("api/[controller]")]
     [ApiController]
     public class BocadilloController : ControllerBase
@@ -12,7 +12,7 @@ namespace AppForSEII2526.API
         private readonly ApplicationDbContext _context;
         private readonly ILogger<BocadilloController> _logger;
 
-        public BocadilloController(ApplicationDbContext context, 
+        public BocadilloController(ApplicationDbContext context,
             ILogger<BocadilloController> logger)
         {
             _context = context;
@@ -25,7 +25,7 @@ namespace AppForSEII2526.API
         //si todo va bien devolvemos una lista SelectBocadilloDTO
         [ProducesResponseType(typeof(IList<SelectBocadilloDTO>), (int)HttpStatusCode.OK)]
         //metodo que devuelve un ActionResult 
-        public async Task<ActionResult> GetBocadilloParaPedir(string? filtroTamano, string? filtroTipoPan, float? filtromin, float? filtromax) //tipo Pan bien que sea String 
+        public async Task<ActionResult> GetBocadilloParaPedir(string? filtroTamano, string? filtroTipoPan) //tipo Pan bien que sea String 
         {
             Tamaño? tamanoFiltrado = null;
 
@@ -40,11 +40,6 @@ namespace AppForSEII2526.API
             .Include(b => b.tipopan)
             .Include(b => b.ComprasBocadillo).ThenInclude(cb => cb.Compra)
             .AsQueryable();
-
-            if (filtromin.HasValue)
-                query = query.Where(b => b.Pvp >= filtromin.Value);  //filtro por float
-            if (filtromax.HasValue)
-                query = query.Where(b => b.Pvp <= filtromax.Value);  //filtro por float
 
             if (tamanoFiltrado.HasValue)
                 query = query.Where(b => b.Tamano == tamanoFiltrado.Value);  //filtro por string

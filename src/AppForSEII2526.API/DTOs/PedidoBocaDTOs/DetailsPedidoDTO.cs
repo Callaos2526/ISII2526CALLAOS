@@ -24,17 +24,18 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
          [Display(Name = "Fecha de pedido")]
         public DateTime FechaPedido { get; set; }
 
+       
         public override bool Equals(object? obj)
         {
             return obj is DetailsPedidoDTO dTO &&
-                   base.Equals(obj) &&
+                   Id == dTO.Id &&
+                   FechaPedido == dTO.FechaPedido &&
                    NombreCliente == dTO.NombreCliente &&
                    ApellidoCliente1 == dTO.ApellidoCliente1 &&
                    ApellidoCliente2 == dTO.ApellidoCliente2 &&
                    Metodo == dTO.Metodo &&
-                   EqualityComparer<IList<ItemPedidoDTO>>.Default.Equals(BocadilloItem, dTO.BocadilloItem) &&
-                   Id == dTO.Id &&
-                   FechaPedido == dTO.FechaPedido;
+                   // comprueba que ambas colecciones son iguales (SequenceEqual requiere ItemPedidoDTO.Equals)
+                   BocadilloItem.SequenceEqual(dTO.BocadilloItem);
         }
 
         public override int GetHashCode()

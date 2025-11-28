@@ -54,7 +54,8 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
                    ApellidoCliente1 == dTO.ApellidoCliente1 &&
                    ApellidoCliente2 == dTO.ApellidoCliente2 &&
                    Metodo == dTO.Metodo &&
-                   EqualityComparer<IList<ItemPedidoDTO>>.Default.Equals(BocadilloItem, dTO.BocadilloItem);
+                   // comprueba que ambas colecciones son iguales (SequenceEqual requiere que ItemPedidoDTO implemente Equals)
+                   BocadilloItem.SequenceEqual(dTO.BocadilloItem);
         }
     }
 }
