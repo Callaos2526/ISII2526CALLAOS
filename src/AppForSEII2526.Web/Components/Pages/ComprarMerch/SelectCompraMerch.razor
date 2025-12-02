@@ -1,0 +1,152 @@
+﻿@page "/SeleccionarMerch/SelectCompraMerch"
+@using AppForSEII2526.Web.API
+@inject AppForSEII2526APIClient apiclient
+@inject ILogger<SelectCompraMerch> logger
+@inject CompraMerchStateContainer merchState
+@inject NavigationManager navigation
+
+
+<h3>SelectCompraMerch</h3>
+
+<div class="container-fluid">
+    <div class="row alert alert-danger" role="alert" hidden="@hideErrors">
+        <p id="ErrorsShown">Errors: @errors</p>
+    </div>
+        <div class="row">
+                <div class="col-8">
+                    <div class="row">
+                        <div class="col">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="basic-addon1">Tipo</span>
+                                <input type="text" id="inputTipo" @bind=filtroTipo class="form-control" placeholder="Tipo" aria-label="Tipo" aria-describedby="basic-addon1">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" id="basic-addon1">Precio máximo</span>
+                                <input type="number" id="inputPrecio" @bind=filtroPrecio class="form-control" placeholder="Precio" aria-label="Precio" aria-describedby="basic-addon1">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <button type="boton" class="btn btn-primary" @onclick=@BuscarMerch id="BuscarMerch">Buscar Merch</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        @if (merch == null)
+                        {
+                            <p>Loading merch....</p>
+                        }
+                        else
+                        {
+                            <div class="mh-100 table-responsive">
+                                <table class="table table-condensed table-hover" id="TablaDeMerch">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombre</th>
+                                            <th>Tipo</th>
+                                            <th>Stock</th>
+                                            <th>Precio</th>
+                                            <th>Añadir</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in merch)
+                                        {
+                                            <tr id="MerchData_@item.ProductoId">
+                                                <td>@item.NombreProducto</td>
+                                                <td>@item.TipoProducto</td>
+                                                <td>@item.Stock</td>
+                                                <td>@item.Pvp</td>
+                                                <td>
+                                                    <button class="btn btn-outline-secondary" id="addMerch_@item.ProductoId" @onclick="@(() => AddMerchToCart(item))">Add</button>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="col-12" hidden="@HideRentingCart">
+                        <div class="row">
+                            <h4>Carrito de la compra</h4>
+                        </div>
+
+                        @foreach (var item in compra.MerchItems)
+                        {
+                            <div class="row mb-2">
+                                <div class="col">
+                                    <button type="button" class="btn btn-light" id="removeMerch_@item.Id" @onclick="@(() => RemoveMerchItem(item))">
+                                        x @item.NombreProducto - @item.Pvp€ (x @item.Cantidad)
+                                    </button>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="row mt-2">
+                            <div class="col">
+                                <p>Total: @merchState.TotalPrice €</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col">
+                                <button type="button" class="btn btn-primary" id="purchaseMerchButton" @onclick="ProceedToCreatePurchase">Procesar compra</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12" hidden="@(compra.MerchItems.Count > 0)">
+                        <p>El carrito está vacío</p>
+                    </div>
+                </div>
+        </div>
+</div>
+@code {
+    private ICollection<ComprarMerchandaisingDTO>? merch;
+    private string errors = string.Empty;
+    private bool hideErrors => string.IsNullOrEmpty(errors);
+    private string filtroTipo { get; set; } = string.Empty;
+    private int filtroPrecio { get; set; } = 0;
+    private bool HideRentingCart => !compra.MerchItems.Any();
+    private void ProceedToCreatePurchase()
+    {
+        navigation.NavigateTo("/ComprarMerch/CreateCompraMerch");
+    }
+    private ComprarMerchCreateDTO compra => merchState.Compra;
+
+    private bool hiddenRentingCart = true;
+
+    private void AddMerchToCart(ComprarMerchandaisingDTO item)
+    {
+        merchState.AddProduct(item);
+    }
+
+    private void RemoveMerchItem(ComprarMerchItemDTO item)
+    {
+        if (item == null) return;
+
+        merchState.RemoveItem(item);
+
+        if (compra.MerchItems.Count == 0)
+        {
+            hiddenRentingCart = true;
+        }
+    }
+    public async void BuscarMerch()
+    {
+        try
+        {
+            merch = await apiclient.GetMerchParaCompraAsync(filtroTipo, filtroPrecio);
+            errors = string.Empty;
+        }
+        catch (ApiException ex)
+        {
+            logger.LogError($"{DateTime.Now} Error: {ex}");
+            errors = "Error while connecting to the system";
+        }
+        StateHasChanged();
+    }
+}
