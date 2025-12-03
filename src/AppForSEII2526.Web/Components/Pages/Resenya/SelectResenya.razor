@@ -1,0 +1,123 @@
+﻿@using AppForSEII2526.Web
+@page "/resenya/selectbocadillos"
+
+@using AppForSEII2526.Web.API
+@inject AppForSEII2526APIClient apiclient
+@inject ILogger<SelectResenya> logger
+@inject ResenyaStateContainer resenyaState
+
+<h3>Select Bocadillos For Reseña</h3>
+<div class="container-fluid">
+    <div class="row" hidden="@hideErrors">
+        <p>aqui mostrare los errores</p>
+    </div>
+    <div class="row">
+        <div class="col-8">
+            <div class="row">
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">Tamaño</span>
+                        <input type="text" id="inputTamano" @bind=filtroTamano class="form-control" placeholder="Tamaño" aria-label="Tamaño" aria-describedby="basic-addon1">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">Tipo Pan</span>
+                        <input type="text" id="inputTipoPan" @bind=filtroTipoPan class="form-control" placeholder="Tipo de pan" aria-label="Tipo de pan" aria-describedby="basic-addon1">
+                    </div>
+                </div>
+                <div class="col">
+                    <button type="button" class="btn btn-primary" @onclick=@SearchBocadillos id="searchBocadillos">Buscar bocadillos</button>
+                </div>
+            </div>
+
+            <div class="row">
+                @if (bocadillos == null)
+                {
+                    <p>Cargando bocadillos....</p>
+                }
+                else
+                {
+                    <p>numero de bocadillos @bocadillos.Count</p>
+
+                    <div class="mh-100 table-responsive">
+                        <table class="table table-condensed table-hover" id="TableOfBocadillos">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Tamaño</th>
+                                    <th>Tipo Pan</th>
+                                    <th>Precio</th>
+                                    <th>Añadir</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var b in bocadillos)
+                                {
+                                    <tr id="BocadilloData_@b.NombreBocadillo">
+                                        <td>@b.NombreBocadillo</td>
+                                        <td>@b.Tamano</td>
+                                        <td>@b.TipoPanNombre</td>
+                                        <td>@b.Pvp</td>
+                                        <td>
+                                            <button class="btn btn-outline-secondary"
+                                                    id="bocadilloToAdd_@b.BocadilloID"
+                                                    @onclick="@(() => AddBocadilloToResenya(b))">
+                                                Add
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                }
+            </div>
+        </div>
+
+        <div class="col-2">
+            <p>aqui mostrare la seleccion</p>
+        </div>
+    </div>
+</div>
+
+@code {
+    private ICollection<SelectBocadilloDTO> bocadillos;
+    private bool hideErrors { get { return errors.Length == 0; } }
+    private string errors = "";
+    private string? filtroTamano { get; set; }
+    private string? filtroTipoPan { get; set; }
+
+    private ResenyaForCreateDTO resenya => resenyaState.Resenya;
+
+    private void AddBocadilloToResenya(SelectBocadilloDTO b)
+    {
+        resenyaState.AddBocadillo(b.BocadilloID, 5);
+    }
+
+    private void RemoveBocadilloFromResenya(ResenyaItemDTO item)
+    {
+        resenyaState.RemoveBocadillo(item);
+    }
+
+    public async void SearchBocadillos()
+    {
+        try
+        {
+            bocadillos = await apiclient.GetBocadilloParaPedirAsync(filtroTamano, filtroTipoPan);
+        }
+        catch (ApiException ex)
+        {
+            logger.LogError($"{DateTime.Now} Error: {ex}");
+            errors = "Error while connecting to the system";
+        }
+        StateHasChanged();
+    }
+
+    protected override Task OnInitializedAsync()
+    {
+        SearchBocadillos();
+        return base.OnInitializedAsync();
+    }
+}
