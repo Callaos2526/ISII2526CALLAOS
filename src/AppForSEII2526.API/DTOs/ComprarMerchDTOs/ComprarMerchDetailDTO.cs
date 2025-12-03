@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace AppForSEII2526.API.DTOs.ComprarMerch
+namespace AppForSEII2526.API.DTOs.ComprarMerchDTOs
 {
     //Paso 7. El sistema muestra una confirmación y un ticket indicando todos los datos del cliente
     //(nombre, apellidos, dirección y método de pago) y todos los artículos que ha comprado

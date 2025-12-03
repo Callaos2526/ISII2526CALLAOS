@@ -1,4 +1,4 @@
-﻿using AppForSEII2526.API.DTOs.ComprarMerch;
+﻿using AppForSEII2526.API.DTOs.ComprarMerchDTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
