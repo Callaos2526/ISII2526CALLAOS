@@ -86,7 +86,7 @@ namespace AppForSEII2526.UT.PedidoController_test
             // Assert: comprobar el IActionResult contenido en result.Result
             Assert.IsType<NotFoundResult>(result.Result);
         }
-    
+
         [Fact]
         public async Task GetPedido_Returns_NotFound_IdInexistente()
         {

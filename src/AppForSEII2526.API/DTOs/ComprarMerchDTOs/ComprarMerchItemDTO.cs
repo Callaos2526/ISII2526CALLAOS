@@ -1,5 +1,5 @@
 ﻿
-namespace AppForSEII2526.API.DTOs.ComprarMerch
+namespace AppForSEII2526.API.DTOs.ComprarMerchDTOs
 {
     public class ComprarMerchItemDTO
     {

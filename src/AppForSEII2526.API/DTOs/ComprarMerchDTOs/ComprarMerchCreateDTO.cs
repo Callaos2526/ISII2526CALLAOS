@@ -1,7 +1,7 @@
 ﻿using AppForSEII2526.API.Models;
 using Microsoft.CodeAnalysis;
 
-namespace AppForSEII2526.API.DTOs.ComprarMerch
+namespace AppForSEII2526.API.DTOs.ComprarMerchDTOs
 {
     public class ComprarMerchCreateDTO
     {
@@ -24,7 +24,7 @@ namespace AppForSEII2526.API.DTOs.ComprarMerch
         }
         public ComprarMerchCreateDTO()
         {
-                       MerchItems = new List<ComprarMerchItemDTO>();
+            MerchItems = new List<ComprarMerchItemDTO>();
         }
         public int CompraId { get; set; }
         [Required(AllowEmptyStrings = false, ErrorMessage = "Por favor, indica tu nombre")]
