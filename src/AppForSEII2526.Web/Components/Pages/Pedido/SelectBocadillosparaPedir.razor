@@ -9,7 +9,7 @@
 @inject NavigationManager navigation
 
 
-@attribute [Authorize]
+<!--  [Authorize] rama 59 appformovies-->
 <h3>Seleccionar Bocadillos Para Pedir</h3>
 
 <div class="container-fluid">
@@ -21,15 +21,7 @@
         <!-- Col principal: filtros + tabla -->
         <div class="col-8">
             <!-- Filtros -->
-            <div class="row">
-                <div class="col">
-                    <div class="input-group mb-3">
-                        <span class="input-group-text" id="basic-addon1">Nombre</span>
-                        <input type="text" id="inputNombre" @bind="bocadilloNombre" class="form-control"
-                               placeholder="Nombre" aria-label="Nombre" aria-describedby="basic-addon1" />
-                    </div>
-                </div>
-
+            
                 <div class="col">
                     <div class="input-group mb-3">
                         <span class="input-group-text" id="basic-addon1">Tamaño</span>
@@ -52,7 +44,7 @@
                 </div>
 
                 <div class="col-auto d-flex align-items-center">
-                    <button type="button" class="btn btn-primary" @onclick="BuscarBocadillos" id="BuscarBocadillos">
+                    <button type="button" class="btn btn-primary" @onclick="BuscarBocadillos" id="buscarBocadillos">
                         Buscar bocadillos
                     </button>
                 </div>
@@ -138,10 +130,10 @@
             }
         </div>
     </div>
-</div>
+
 
 @code{
-        //datos de la UI
+    //datos de la UI
     private ICollection<SelectBocadilloDTO>? bocadillos;
     private bool hideErrors { get { return errors.Length == 0; } }
     private string errors = string.Empty;
@@ -205,6 +197,7 @@
 
         try
         {
+            logger.LogDebug("Funciona ");
             bocadillos = await apiclient.GetBocadilloParaPedirAsync(tamano, filtroTipoPan);
             errors = string.Empty;
         }
