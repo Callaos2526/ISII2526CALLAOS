@@ -34,29 +34,29 @@ namespace AppForSEII2526.API.Controllers
                 _logger.LogError("Error: No hay compras disponibles");
                 return NotFound();
             }
-            if(id < 0)
+            if (id < 0)
             {
                 _logger.LogError("Error: Id negativo, no valido");
                 return NotFound();
             }
             //buscar compra con ese id, incluyendo las lineas y proyectarla
-            var comprasdto = await _context.Compras 
-             .Where(compra => compra.CompraId == id)                
-             .Include(compra => compra.BocadillosComprados) 
-                .ThenInclude(bocadilloItem => bocadilloItem.Bocadillo) 
-                     .ThenInclude(Bocadillo => Bocadillo.tipopan)    
+            var comprasdto = await _context.Compras
+             .Where(compra => compra.CompraId == id)
+             .Include(compra => compra.BocadillosComprados)
+                .ThenInclude(bocadilloItem => bocadilloItem.Bocadillo)
+                     .ThenInclude(Bocadillo => Bocadillo.tipopan)
              .Select(compra => new DetailsPedidoDTO(
                  compra.CompraId,
                  compra.FechaCompra,
-                 compra.ApplicationUser.NombreCliente, 
+                 compra.ApplicationUser.NombreCliente,
                  compra.ApplicationUser.ApellidoCliente1,
                  compra.ApplicationUser.ApellidoCliente2,
                  compra.metodoPago.metodoName,
                  compra.BocadillosComprados.Select(
-                     cb => new ItemPedidoDTO(  
+                     cb => new ItemPedidoDTO(
                          cb.BocadilloId,
                          cb.Bocadillo.Nombre,
-                         cb.Bocadillo.tipopan.Nombre, 
+                         cb.Bocadillo.tipopan.Nombre,
                          cb.Cantidad,
                          cb.Bocadillo.Pvp
                      )).ToList())).FirstOrDefaultAsync();
@@ -68,7 +68,7 @@ namespace AppForSEII2526.API.Controllers
             }
 
             return Ok(comprasdto);
-        }        
+        }
 
         [HttpPost] //create y itemdto : envia datos al servidor para crear un nuevo elemento
         [Route("[action]")]
@@ -145,7 +145,7 @@ namespace AppForSEII2526.API.Controllers
             {
                 ModelState.AddModelError("Metodo",
                     $"El método de pago '{crearPedido.Metodo}' no está registrado.");
-            }                           
+            }
 
             //PASO 2. vamos recuperando objetos y rellenando el pedido 
 
@@ -154,18 +154,18 @@ namespace AppForSEII2526.API.Controllers
             //cargamos bocadillos desde la BD con la info que necesitamos 
             var bocadillosBD = _context.Bocadillos
                 .Where(b => bocadilloNombres.Contains(b.Id))
-                .Select(b=> new 
+                .Select(b => new
                 {
-                     b.Id,
-                     b.Nombre,
-                     b.Pvp,
-                     b.Stock
+                    b.Id,
+                    b.Nombre,
+                    b.Pvp,
+                    b.Stock
                 }).ToList();
 
-           
-           //crear compra usando usuario recuperado
+
+            //crear compra usando usuario recuperado
             var compra = new Compra             //algunos paramtetros los saco del DTO que recibo
-            { 
+            {
                 metodoPago = metodo_Pago,
                 FechaCompra = DateTime.Now, //aqui pongo la fecha en el momento 
                 ApplicationUser = user,
@@ -178,7 +178,7 @@ namespace AppForSEII2526.API.Controllers
             {
                 //Buscar bocadillo en la BBDD por su ID
                 var bocInfo = bocadillosBD.FirstOrDefault(b => b.Id == unidad.ID); //bocadillosBD variable creada PASO 2
-               
+
                 if (bocInfo == null)
                 {
                     ModelState.AddModelError("Bocadillo", $"El bocadillo {unidad.ID} no existe.");
@@ -189,7 +189,7 @@ namespace AppForSEII2526.API.Controllers
                 {
                     ModelState.AddModelError("CrearPedido", $"Error! se han pedido {unidad.Cantidad} bocadillos, pero no hay suficientes");
                 }
-                
+
                 //ahora que estoy recorriendo las lineas calculo el precio total
                 var subtotal = bocInfo.Pvp * unidad.Cantidad; //calculo precio total de esa linea
 
@@ -218,7 +218,7 @@ namespace AppForSEII2526.API.Controllers
 
             try
             {
-                
+
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -235,13 +235,13 @@ namespace AppForSEII2526.API.Controllers
                 crearPedido.BocadilloItem);
 
             //devuelvo el recurso DTO de detalles del pedido
-            return CreatedAtAction("GetPedido",new { id = compra.CompraId },pedidoDetalles);
-        
+            return CreatedAtAction("GetPedido", new { id = compra.CompraId }, pedidoDetalles);
+
 
 
         }
-        
-        
+
+
 
     }
 }
