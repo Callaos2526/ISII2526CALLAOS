@@ -1,4 +1,4 @@
-﻿@page "/resenyas/createresenya"
+﻿@page "/resenya/createresenya"
 
 @using AppForSEII2526.Web.API
 @inject AppForSEII2526APIClient apiclient
@@ -9,26 +9,51 @@
 
 <EditForm Model="resenya" OnValidSubmit="OpenDialog">
     <div class="row">
+
         <div class="col-md">
             <div class="form-floating">
 
-                
+                @* this button asks the user if they want to continue with the creation *@
                 <button class="btn btn-primary" type="submit" id="Submit">
                     Enviar reseña
                 </button>
 
             </div>
         </div>
+
     </div>
 </EditForm>
 
+@* Modal dialog to confirm reseña creation *@
+@if (DialogIsOpen)
+{
+    <Dialog Caption="Crear reseña"
+            Message="¿Deseas crear esta reseña?"
+            OnClose="@OnDialogClose"
+            Type="Dialog.Category.SaveNot">
+    </Dialog>
+}
+
 @code {
+
+    private bool DialogIsOpen;
 
     private ResenyaForCreateDTO resenya => resenyaState.Resenya;
 
     private void OpenDialog()
     {
-        
+        DialogIsOpen = true;
+    }
+
+    private async Task OnDialogClose(bool isOk)
+    {
+        DialogIsOpen = false;
+
+        if (isOk)
+        {
+            // Aquí luego llamaremos a la API:
+            // await apiclient.CreateResenyaAsync(resenya)
+        }
     }
 
 }
