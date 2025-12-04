@@ -24,17 +24,14 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
         public int Cantidad { get; set; }
         public float Pvp { get; set; }
 
-        public bool Equals(ItemPedidoDTO? other)
+        public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-
-            const float EPS = 0.001f;
-            return ID == other.ID
-                && string.Equals(NombreBocadillo, other.NombreBocadillo, StringComparison.Ordinal)
-                && string.Equals(TipoPan, other.TipoPan, StringComparison.Ordinal)
-                && Cantidad == other.Cantidad
-                && MathF.Abs(Pvp - other.Pvp) < EPS;
+            return obj is ItemPedidoDTO dTO &&
+                   ID == dTO.ID &&
+                   NombreBocadillo == dTO.NombreBocadillo &&
+                   TipoPan == dTO.TipoPan &&
+                   Cantidad == dTO.Cantidad &&
+                   Pvp == dTO.Pvp;
         }
 
         public override int GetHashCode()
