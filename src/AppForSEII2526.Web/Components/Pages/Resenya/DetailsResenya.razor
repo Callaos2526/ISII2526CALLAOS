@@ -1,0 +1,105 @@
+﻿@page "/resenya/detailresenya"
+
+@using AppForSEII2526.Web.API
+@using Microsoft.AspNetCore.Authorization
+@inject AppForSEII2526APIClient apiclient
+
+<h3>Detalle de la Reseña</h3>
+
+@attribute [Authorize]
+
+@if (resenya == null)
+{
+    <p>@error</p>
+}
+else
+{
+    <table class="table table-borderless table-sm">
+        <tr>
+            <th>Usuario</th>
+            <td id="NombreUsuario">@resenya.NombreUsuario</td>
+        </tr>
+        <tr>
+            <th>Fecha de publicación</th>
+            <td id="FechaPublicacion">@resenya.FechaPublicacion.ToString("dd/MM/yyyy")</td>
+        </tr>
+        <tr>
+            <th>Título</th>
+            <td id="Titulo">@resenya.Titulo</td>
+        </tr>
+        <tr>
+            <th>Descripción</th>
+            <td id="Descripcion">@resenya.Descripcion</td>
+        </tr>
+        <tr>
+            <th>Valoración general</th>
+            <td id="Valoracion">@resenya.Valoracion</td>
+        </tr>
+    </table>
+
+    <h4>Bocadillos Puntuados</h4>
+
+    <table class="table" id="ResenyaBocadillos">
+        <thead>
+            <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Tamaño</th>
+                <th scope="col">Puntuación</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (ResenyaItemDTO item in resenya.ResenyaBocadillo)
+            {
+                <tr id="Bocadillo_@item.BocadilloId">
+                    <td>@item.Nombre</td>
+                    <td>@item.Pvp €</td>
+                    <td>@item.Tamano</td>
+                    <td>@item.Puntuacion</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public int ResenyaID { get; set; }
+
+    private ResenyaDetailDTO? resenya;
+    private string error = "";
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        string userName = "";
+
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
+            {
+                userName = user.Identity.Name;
+            }
+        }
+
+        try
+        {
+            resenya = await apiclient.GetResenyaAsync(ResenyaID);
+        }
+        catch (ApiException)
+        {
+            resenya = null;
+        }
+
+        if (resenya == null)
+        {
+            error = $"Error: No existe una reseña con id={ResenyaID}";
+        }
+    }
+}
