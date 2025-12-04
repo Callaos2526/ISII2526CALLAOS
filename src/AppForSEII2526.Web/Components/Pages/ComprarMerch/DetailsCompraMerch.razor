@@ -1,0 +1,108 @@
+﻿@page "/SeleccionarMerch/DetailsCompraMerch"
+
+@using AppForSEII2526.Web.API;
+@using Microsoft.AspNetCore.Authorization
+@inject AppForSEII2526APIClient apiclient
+
+<h3>DetailsCompraMerch</h3>
+
+@attribute [Authorize]
+
+@if (compra == null)
+{
+    <p>@error</p>
+}
+else
+{
+    <table class="table table-borderless table-sm">
+        <tr>
+            <th>Nombre y apellidos</th>
+            <td id="NombreApellidos">@compra.Nombre @compra.Apellido_1 @compra.Apellido_2</td>
+        </tr>
+        <tr>
+            <th>Dirección de envío</th>
+            <td id="DireccionEnvio">@compra.Direccion_Envio</td>
+        </tr>
+        <tr>
+            <th>Método de pago</th>
+            <td id="MetodoPago">@compra.Metodo_Pago</td>
+        </tr>
+        <tr>
+            <th>Cantidad</th>
+            <td id="Cantidad">@compra.Cantidad</td>
+        </tr>
+    </table>
+
+    <h4>Merch Comprado</h4>
+
+    <table class="table" id="CompraMerch">
+        <thead>
+            <tr>
+                <th scope="col">NombreProducto</th>
+                <th scope="col">Precio</th>
+                <th scope="col">TipoProducto</th>
+                <th scope="col">Cantidad</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (ComprarMerchItemDTO item in compra.MerchItems)
+            {
+                <tr id="RentalItem_@item.Id">
+                    <td>@item.NombreProducto</td>
+                    <td>@item.Pvp €</td>
+                    <td>@item.TipoProducto</td>
+                    <td>@item.Cantidad</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public int CompraID { get; set; }
+    private ComprarMerchDetailDTO compra;
+    private string error = "";
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        //we check the user is logged in
+        string userName = "";
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            //we retrieve the id of the user logged in
+            if (user is not null)
+            {
+                if (user.Identity is not null && user.Identity.IsAuthenticated && user.IsInRole("User"))
+                {
+                    userName = user.Identity.Name;
+                }
+            }
+        }
+
+        try
+        {
+            compra = await apiclient.GetCompraDetailAsync(CompraID);
+        }
+        catch (ApiException exception)
+        {
+            compra = null;
+        }
+        if ((compra == null) || (compra.Nombre != userName))
+        {
+            error = $"Error! No estas autorizado para ver esta compra o no existe ninguna compra con id={CompraID}";
+        }
+
+
+    }
+
+}
+
+
+}
