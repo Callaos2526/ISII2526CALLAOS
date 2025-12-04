@@ -59,39 +59,38 @@ namespace AppForSEII2526.API
 
         }
 
-        public async Task<ActionResult> GetBocadilloParaReseña(string? NombreBocadillo, float Pvp) 
+        [HttpGet] //Accion que responde a peticiones HTTP GET
+        [Route("[action]")]
+        //si todo va bien devolvemos una lista SelectBocadilloDTO
+        [ProducesResponseType(typeof(IList<SelectBocadilloDTO>), (int)HttpStatusCode.OK)]
+        //metodo que devuelve un ActionResult 
+        public async Task<ActionResult> GetBocadilloParaPedir(string? filtroNombre, float? filtroPvp)
         {
-            Tamaño? tamanoFiltrado = null;
-
-            if (!string.IsNullOrWhiteSpace(NombreBocadillo) &&
-                Enum.TryParse<Tamaño>(NombreBocadillo, ignoreCase: true, out var parsed))
-            {
-                tamanoFiltrado = parsed;
-            }
-
             var query = _context.Bocadillos
-            .AsNoTracking()
-            .Include(b => b.tipopan)
-            .Include(b => b.ComprasBocadillo).ThenInclude(cb => cb.Compra)
-            .AsQueryable();
+                .AsNoTracking()
+                .Include(b => b.tipopan)
+                .Include(b => b.ComprasBocadillo).ThenInclude(cb => cb.Compra)
+                .AsQueryable();
 
-            if (tamanoFiltrado.HasValue)
-                query = query.Where(b => b.Tamano == tamanoFiltrado.Value);  //filtro por string
+            //filtro por nombre
+            if (!string.IsNullOrWhiteSpace(filtroNombre))
+                query = query.Where(b => b.Nombre.Contains(filtroNombre));
 
-            if (!string.IsNullOrWhiteSpace(Pvp))
-                query = query.Where(b => b.tipopan.Nombre == Pvp);
+            //filtro por pvp
+            if (filtroPvp.HasValue)
+                query = query.Where(b => b.Pvp == filtroPvp.Value);
 
             var bocadillos = await query
                 .OrderBy(b => b.Nombre)
-                    .Select(b => new SelectBocadilloDTO(b.Id, b.Nombre, b.Tamano, b.tipopan.Nombre, b.Pvp))
-                    .ToListAsync();
+                .Select(b => new SelectBocadilloDTO(b.Id, b.Nombre, b.Tamano, b.tipopan.Nombre, b.Pvp))
+                .ToListAsync();
 
             if (!bocadillos.Any())
                 return NotFound("No hay bocadillos que cumplan los requisitos");
 
             return Ok(bocadillos);
-
         }
+
 
 
     }
