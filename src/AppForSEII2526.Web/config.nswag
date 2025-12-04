@@ -1,0 +1,70 @@
+﻿{
+  "runtime": "Net80",
+  "defaultVariables": null,
+  "documentGenerator": {
+    "fromDocument": {
+      "url": "https://localhost:7081/swagger/v1/swagger.json",
+      "output": null,
+      "newLineBehavior": "Auto"
+    }
+  },
+  "codeGenerators": {
+    "openApiToCSharpClient": {
+      "className": "AppForSEII2526APIClient",
+      "namespace": "AppForSEII2526.Web.API",
+
+      "generateClientClasses": true,
+      "generateClientInterfaces": true,
+      "injectHttpClient": true,
+      "disposeHttpClient": false,
+      "useHttpClientCreationMethod": false,
+      "httpClientType": "System.Net.Http.HttpClient",
+
+      "useBaseUrl": true,
+      "generateBaseUrlProperty": true,
+
+      "generateDtoTypes": true,
+      "generateOptionalParameters": false,
+      "generateDefaultValues": false,
+      "generateDataAnnotations": true,
+
+      "excludedTypeNames": [],
+
+      "generateExceptionClasses": true,
+      "exceptionClass": "ApiException",
+      "wrapDtoExceptions": false,
+
+      "generateResponseClasses": true,
+      "responseClass": "SwaggerResponse",
+      "generateResponseHeaders": true,
+
+      "generateUpdateJsonSerializerSettingsMethod": true,
+      "serializerSettingsTransformationMethod": null,
+
+      "clientBaseClass": null,
+      "configurationClass": null,
+      "useRequestAndResponseSerializationSettings": false,
+      "queryNullValue": "",
+
+      "classNamePrefix": "",
+      "classNameSuffix": "",
+      "generateModelValidationAttributes": false,
+      "generatePartialClasses": true,
+      "generateAbstractProperties": false,
+      "generateContractsOutput": false,
+      "contractsNamespace": "AppForSEII2526.Web.Contracts",
+
+      "output": "swagger2.cs",
+
+      "flattenInheritanceHierarchy": true,
+      "generateImmutableArrayProperties": false,
+      "generateImmutableDictionaryProperties": false,
+
+      "generateJsonMethods": true,
+      "inlineNamedArrays": false,
+      "inlineNamedDictionaries": false,
+      "inlineNamedTuples": false,
+      "generateOptionalPropertiesAsNullable": true
+    }
+  }
+}
