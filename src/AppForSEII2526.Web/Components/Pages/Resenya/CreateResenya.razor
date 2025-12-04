@@ -1,7 +1,5 @@
 ﻿@page "/resenyas/createresenya"
 
-<h3>Create Reseña</h3>
-
 @using AppForSEII2526.Web.API
 @inject AppForSEII2526APIClient apiclient
 @inject ILogger<CreateResenya> logger
@@ -9,6 +7,28 @@
 
 <h3>Create Reseña</h3>
 
+<EditForm Model="resenya" OnValidSubmit="OpenDialog">
+    <div class="row">
+        <div class="col-md">
+            <div class="form-floating">
+
+                
+                <button class="btn btn-primary" type="submit" id="Submit">
+                    Enviar reseña
+                </button>
+
+            </div>
+        </div>
+    </div>
+</EditForm>
+
 @code {
+
     private ResenyaForCreateDTO resenya => resenyaState.Resenya;
+
+    private void OpenDialog()
+    {
+        
+    }
+
 }
