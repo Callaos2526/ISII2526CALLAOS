@@ -11,7 +11,6 @@
 
 <h3>Create Reseña</h3>
 
-@* El objeto reseña será editado por el usuario *@
 <EditForm Model="resenya" OnValidSubmit="OpenDialog">
     <div class="row">
         <DataAnnotationsValidator />
@@ -61,7 +60,7 @@
 
         <div class="col-md">
             <div class="form-floating">
-                @* este botón abre el diálogo *@
+                
                 <button class="btn btn-primary" type="submit" id="Submit">
                     Crear reseña
                 </button>
@@ -110,7 +109,7 @@
 
 </EditForm>
 
-@* DIÁLOGO EXACTO IGUAL QUE EL DEL PROFESOR *@
+
 @if (DialogIsOpen)
 {
     <Dialog Caption="Crear reseña"
