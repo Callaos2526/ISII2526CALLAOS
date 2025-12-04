@@ -1,5 +1,6 @@
 ﻿@page "/resenya/createresenya"
 
+@using AppForSEII2526.Web.Components
 @using AppForSEII2526.Web.API
 @inject AppForSEII2526APIClient apiclient
 @inject ILogger<CreateResenya> logger
@@ -7,24 +8,23 @@
 
 <h3>Create Reseña</h3>
 
+@* La reseña que el usuario está editando *@
 <EditForm Model="resenya" OnValidSubmit="OpenDialog">
     <div class="row">
 
         <div class="col-md">
             <div class="form-floating">
-
-                @* this button asks the user if they want to continue with the creation *@
+                @* Este botón abrirá el diálogo de confirmación *@
                 <button class="btn btn-primary" type="submit" id="Submit">
-                    Enviar reseña
+                    Enviar Reseña
                 </button>
-
             </div>
         </div>
 
     </div>
 </EditForm>
 
-@* Modal dialog to confirm reseña creation *@
+@* Modal de confirmación (igual que el profesor) *@
 @if (DialogIsOpen)
 {
     <Dialog Caption="Crear reseña"
@@ -51,8 +51,8 @@
 
         if (isOk)
         {
-            // Aquí luego llamaremos a la API:
-            // await apiclient.CreateResenyaAsync(resenya)
+            // Aquí luego llamaremos apiclient.CreateResenyaAsync(...)
+            // cuando lleguemos al commit correspondiente
         }
     }
 
