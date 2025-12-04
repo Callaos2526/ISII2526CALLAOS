@@ -1,0 +1,14 @@
+﻿@page "/resenyas/createresenya"
+
+<h3>Create Reseña</h3>
+
+@using AppForSEII2526.Web.API
+@inject AppForSEII2526APIClient apiclient
+@inject ILogger<CreateResenya> logger
+@inject ResenyaStateContainer resenyaState
+
+<h3>Create Reseña</h3>
+
+@code {
+    private ResenyaForCreateDTO resenya => resenyaState.Resenya;
+}
