@@ -64,7 +64,7 @@ namespace AppForSEII2526.API
         //si todo va bien devolvemos una lista SelectBocadilloDTO
         [ProducesResponseType(typeof(IList<SelectBocadilloDTO>), (int)HttpStatusCode.OK)]
         //metodo que devuelve un ActionResult 
-        public async Task<ActionResult> GetBocadilloParaPedir(string? filtroNombre, float? filtroPvp)
+        public async Task<ActionResult> GetBocadilloParaReseña(string? filtroNombre, float? filtroPvp)
         {
             var query = _context.Bocadillos
                 .AsNoTracking()
