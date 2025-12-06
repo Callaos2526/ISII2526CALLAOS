@@ -1,4 +1,4 @@
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
 using System.Data.Common;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -71,7 +71,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowLocalDev", policy =>
     {
         policy
-            .WithOrigins("https://localhost:7067", "http://localhost:7067", "https://localhost:5001", "http://localhost:5000") // ajusta puertos seg�n tu Swagger/API
+            .WithOrigins("https://localhost:7067", "http://localhost:7067", "https://localhost:5001", "http://localhost:5000") // ajusta puertos según tu Swagger/API
             .AllowAnyMethod()
             .AllowAnyHeader();
             // .AllowCredentials() // no usar con AllowAnyOrigin

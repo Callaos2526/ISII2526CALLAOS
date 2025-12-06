@@ -9,7 +9,7 @@
 @inject NavigationManager navigation
 
 
-<!--  [Authorize] rama 59 appformovies-->
+
 <h3>Seleccionar Bocadillos Para Pedir</h3>
 
 <div class="container-fluid">
@@ -20,15 +20,17 @@
     <div class="row">
         <!-- Col principal: filtros + tabla -->
         <div class="col-8">
+      
             <!-- Filtros -->
             
                 <div class="col">
                     <div class="input-group mb-3">
                         <span class="input-group-text" id="basic-addon1">Tamaño</span>
                         <select class="form-select" aria-label="Default select" @bind="filtroTamano" id="selectTamano">
-                            <option value="">(Todos)</option>
+                            <option value="All" selected>Todos</option>
                             @foreach (var name in Enum.GetNames(typeof(Tamaño)))
                             {
+
                                 <option value="@name">@name</option>
                             }
                         </select>
@@ -43,10 +45,8 @@
                     </div>
                 </div>
 
-                <div class="col-auto d-flex align-items-center">
-                    <button type="button" class="btn btn-primary" @onclick="BuscarBocadillos" id="buscarBocadillos">
-                        Buscar bocadillos
-                    </button>
+                <div class="col">
+                    <button type="button" class="btn btn-primary" @onclick="BuscarBocadillos" id="buscarBocadillos">Buscar bocadillos</button>
                 </div>
             </div>
 
@@ -171,7 +171,12 @@
     //carrito /estado pedido
     private CreatePedidoDTO pedido => pedidoState.Pedido;
     //Ocultar carrito cuando esta vacio
-    private bool hideCarritoPedido = true;
+    private bool _hideCarritoPedido;
+    private bool hideCarritoPedido
+    {
+        get => !(pedido?.BocadilloItem?.Any() ?? false);
+        set => _hideCarritoPedido = value;
+    }
 
     //Metodos para añadir y quitar bocadillos del carrito
     private void AddBocadillo(SelectBocadilloDTO b)
@@ -193,7 +198,7 @@
     //Metodo para buscar bocadillos con los filtros
     private async Task BuscarBocadillos()
     {
-        string? tamano = string.IsNullOrWhiteSpace(filtroTamano) ? null : filtroTamano;
+        string? tamano = string.IsNullOrWhiteSpace(filtroTamano) || filtroTamano == "All" ? null : filtroTamano;
 
         try
         {
