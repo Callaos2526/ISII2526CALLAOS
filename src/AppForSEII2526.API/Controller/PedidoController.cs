@@ -1,5 +1,4 @@
-﻿
-using AppForSEII2526.API.DTOs.PedidoBocaDTOs;
+﻿using AppForSEII2526.API.DTOs.PedidoBocaDTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Scaffolding.Shared.CodeModifier.CodeChange;
 using System.Collections.Generic;
@@ -150,7 +149,7 @@ namespace AppForSEII2526.API.Controllers
             //PASO 2. vamos recuperando objetos y rellenando el pedido 
 
             //sacar nombre de bocadillos que quiere el cliente
-            var bocadilloNombres = crearPedido.BocadilloItem.Select(bi => bi.ID).ToList();
+            var bocadilloNombres = crearPedido.BocadilloItem.Select(bi => bi.Id).ToList();
             //cargamos bocadillos desde la BD con la info que necesitamos 
             var bocadillosBD = _context.Bocadillos
                 .Where(b => bocadilloNombres.Contains(b.Id))
@@ -177,11 +176,11 @@ namespace AppForSEII2526.API.Controllers
             foreach (var unidad in crearPedido.BocadilloItem)
             {
                 //Buscar bocadillo en la BBDD por su ID
-                var bocInfo = bocadillosBD.FirstOrDefault(b => b.Id == unidad.ID); //bocadillosBD variable creada PASO 2
+                var bocInfo = bocadillosBD.FirstOrDefault(b => b.Id == unidad.Id); // <-- unidad.Id
 
                 if (bocInfo == null)
                 {
-                    ModelState.AddModelError("Bocadillo", $"El bocadillo {unidad.ID} no existe.");
+                    ModelState.AddModelError("Bocadillo", $"El bocadillo {unidad.Id} no existe.");
                     continue;
                 }
                 //VALIDACION de stock (comprobar que hay bocadillos)
