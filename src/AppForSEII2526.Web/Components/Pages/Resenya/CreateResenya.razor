@@ -9,7 +9,7 @@
 
 @attribute [Authorize]
 
-<h3>Create Reseña</h3>
+<h3>Crear Reseña</h3>
 
 <EditForm Model="resenya" OnValidSubmit="OpenDialog">
     <div class="row">
@@ -21,6 +21,7 @@
         <p id="ErrorsShown">Errores: @messageError</p>
     </div>
 
+    
     <div class="row g-3">
         <div class="col-md">
             <div class="form-floating mb-3">
@@ -47,20 +48,22 @@
 
         <div class="col-md-3">
             <div class="form-floating mb-3">
+
+                
                 <InputSelect class="form-select" @bind-Value="resenya.Valoracion" id="Valoracion">
-                    <option value="UnaEstrella">★</option>
-                    <option value="DosEstrellas">★★</option>
-                    <option value="TresEstrellas">★★★</option>
-                    <option value="CuatroEstrellas">★★★★</option>
-                    <option value="CincoEstrellas">★★★★★</option>
+                    <option value="Uno">Uno</option>
+                    <option value="Dos">Dos</option>
+                    <option value="Tres">Tres</option>
+                    <option value="Cuatro">Cuatro</option>
+                    <option value="Cinco">Cinco</option>
                 </InputSelect>
+
                 <label for="Valoracion">Valoración General</label>
             </div>
         </div>
 
         <div class="col-md">
             <div class="form-floating">
-                
                 <button class="btn btn-primary" type="submit" id="Submit">
                     Crear reseña
                 </button>
@@ -68,6 +71,7 @@
         </div>
     </div>
 
+    
     <h4>Detalle de la reseña</h4>
 
     <p><b>Número de bocadillos:</b> @resenya.NumeroDeBocadillos</p>
@@ -93,7 +97,7 @@
                 {
                     <tr id="BocadilloData_@item.BocadilloId">
                         <td>@item.Nombre</td>
-                        <td>@item.Pvp</td>
+                        <td>@item.Pvp €</td>
                         <td>@item.Tamano</td>
                         <td>
                             <InputNumber @bind-Value="item.Puntuacion"
@@ -109,7 +113,6 @@
 
 </EditForm>
 
-
 @if (DialogIsOpen)
 {
     <Dialog Caption="Crear reseña"
@@ -122,12 +125,11 @@
 @code {
 
     private string messageError = "";
-    private bool hideErrors { get { return messageError.Length == 0; } }
+    private bool hideErrors => messageError.Length == 0;
 
     private bool DialogIsOpen;
 
     private ResenyaForCreateDTO resenya => resenyaState.Resenya;
-
 
     private void ModifyItems()
     {
@@ -149,9 +151,9 @@
             {
                 try
                 {
-                    var result = await apiclient.CreateResenyaAsync(resenya);
+                    var created = await apiclient.CreateResenyaAsync(resenya);
                     resenyaState.ResenyaProcessed();
-                    navigation.NavigateTo($"/resenya/detailresenya/?ResenyaID={result.Id}");
+                    navigation.NavigateTo($"/resenya/detailresenya/?ResenyaID={created.Id}");
                 }
                 catch (ApiException<ValidationProblemDetails> apiexceptionvalidation)
                 {
@@ -180,11 +182,12 @@
             var authState = await authenticationState;
             var user = authState?.User;
 
-            if (user is not null && user.Identity is not null && user.Identity.IsAuthenticated)
+            if (user is not null && user.Identity?.IsAuthenticated == true)
             {
                 resenya.NombreUsuario = user.Identity.Name;
             }
 
+            
             resenya.Titulo = resenya.Titulo ?? "";
             resenya.Descripcion = resenya.Descripcion ?? "";
         }

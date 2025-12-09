@@ -6,18 +6,17 @@
 @inject ILogger<SelectResenya> logger
 @inject ResenyaStateContainer resenyaState
 
-<h3>Select Bocadillos For Reseña</h3>
+<h3>Seleccionar Bocadillos Para Reseña</h3>
 
 <div class="container-fluid">
 
-    <div class="row" hidden="@hideErrors">
-        <p>@errors</p>
+    <div class="row alert alert-danger" role="alert" hidden="@hideErrors">
+        <p id="ErrorsShown">@errors</p>
     </div>
 
     <div class="row">
         <div class="col-8">
 
-            
             <div class="row">
 
                 <div class="col">
@@ -40,8 +39,8 @@
                 </div>
 
                 <div class="col">
-                    <button type="button"
-                            class="btn btn-primary"
+                    <button type="button" class="btn btn-primary"
+                            id="buscarBocadillos"
                             @onclick="SearchBocadillos">
                         Buscar bocadillos
                     </button>
@@ -49,7 +48,6 @@
 
             </div>
 
-            <!-- RESULTADOS -->
             <div class="row">
 
                 @if (bocadillos == null)
@@ -58,10 +56,8 @@
                 }
                 else
                 {
-                    <p>Numero de bocadillos: @bocadillos.Count</p>
-
                     <div class="mh-100 table-responsive">
-                        <table class="table table-condensed table-hover" id="TableOfBocadillos">
+                        <table class="table table-condensed table-hover" id="TablaBocadillos">
                             <thead>
                                 <tr>
                                     <th>Nombre</th>
@@ -109,7 +105,7 @@
                 <ul>
                     @foreach (var item in resenya.ResenyaBocadillo)
                     {
-                        <li>@item.BocadilloId (Puntuación: @item.Puntuacion)</li>
+                        <li>@item.BocadilloId — Puntuación: @item.Puntuacion</li>
                     }
                 </ul>
             }
@@ -119,47 +115,52 @@
 
 </div>
 
-
 @code {
 
+    // Datos cargados
     private ICollection<SelectBocadilloDTO>? bocadillos;
 
+    // Error UI
     private string errors = "";
     private bool hideErrors => errors.Length == 0;
 
-    
+    // Filtros
     private string? filtroNombre { get; set; }
     private float? filtroPvp { get; set; }
 
-    // State container
+    // Estado de reseña
     private ResenyaForCreateDTO resenya => resenyaState.Resenya;
 
 
     private void AddBocadilloToResenya(SelectBocadilloDTO b)
     {
-        resenyaState.AddBocadillo(b.BocadilloID, 1);
+        resenyaState.AddBocadillo(b.BocadilloID, 5);
     }
+
 
     private async Task SearchBocadillos()
     {
         try
         {
-            
             bocadillos = await apiclient.GetBocadilloParaReseñaAsync(filtroNombre, filtroPvp);
+            errors = "";
         }
         catch (ApiException ex)
         {
             logger.LogError($"{DateTime.Now} Error: {ex}");
             errors = "Error while connecting to the system";
+            bocadillos = new List<SelectBocadilloDTO>();
         }
 
         StateHasChanged();
     }
 
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
+        
         SearchBocadillos();
-        return base.OnInitializedAsync();
+
+        await Task.CompletedTask;
     }
 }
