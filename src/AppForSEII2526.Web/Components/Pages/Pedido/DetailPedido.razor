@@ -56,7 +56,7 @@ else
         <tfoot>
             <tr>
                 <th scope="row" colspan="2" class="text-end">Total</th>
-                <td id="TotalCantidad">@pedido.BocadilloItem?.Sum(i => i.Cantidad) ?? 0</td>
+                <td id="TotalCantidad">@(pedido.BocadilloItem?.Sum(i => i.Cantidad) ?? 0)</td>
                 <td id="TotalPrice">@((pedido.BocadilloItem?.Sum(i => i.Pvp * i.Cantidad) ?? 0f).ToString("F2")) €</td>
             </tr>
         </tfoot>

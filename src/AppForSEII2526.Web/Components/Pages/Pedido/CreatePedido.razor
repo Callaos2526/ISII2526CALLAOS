@@ -3,11 +3,12 @@
 @using AppForSEII2526.Web.Components.Shared
 @using AppForSEII2526.Web.API
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @inject AppForSEII2526APIClient apiclient
 @inject ILogger<CreatePedido> logger
 @inject PedidoStateContainer pedidoState
 
-<!--[Authorize]-->
+
 
 <h3>Crear Pedido</h3>
 
@@ -25,20 +26,20 @@
     <div class="row g-3">
         <div class="col-md">
             <div class="form-floating mb-3">
-                <InputText @bind-Value="pedido.NombreCliente" class="form-control" id="NombreCliente" />
-                <label for="NombreCliente">Nombre</label>
+                <InputText @bind-Value="pedido.NombreCliente" class="form-control" id="Name" />
+                <label for="Name">Nombre</label>
             </div>
         </div>
         <div class="col-md">
             <div class="form-floating mb-3">
-                <InputText @bind-Value="pedido.ApellidoCliente1" class="form-control" id="Apellido1" />
-                <label for="Apellido1">Primer apellido</label>
+                <InputText @bind-Value="pedido.ApellidoCliente1" class="form-control" id="Surname1" />
+                <label for="Surname1">Primer apellido</label>
             </div>
         </div>
         <div class="col-md">
             <div class="form-floating mb-3">
-                <InputText @bind-Value="pedido.ApellidoCliente2" class="form-control" id="Apellido2" />
-                <label for="Apellido2">Segundo apellido (opcional)</label>
+                <InputText @bind-Value="pedido.ApellidoCliente2" class="form-control" id="Surname2" />
+                <label for="Surname2">Segundo apellido (opcional)</label>
             </div>
         </div>
     </div>
@@ -46,14 +47,19 @@
     <div class="row g-2">
         <div class="col-md">
             <div class="form-floating">
-               
-                <InputText @bind-Value="pedido.Metodo" class="form-control" id="MetodoPago" />
+                @* dropdown para el método de pago adaptado a tus opciones *@
+                <InputSelect TValue="string" @bind-Value="pedido.Metodo" class="form-select" id="MetodoPago">
+                    <option value="Tarjeta">Tarjeta</option>
+                    <option value="PayPal">PayPal</option>
+                    <option value="GooglePay">Google Pay</option>
+                </InputSelect>
                 <label for="MetodoPago">Método de pago</label>
             </div>
         </div>
         <div class="col-md">
             <div class="form-floating">
-                <button class="btn btn-primary" type="submit" id="SubmitPedido">
+                @* botón que lanza el diálogo de confirmación *@
+                <button class="btn btn-primary" type="submit" id="SubmitPedido" disabled="@pedidoButtonDisabled">
                     Realizar pedido
                 </button>
             </div>
@@ -62,7 +68,7 @@
 
     <h4>Detalle del pedido</h4>
     <p>
-        <b>Total precio:</b> @TotalPriceFormatted €
+        <b>Total precio:</b> @TotalPrice € 
         <button class="btn btn-outline-primary" type="submit" @onclick="ModifyBocadillos" id="ModifyBocadillos">
             Modificar bocadillos
         </button>
@@ -79,46 +85,51 @@
                 </tr>
             </thead>
             <tbody>
-               
-                    @foreach (var item in pedido.BocadilloItem)
-                    {
-                        <tr id="BocadilloData_@item.ID">
-                            <td>@item.NombreBocadillo</td>
-                            <td>@item.TipoPan</td>
-                            <td> <InputNumber @bind-Value="item.Cantidad" class="form-control" id="@($"cantidad_{item.ID}")" /></td>
-                            
-                            <td>@item.Pvp.ToString("F2") €</td>
-                        </tr>
-                    }
-                
+                @foreach (var item in pedido.BocadilloItem)
+                {
+                    <tr id="BocadilloData_@item.Id">
+                        <td>@item.NombreBocadillo</td>
+                        <td>@item.TipoPan</td>
+                        <td>
+                            <InputNumber TValue="int"
+                                         @bind-Value="item.Cantidad"
+                                         class="form-control"
+                                         id="@($"cantidad_{item.Id}")" />
+                        </td>
+                        <td>@item.Pvp.ToString("F2") €</td>
+                    </tr>
+                }
             </tbody>
         </table>
     </div>
 </EditForm>
-
 
 @if (DialogIsOpen)
 {
     <Dialog Caption="Confirmar pedido"
             Message="¿Deseas confirmar el pedido con los datos actuales?"
             OnClose="@OnDialogClose"
-            Type="Dialog.Category.SaveNot">
+            Type=Dialog.Category.SaveNot>
     </Dialog>
 }
 
 @code {
     private string messageError = "";
     private bool hideErrors { get { return messageError.Length == 0; } }
+    //rentalbutton will be disabled if there are not movies in the renting cart
+    private bool pedidoButtonDisabled
+    {
+        get { return (pedido.BocadilloItem == null || pedido.BocadilloItem.Count == 0); }
+    }
+
     private bool DialogIsOpen;
 
-    private string TotalPriceFormatted => TotalPrice.ToString("F2");
     private decimal TotalPrice
     {
         get
         {
-           
-            var total = pedido?.BocadilloItem?.Sum(i => Convert.ToDecimal(i.Pvp) * i.Cantidad) ?? 0m;
-            return total;
+            double price = pedido.BocadilloItem.Sum(b => (double)b.Pvp * b.Cantidad);
+            return Convert.ToDecimal(price);
         }
     }
 
@@ -137,10 +148,11 @@
     private async Task OnDialogClose(bool isOk)
     {
         DialogIsOpen = false;
+
         if (isOk)
         {
-            
-            if (pedido.BocadilloItem != null && pedido.BocadilloItem.Count > 0)
+            // Process the data introduced by the user if they are valid
+            if (pedido.BocadilloItem.Count > 0)
             {
                 try
                 {
@@ -154,17 +166,22 @@
                     {
                         messageError = "";
                         foreach (var errors in apiexceptionvalidation.Result.Errors.Values)
-                            //https://learn.microsoft.com/en-us/dotnet/api/system.string.join?view=net-7.0
-                            messageError = string.Join("(*) ", messageError, string.Join(" (*) ", errors));
+                        {
+                            messageError = string.Join("(*) ",
+                                messageError,
+                                string.Join(" (*) ", errors));
+                        }
                     }
                 }
-                catch (ApiException apiexception)
+                catch (ApiException)
                 {
-                      messageError = "Error al procesar el pedido, intentalo mas tarde!";
+                    //we need to inform user that there was some other error while processing the request
+                    messageError = "Error al procesar el pedido, ¡inténtalo más tarde!";
                 }
             }
         }
     }
+
     protected override async Task OnInitializedAsync()
     {
         if (authenticationState is not null)
@@ -172,21 +189,11 @@
             var authState = await authenticationState;
             var user = authState?.User;
 
-            if (user is not null)
+            if (user is not null && user.Identity is not null && user.Identity.IsAuthenticated)
             {
-                if (user.Identity is not null && user.Identity.IsAuthenticated)
-                {
-                    // Nuestro DTO `CreatePedidoDTO` no tiene `UserNameCustomer`, por eso no la asigno aquí.
-                    // La comprobación de propietario y la autorización final las hemos realizado en el servidor.
-
-                     var userName = user.Identity?.Name ?? string.Empty;
-                    logger.LogDebug("Usuario autenticado: {UserName}", userName);
-
-                    if (string.IsNullOrWhiteSpace(pedido.NombreCliente) && !string.IsNullOrWhiteSpace(userName))
-                    {
-                        pedido.NombreCliente = userName;
-                    }
-                }
+                // aquí solo registro el usuario porque no tenemos UserName en el DTO
+                var userName = user.Identity.Name ?? string.Empty;
+                logger.LogDebug("Usuario autenticado: {UserName}", userName);
             }
 
             pedido.NombreCliente = pedido.NombreCliente == null ? "" : pedido.NombreCliente;
