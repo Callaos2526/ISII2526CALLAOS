@@ -1,14 +1,13 @@
 ﻿@page "/SeleccionarMerch/CreateCompraMerch"
 
+@inject NavigationManager navigation
 @using AppForSEII2526.Web.Components.Shared
 @using AppForSEII2526.Web.API
 @using Microsoft.AspNetCore.Authorization
-@inject NavigationManager navigation
+@using Microsoft.AspNetCore.Components.Authorization
 @inject AppForSEII2526APIClient apiclient
 @inject ILogger<SelectCompraMerch> logger
 @inject CompraMerchStateContainer merchState
-@inject NavigationManager navigation
-@attribute [Authorize]
 
 <h3>CreateCompraMerch</h3>
 <EditForm Model="compra" OnValidSubmit="OpenDialog">
@@ -17,9 +16,11 @@
         <ValidationSummary />
         <ValidationSummary class="row alert alert-danger" />
     </div>
+
     <div class="row alert alert-danger" role="alert" hidden="@hideErrors">
         <p id="ErrorsShown">Errors: @mensajeError</p>
     </div>
+
     <div class="row g-3">
         <div class="col-md">
             <div class="form-floating mb-3">
@@ -30,7 +31,13 @@
         <div class="col-md">
             <div class="form-floating mb-3">
                 <InputText @bind-Value="compra.Apellido_1" class="form-control" id="apellido1" />
-                <label for="Nombre">Nombre</label>
+                <label for="Nombre">Primer Apellido</label>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="compra.Apellido_2" class="form-control" id="apellido2" />
+                <label for="Nombre">Segundo Apellido (opcional) </label>
             </div>
         </div>
         <div class="col-md">
@@ -58,7 +65,7 @@
             <div class="form-floating">
                 @* botón que lanza el diálogo de confirmación *@
                 <button class="btn btn-primary" type="submit" id="SubmitPedido" disabled="@compraButtonDisabled">
-                    Realizar pedido
+                    Realizar compra
                 </button>
             </div>
     </div>
@@ -83,7 +90,7 @@
             <tbody>
                 @foreach (var item in compra.MerchItems)
                 {
-                    <tr id="MovieData_@item.Id">
+                    <tr id="MerchData_@item.Id">
                         <td>@item.NombreProducto</td>
                         <td>@item.Pvp</td>
                         <td>@item.TipoProducto</td>
@@ -104,7 +111,6 @@
 }
 @code {
     private bool DialogIsOpen;
-    private object? errors;
     private ComprarMerchCreateDTO compra => merchState.Compra;
     private string mensajeError = "";
     private bool compraButtonDisabled
@@ -113,11 +119,12 @@
     }
 
     private bool hideErrors { get { return mensajeError.Length == 0; } }
-    private double PrecioTotal
+    private decimal PrecioTotal
     {
         get
         {
-            return merchState.Compra.MerchItems.Sum(item => item.Pvp * item.Cantidad);
+            double price = compra.MerchItems.Sum(item => item.Pvp * item.Cantidad);
+            return Convert.ToDecimal(price);
         }
     }
 
@@ -143,7 +150,7 @@
                 {
                     var created = await apiclient.CrearCompraMerchAsync(compra);
                     merchState.compraProcesada();
-                    navigation.NavigateTo($"/Pedido/DetailPedido/?PedidoID={created.Id}");
+                    navigation.NavigateTo($"/SeleccionarMerch/DetailsCompraMerch?CompraID={created.Id}");
                 }
                 catch (ApiException<ValidationProblemDetails> apiexceptionvalidation)
                 {
