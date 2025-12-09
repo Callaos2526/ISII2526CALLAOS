@@ -1,69 +1,68 @@
-using Microsoft.Data.Sqlite;
+﻿using Microsoft.Data.Sqlite;
 using System.Data.Common;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using Microsoft.AspNetCore.Identity;
+using System.Reflection;
+using System.Text.Json.Serialization;
+using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers()
-//show definitions of enums as strings
-.AddJsonOptions(options => {
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-});
+    // show definitions of enums as strings
+    .AddJsonOptions(options => {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
-// Add service for managing a sqlserver database that will be managed using ApplicationDBContext
-// the connection to the database was defined in appsettings
-
+// Database selection by environment variable
 string? connection2Database = Environment.GetEnvironmentVariable("DBConnection2Use");
 
-// If we are using the Production Environment, then the AZURE DB should be used,
-// otherwise the localdb or SQLite should be used
-//https://learn.microsoft.com/en-us/aspnet/core/fundamentals/environments?source=recommendations&view=aspnetcore-7.0
-switch (connection2Database) {
+// Configure DB contexts
+switch (connection2Database)
+{
     case "SQLite":
         DbConnection _connection = new SqliteConnection("Filename=:memory:");
-        //connection in case a persistent database is required
-        //DbConnection _connection = new SqliteConnection("Data Source=Application.db;Cache=Shared");
         _connection.Open();
         builder.Services.AddDbContext<ApplicationDbContext>(opt => opt.UseSqlite(_connection));
         break;
 
     case "AzureSQL":
         builder.Services.AddDbContext<ApplicationDbContext>(opt =>
-                       opt.UseSqlServer(Environment.GetEnvironmentVariable("AzureSQL")));
-
+            opt.UseSqlServer(Environment.GetEnvironmentVariable("AzureSQL")));
         break;
+
     default:
-        //the localdb is used
         var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
         break;
 }
 
-//Add Identity services to the container
+// Add Identity / Authorization
 builder.Services.AddAuthorization();
-//Activate Identity APIs 
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(options => {
+builder.Services.AddSwaggerGen(options =>
+{
     options.SwaggerDoc("v1",
-    new OpenApiInfo {
-        Title = "AppForSEII2526.API",
-        Version = "v1",
-        Description = "This API provides services for renting and purchasing movies",
-        License = new OpenApiLicense { Name = "MIT License", Url = new Uri("https://opensource.org/license/mit/") },
-        Contact = new OpenApiContact { Name = "Software Engineering II Team", Email = "isii@on.uclm.es" },
-    });
-    //this assign operation names, as the actual names they have
-    options.CustomOperationIds(apiDescription => {
-        return apiDescription.TryGetMethodInfo(out MethodInfo methodInfo) ? methodInfo.Name : null;
-    });
+        new OpenApiInfo
+        {
+            Title = "AppForSEII2526.API",
+            Version = "v1",
+            Description = "This API provides services for renting and purchasing movies",
+            License = new OpenApiLicense { Name = "MIT License", Url = new Uri("https://opensource.org/license/mit/") },
+            Contact = new OpenApiContact { Name = "Software Engineering II Team", Email = "isii@on.uclm.es" },
+        });
 
+    options.CustomOperationIds(apiDescription =>
+        apiDescription.TryGetMethodInfo(out MethodInfo methodInfo) ? methodInfo.Name : null);
 });
 
 builder.Services.AddCors(options =>
@@ -71,60 +70,71 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowLocalDev", policy =>
     {
         policy
-            .WithOrigins("https://localhost:7067", "http://localhost:7067", "https://localhost:5001", "http://localhost:5000") // ajusta puertos seg�n tu Swagger/API
+            .WithOrigins("https://localhost:7067", "http://localhost:7067", "https://localhost:5001", "http://localhost:5000")
             .AllowAnyMethod()
             .AllowAnyHeader();
-            // .AllowCredentials() // no usar con AllowAnyOrigin
     });
 });
 
 var app = builder.Build();
 
 app.UseRouting();
-
 app.UseCors("AllowLocalDev");
 
-    //Map Identity routes
-    //app.MapIdentityApi<IdentityUser>();
-    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+// obtener logger para mensajes de inicialización
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-using (var scope = app.Services.CreateScope()) {
-    try {
-
+// Inicialización de la base de datos: aplicar migraciones solo si hay pendientes.
+// Evita lanzar excepción si la BD ya contiene tablas (por ejemplo AspNetRoles).
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        //it creates the DB in case it does not exist
-        //this is used only while developing the system
         if (connection2Database == "SQLite")
+        {
             db.Database.EnsureCreated();
+            logger.LogInformation("SQLite in-memory DB ensured created.");
+        }
         else
-            db.Database.Migrate();
+        {
+            var pending = db.Database.GetPendingMigrations().ToList();
+            if (pending.Any())
+            {
+                logger.LogInformation("Applying {Count} pending migrations: {Migrations}", pending.Count, string.Join(", ", pending));
+                db.Database.Migrate();
+            }
+            else
+            {
+                logger.LogInformation("No pending migrations. Database is up to date.");
+            }
+        }
 
-
-        //it sees the database
-        //SeedData.Initialize(db, scope.ServiceProvider, logger);
+        // SeedData.Initialize(db, scope.ServiceProvider, logger); // descomentar si tienes SeedData y quieres ejecutarlo
     }
-    catch (Exception ex) {
+    catch (SqlException sqlEx) when (sqlEx.Number == 2714)
+    {
+        // 2714 = objeto ya existe: evitar crash y dar pista
+        logger.LogWarning(sqlEx, "SQL error 2714 while applying migrations: objeto ya existe en la BD. " +
+            "Si estás en desarrollo borra la BD local y vuelve a aplicar migraciones, o sincroniza manualmente la tabla __EFMigrationsHistory.");
+    }
+    catch (Exception ex)
+    {
         logger.LogError(ex, "An error occurred seeding the DB.");
     }
 }
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment()) {
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
-    app.UseSwaggerUI(c => {
-        //this facilitates to generate unique ids for the operations
-        c.DisplayOperationId();
-    });
+    app.UseSwaggerUI(c => c.DisplayOperationId());
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
 
-//Expose the implicitly defined Program class to the test project by doing:
 public partial class Program { }

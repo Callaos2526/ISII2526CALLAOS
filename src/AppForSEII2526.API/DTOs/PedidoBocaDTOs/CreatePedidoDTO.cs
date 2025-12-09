@@ -1,4 +1,6 @@
-﻿using AppForSEII2526.API.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using AppForSEII2526.API.Models;
+
 namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
 {
     public class CreatePedidoDTO
@@ -54,7 +56,6 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
                    ApellidoCliente1 == dTO.ApellidoCliente1 &&
                    ApellidoCliente2 == dTO.ApellidoCliente2 &&
                    Metodo == dTO.Metodo &&
-                   // comprueba que ambas colecciones son iguales (SequenceEqual requiere que ItemPedidoDTO implemente Equals)
                    BocadilloItem.SequenceEqual(dTO.BocadilloItem);
         }
     }

@@ -1,0 +1,114 @@
+﻿@page "/Pedido/DetailPedido"
+
+@using AppForSEII2526.Web.API
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AppForSEII2526APIClient apiclient
+@inject ILogger<DetailPedido> logger
+
+<h3>Detalle del Pedido</h3>
+
+<!-- [Authorize]-->
+
+@if (pedido == null)
+{
+    <p id="ErrorMessage">@error</p>
+}
+else
+{
+    <table class="table table-borderless table-sm">
+        <tr>
+            <th>Nombre y Apellidos</th>
+            <td id="NameSurname">@pedido.NombreCliente @pedido.ApellidoCliente1 @pedido.ApellidoCliente2</td>
+        </tr>
+        <tr>
+            <th>Método de Pago</th>
+            <td id="PaymentMethod">@pedido.Metodo</td>
+        </tr>
+        <tr>
+            <th>Fecha del pedido</th>
+            <td id="FechaPedido">@pedido.FechaPedido.ToString("dd/MM/yyyy HH:mm:ss")</td>
+        </tr>
+    </table>
+
+    <h4>Bocadillos del pedido</h4>
+
+    <table class="table" id="BocadillosPedido">
+        <thead>
+            <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Tipo Pan</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Precio unidad</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in pedido.BocadilloItem)
+            {
+                <tr id="PedidoItem_@item.Id">
+                    <td>@item.NombreBocadillo</td>
+                    <td>@item.TipoPan</td>
+                    <td>@item.Cantidad</td>
+                    <td>@item.Pvp.ToString("F2") €</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th scope="row" colspan="2" class="text-end">Total</th>
+                <td id="TotalCantidad">@pedido.BocadilloItem?.Sum(i => i.Cantidad) ?? 0</td>
+                <td id="TotalPrice">@((pedido.BocadilloItem?.Sum(i => i.Pvp * i.Cantidad) ?? 0f).ToString("F2")) €</td>
+            </tr>
+        </tfoot>
+    </table>
+}
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public int PedidoID { get; set; }
+
+    private DetailsPedidoDTO? pedido;
+    private string error = string.Empty;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // obtener nombre del usuario autenticado (estilo profesora)
+        string userName = "";
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user is not null)
+            {
+                if (user.Identity is not null && user.Identity.IsAuthenticated && user.IsInRole("User"))
+                {
+                    userName = user.Identity.Name ?? "";
+                }
+            }
+        }
+
+        // registro para evitar variable sin usar y facilitar diagnóstico
+        logger.LogDebug("Usuario autenticado: {UserName}", userName);
+
+        try
+        {
+            pedido = await apiclient.GetPedidoAsync(PedidoID);
+        }
+        catch (ApiException exception)
+        {
+            logger.LogError($"{DateTime.Now} Error al obtener pedido: {exception}");
+            pedido = null;
+        }
+
+        // No comparamos con UserNameCustomer (no existe en tus DTOs).
+        if (pedido == null)
+        {
+            error = $"Error! No existe el pedido con id={PedidoID} o no se pudo recuperar.";
+        }
+    }
+}
