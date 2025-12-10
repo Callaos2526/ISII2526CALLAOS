@@ -71,7 +71,7 @@ namespace AppForSEII2526.Web
                 NotifyStateChanged();
             }
         }
-        /*public void RemoveItemById(int productId)
+        public void RemoveItemById(int productId)
         {
             var item = Compra.MerchItems.FirstOrDefault(i => i.Id == productId);
             if (item != null)
@@ -79,7 +79,7 @@ namespace AppForSEII2526.Web
                 Compra.MerchItems.Remove(item);
                 NotifyStateChanged();
             }
-        }*/
+        }
 
         // Vaciar el carrito
         public void ClearCart()
@@ -99,8 +99,7 @@ namespace AppForSEII2526.Web
             NotifyStateChanged();
         }
 
-        // Reset del estado cuando la compra se ha procesado
-        public void ResetAfterPurchase()
+        public void compraProcesada()
         {
             Compra = new ComprarMerchCreateDTO()
             {
@@ -108,5 +107,6 @@ namespace AppForSEII2526.Web
             };
             NotifyStateChanged();
         }
+
     }
 }
