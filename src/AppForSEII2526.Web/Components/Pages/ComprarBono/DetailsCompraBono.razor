@@ -1,0 +1,106 @@
+﻿@page "/SeleccionarBono/DetailCompraBono"
+@using AppForSEII2526.Web.API
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AppForSEII2526APIClient apiclient
+@inject ILogger<DetailsCompraBono> logger
+@inject BonoStateContainer bonoState
+
+<h3>Detalle de la Compra de Bonos</h3>
+
+@if (compra == null)
+{
+    <p id="ErrorMessage">@error</p>
+}
+else
+{
+    <table class="table table-borderless table-sm">
+        <tr>
+            <th>Nombre y Apellidos</th>
+            <td id="NameSurname">@compra.NombreCliente @compra.ApellidoCliente1 @compra.ApellidoCliente2</td>
+        </tr>
+        <tr>
+            <th>Método de Pago</th>
+            <td id="PaymentMethod">@compra.MetodoPagoName</td>
+        </tr>
+        <tr>
+            <th>Fecha de la compra</th>
+            <td id="FechaCompra">@compra.FechaCompra.ToString("dd/MM/yyyy HH:mm:ss")</td>
+        </tr>
+    </table>
+
+    <h4>Bonos comprados</h4>
+
+    <table class="table" id="BonosCompra">
+        <thead>
+            <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Cantidad</th>
+                <th scope="col">Precio unidad</th>
+                <th scope="col">Nº bocadillos (por bono)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in compra.BonoItem ?? Enumerable.Empty<BonoItemForCreateDTO>())
+            {
+                <tr id="CompraBonoItem_@item.BonoId">
+                    <td>@item.Nombre</td>
+                    <td>@item.Tipo</td>
+                    <td>@item.Cantidad</td>
+                    <td>@item.Precio.ToString("F2") €</td>
+                    <td>@item.NumeroDeBocadillos</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr>
+                <th scope="row" colspan="2" class="text-end">Total</th>
+                <td id="TotalCantidad">@(compra.BonoItem?.Sum(i => i.Cantidad) ?? 0)</td>
+                <td id="TotalPrice">@((compra.PrecioTotal).ToString("F2")) €</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+}
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public int CompraID { get; set; }
+
+    private CompraBonoDetallesDTO? compra;
+    private string error = string.Empty;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        string userName = "";
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+            if (user is not null && user.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                userName = user.Identity.Name ?? "";
+            }
+        }
+
+        logger.LogDebug("Usuario autenticado: {UserName}", userName);
+
+        try
+        {
+            compra = await apiclient.GetCompraAsync(CompraID);
+            error = string.Empty;
+        }
+        catch (ApiException ex)
+        {
+            logger.LogError("{Time} Error al obtener compra: {Ex}", DateTime.Now, ex);
+            compra = null;
+            error = $"Error al recuperar la compra con id={CompraID}.";
+        }
+    }
+}
+}
