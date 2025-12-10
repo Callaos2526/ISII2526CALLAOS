@@ -52,12 +52,14 @@ namespace AppForSEII2526.Web
         public void RemoveItem(BonoItemForCreateDTO item)
         {
             Compra.BonoItem.Remove(item);
+            NotifyStateChanged();
         }
 
         // Vaciar el carrito
         public void ClearCart()
         {
             Compra.BonoItem.Clear();
+            NotifyStateChanged();
         }
 
         // Reset del estado cuando la compra se ha procesado
