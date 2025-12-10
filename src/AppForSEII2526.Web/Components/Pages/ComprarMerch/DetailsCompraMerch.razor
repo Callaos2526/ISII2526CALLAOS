@@ -6,7 +6,6 @@
 
 <h3>DetailsCompraMerch</h3>
 
-@attribute [Authorize]
 
 @if (compra == null)
 {
@@ -94,7 +93,7 @@ else
         {
             compra = null;
         }
-        if ((compra == null) || (compra.Nombre != userName))
+        if ((compra == null))
         {
             error = $"Error! No estas autorizado para ver esta compra o no existe ninguna compra con id={CompraID}";
         }
