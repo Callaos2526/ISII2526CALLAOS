@@ -1,95 +1,151 @@
 ﻿@implements IDisposable
-
 @inject NavigationManager NavigationManager
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">AppForSEII2526.Web</a>
+<style>
+    /* 1. FONDO CON UN TOQUE DEGRADADO SUTIL */
+    .nav-scrollable {
+        background: linear-gradient(180deg, #1e2125 0%, #101214 100%);
+        height: 100vh;
+    }
+
+    /* 2. ESTILO "CÁPSULA" (Pill) */
+    .nav-pills .nav-link {
+        color: #b0b3b8; /* Gris claro suave */
+        font-weight: 500;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        /* FORMA Y TAMAÑO */
+        border-radius: 50px; /* Bordes totalmente redondos */
+        margin: 6px 16px; /* Separación externa */
+        padding: 12px 24px; /* Relleno interno generoso */
+        /* ALINEACIÓN FLEXBOX ESTRICTA */
+        display: flex;
+        align-items: center;
+    }
+
+        /* 3. EFECTO HOVER (AL PASAR EL RATÓN) */
+        .nav-pills .nav-link:not(.active):hover {
+            background-color: rgba(255, 255, 255, 0.08); /* Fondo casi transparente */
+            color: #ffffff;
+            transform: translateX(5px); /* Deslizamiento suave */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* 4. ESTADO ACTIVO (SELECCIONADO) */
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, #0d6efd, #0043a8); /* Degradado azul profundo */
+            color: white !important;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4); /* Resplandor azul */
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+    /* 5. ICONOS GRANDES Y ALINEADOS */
+    .bi {
+        font-size: 1.5rem; /* Iconos más grandes (aprox 24px) */
+        /* CAJA DEL ICONO */
+        min-width: 2.8rem; /* Espacio reservado fijo para el icono */
+        height: 1.5rem;
+        /* CENTRADO ABSOLUTO DEL ICONO */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.2rem; /* Separación visual con el texto */
+    }
+
+    /* TÍTULOS DE SECCIÓN */
+    .nav-section-label {
+        font-size: 0.75rem;
+        letter-spacing: 1.5px;
+        color: #6c757d;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+        padding-left: 2rem;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+</style>
+
+<div class="top-row ps-3 navbar navbar-dark bg-transparent border-bottom border-secondary border-opacity-25">
+    <div class="container-fluid py-2">
+        <a class="navbar-brand fw-bold d-flex align-items-center fs-5" href="">
+            <span class="bi bi-shop-window me-3 text-primary"></span>
+            <span>App Bocadillos</span>
+        </a>
     </div>
 </div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
+    <nav class="flex-column nav-pills pt-3 pb-5">
+
+        <div class="nav-item">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/SeleccionarMerch/SelectCompraMerch">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> SeleccionarMerch
+                <span class="bi bi-house-door-fill" aria-hidden="true"></span> Inicio
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/Pedido/SelectBocadillosparaPedir">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Pedido
-            </NavLink>
-        </div>
+        <div class="nav-section-label">Tienda</div>
 
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="/ComprarBono/SelectBonoUI">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Comprar Bono
+                <span class="bi bi-ticket-perforated-fill" aria-hidden="true"></span> Bonos
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+        <div class="nav-item">
+            <NavLink class="nav-link" href="/Pedido/SelectBocadillosparaPedir">
+                <span class="bi bi-bag-check-fill" aria-hidden="true"></span> Pedidos
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+        <div class="nav-item">
+            <NavLink class="nav-link" href="/SeleccionarMerch/SelectCompraMerch">
+                <span class="bi bi-shop" aria-hidden="true"></span> Merch
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="auth">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
-            </NavLink>
-        </div>
+        <div class="nav-section-label">Comunidad</div>
 
-
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="/resenya/selectbocadillos">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> SeleccionarReseña
+                <span class="bi bi-star-half" aria-hidden="true"></span> Reseñas
             </NavLink>
         </div>
+
+        <div class="nav-section-label">Cuenta</div>
 
         <AuthorizeView>
             <Authorized>
-                <div class="nav-item px-3">
+                <div class="nav-item">
                     <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                        <span class="bi bi-person-circle" aria-hidden="true"></span> Perfil
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
+                <div class="nav-item">
+                    <form action="Account/Logout" method="post" class="m-0 w-100">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        <button type="submit" class="nav-link w-100 bg-transparent border-0 text-start">
+                            <span class="bi bi-box-arrow-left" aria-hidden="true"></span> Salir
                         </button>
                     </form>
                 </div>
             </Authorized>
             <NotAuthorized>
-                <div class="nav-item px-3">
+                <div class="nav-item">
                     <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                        <span class="bi bi-person-plus-fill" aria-hidden="true"></span> Registro
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
+                <div class="nav-item">
                     <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                        <span class="bi bi-box-arrow-in-right" aria-hidden="true"></span> Entrar
                     </NavLink>
                 </div>
             </NotAuthorized>
         </AuthorizeView>
+
     </nav>
 </div>
 
@@ -113,4 +169,3 @@
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
-

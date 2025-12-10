@@ -1,0 +1,206 @@
+﻿@page "/ComprarBono/CreateCompra"
+@inject NavigationManager navigation
+@using AppForSEII2526.Web.Components.Shared
+@using AppForSEII2526.Web.API
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AppForSEII2526APIClient apiclient
+@inject ILogger<CrearCompraBono> logger
+@inject BonoStateContainer bonoState
+
+<h3>Crear Compra de Bonos</h3>
+
+<EditForm Model="compra" OnValidSubmit="OpenDialog">
+    <div class="row">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="row alert alert-danger" />
+    </div>
+
+    <div class="row alert alert-danger" role="alert" hidden="@hideErrors">
+        <p id="ErrorsShown">Errors: @messageError</p>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md">
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="compra.NombreCliente" class="form-control" id="Name" />
+                <label for="Name">Nombre</label>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="compra.ApellidoCliente1" class="form-control" id="Surname1" />
+                <label for="Surname1">Primer apellido</label>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="compra.ApellidoCliente2" class="form-control" id="Surname2" />
+                <label for="Surname2">Segundo apellido (opcional)</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-2">
+        <div class="col-md">
+            <div class="form-floating">
+                <InputDate @bind-Value="compra.FechaCompra" class="form-control" id="FechaCompra" />
+                <label for="FechaCompra">Fecha compra</label>
+            </div>
+        </div>
+
+        <div class="col-md">
+            <div class="form-floating">
+                <InputSelect TValue="string" @bind-Value="compra.MetodoPagoName" class="form-select" id="MetodoPago">
+                    <option value="">-- Seleccionar --</option>
+                    <option value="Tarjeta">Tarjeta</option>
+                    <option value="Paypal">Paypal</option>
+					<option value="GooglePay">GooglePay</option>
+                </InputSelect>
+                <label for="MetodoPago">Método de pago</label>
+            </div>
+        </div>
+
+        <div class="col-md">
+            <div class="form-floating">
+                <button class="btn btn-primary" type="submit" id="SubmitCompra" disabled="@compraButtonDisabled">
+                    Realizar compra
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <h4>Detalle de la compra</h4>
+    <p>
+        <b>Total precio:</b> @TotalPrice €
+        <button class="btn btn-outline-primary" type="button" @onclick="ModifyBonos" id="ModifyBonos">
+            Modificar bonos
+        </button>
+    </p>
+
+    <div class="mh-100 table-responsive">
+        <table class="table table-condensed table-hover" id="TableOfCompraItems">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Cantidad</th>
+                    <th>Precio unidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in compra.BonoItem)
+                {
+                    <tr id="BonoData_@item.BonoId">
+                        <td>@item.Nombre</td>
+                        <td>@item.Tipo</td>
+                        <td>
+                            <InputNumber TValue="int"
+                                         @bind-Value="item.Cantidad"
+                                         class="form-control"
+                                         id="@($"cantidad_{item.BonoId}")" />
+                        </td>
+                        <td>@item.Precio.ToString("F2") €</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</EditForm>
+
+@if (DialogIsOpen)
+{
+    <Dialog Caption="Confirmar compra"
+            Message="¿Deseas confirmar la compra con los datos actuales?"
+            OnClose="@OnDialogClose"
+            Type=Dialog.Category.SaveNot>
+    </Dialog>
+}
+
+@code {
+    private string messageError = "";
+    private bool hideErrors => string.IsNullOrEmpty(messageError);
+
+    private bool compraButtonDisabled => (compra.BonoItem == null || compra.BonoItem.Count == 0);
+
+    private bool DialogIsOpen;
+
+    private decimal TotalPrice => bonoState.TotalPrice;
+
+    private void ModifyBonos()
+    {
+        navigation.NavigateTo("/ComprarBono/SelectCompraBono");
+    }
+
+    // Exponer la compra desde el state container
+    private CrearCompraDTO compra => bonoState.Compra;
+
+    private void OpenDialog()
+    {
+        DialogIsOpen = true;
+    }
+
+    private async Task OnDialogClose(bool isOk)
+    {
+        DialogIsOpen = false;
+
+        if (!isOk) return;
+
+        if (compra.BonoItem.Count > 0)
+        {
+            try
+            {
+                var created = await apiclient.CrearCompraAsync(compra);
+                // Resetear el estado local del carrito (ajusta el método si tu BonoStateContainer usa otro nombre)
+                bonoState.CompraProcessed();
+                // Navegar a la página de detalle de la compra usando el id devuelto
+                navigation.NavigateTo($"/ComprarBono/DetailCompraBono/?CompraID={created.CompraId}");
+            }
+            catch (ApiException<ValidationProblemDetails> apiex)
+            {
+                if (apiex.Result?.Errors?.Values != null)
+                {
+                    messageError = "";
+                    foreach (var errors in apiex.Result.Errors.Values)
+                    {
+                        messageError = string.Join("(*) ",
+                            messageError,
+                            string.Join(" (*) ", errors));
+                    }
+                }
+            }
+            catch (ApiException)
+            {
+                messageError = "Error al procesar la compra, ¡inténtalo más tarde!";
+            }
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user is not null && user.Identity is not null && user.Identity.IsAuthenticated)
+            {
+                var userName = user.Identity.Name ?? string.Empty;
+                logger.LogDebug("Usuario autenticado: {UserName}", userName);
+            }
+
+            compra.NombreCliente = compra.NombreCliente ?? "";
+            compra.ApellidoCliente1 = compra.ApellidoCliente1 ?? "";
+            compra.ApellidoCliente2 = compra.ApellidoCliente2 ?? "";
+            compra.MetodoPagoName = compra.MetodoPagoName ?? "";
+            // Asegurar fecha por defecto si no viene establecida
+            if (compra.FechaCompra == default)
+            {
+                compra.FechaCompra = DateTimeOffset.Now;
+            }
+        }
+    }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+}
