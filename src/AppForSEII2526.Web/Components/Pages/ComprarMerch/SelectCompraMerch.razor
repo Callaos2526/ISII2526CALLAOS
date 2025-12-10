@@ -7,7 +7,6 @@
 
 
 <h3>SelectCompraMerch</h3>
-
 <div class="container-fluid">
     <div class="row alert alert-danger" role="alert" hidden="@hideErrors">
         <p id="ErrorsShown">Errors: @errors</p>
@@ -113,7 +112,7 @@
     private bool HideRentingCart => !compra.MerchItems.Any();
     private void ProceedToCreatePurchase()
     {
-        navigation.NavigateTo("/ComprarMerch/CreateCompraMerch");
+        navigation.NavigateTo("/SeleccionarMerch/CreateCompraMerch");
     }
     private ComprarMerchCreateDTO compra => merchState.Compra;
 
