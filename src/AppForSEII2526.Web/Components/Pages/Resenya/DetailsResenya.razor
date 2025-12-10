@@ -2,7 +2,10 @@
 
 @using AppForSEII2526.Web.API
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+
 @inject AppForSEII2526APIClient apiclient
+@inject ILogger<DetailsResenya> logger
 
 <h3>Detalle de la Reseña</h3>
 
@@ -10,7 +13,7 @@
 
 @if (resenya == null)
 {
-    <p>@error</p>
+    <p id="ErrorMessage">@error</p>
 }
 else
 {
@@ -20,8 +23,8 @@ else
             <td id="NombreUsuario">@resenya.NombreUsuario</td>
         </tr>
         <tr>
-            <th>Fecha de publicación</th>
-            <td id="FechaPublicacion">@resenya.FechaPublicacion.ToString("dd/MM/yyyy")</td>
+            <th>Fecha Publicación</th>
+            <td id="FechaPublicacion">@resenya.FechaPublicacion.ToString("dd/MM/yyyy HH:mm:ss")</td>
         </tr>
         <tr>
             <th>Título</th>
@@ -37,23 +40,23 @@ else
         </tr>
     </table>
 
-    <h4>Bocadillos Puntuados</h4>
+    <h4>Bocadillos puntuados</h4>
 
     <table class="table" id="ResenyaBocadillos">
         <thead>
             <tr>
                 <th scope="col">Nombre</th>
-                <th scope="col">Precio</th>
+                <th scope="col">PVP</th>
                 <th scope="col">Tamaño</th>
                 <th scope="col">Puntuación</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (ResenyaItemDTO item in resenya.ResenyaBocadillo)
+            @foreach (var item in resenya.ResenyaBocadillo)
             {
-                <tr id="Bocadillo_@item.BocadilloId">
+                <tr id="ResenyaItem_@item.BocadilloId">
                     <td>@item.Nombre</td>
-                    <td>@item.Pvp €</td>
+                    <td>@item.Pvp</td>
                     <td>@item.Tamano</td>
                     <td>@item.Puntuacion</td>
                 </tr>
@@ -63,12 +66,13 @@ else
 }
 
 @code {
+
     [Parameter]
     [SupplyParameterFromQuery]
     public int ResenyaID { get; set; }
 
     private ResenyaDetailDTO? resenya;
-    private string error = "";
+    private string error = string.Empty;
 
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
@@ -82,24 +86,30 @@ else
             var authState = await authenticationState;
             var user = authState?.User;
 
-            if (user != null && user.Identity != null && user.Identity.IsAuthenticated)
+            if (user is not null &&
+                user.Identity is not null &&
+                user.Identity.IsAuthenticated &&
+                user.IsInRole("User"))
             {
-                userName = user.Identity.Name;
+                userName = user.Identity.Name ?? "";
             }
         }
+
+        logger.LogDebug("Usuario autenticado: {UserName}", userName);
 
         try
         {
             resenya = await apiclient.GetResenyaAsync(ResenyaID);
         }
-        catch (ApiException)
+        catch (ApiException ex)
         {
+            logger.LogError($"{DateTime.Now} Error al obtener reseña: {ex}");
             resenya = null;
         }
 
         if (resenya == null)
         {
-            error = $"Error: No existe una reseña con id={ResenyaID}";
+            error = $"Error! No existe la reseña con id={ResenyaID} o no se pudo recuperar.";
         }
     }
 }
