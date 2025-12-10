@@ -26,16 +26,14 @@ namespace AppForSEII2526.API.DTOs.PedidoBocaDTOs
         public string TipoPanNombre { get; set; } //dice noelia que bien que sea string y no objeto tipopan
         public float Pvp { get; set; }
 
-        public bool Equals(SelectBocadilloDTO? other)
+        public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, other)) return false;   // evita NRE
-            if (ReferenceEquals(this, other)) return true;    // rápida igualdad por referencia
-
-            return BocadilloID == other.BocadilloID
-                && NombreBocadillo == other.NombreBocadillo
-                && Tamano == other.Tamano
-                && TipoPanNombre == other.TipoPanNombre
-                && Pvp == other.Pvp;
+            return obj is SelectBocadilloDTO dTO &&
+                   BocadilloID == dTO.BocadilloID &&
+                   NombreBocadillo == dTO.NombreBocadillo &&
+                   Tamano == dTO.Tamano &&
+                   TipoPanNombre == dTO.TipoPanNombre &&
+                   Pvp == dTO.Pvp;
         }
     }
 }

@@ -42,9 +42,18 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-string? URI2API = builder.Configuration.GetValue(typeof(string), "AppForSEII2526APIClient") as string;
+//string? URI2API = builder.Configuration.GetValue(typeof(string), "AppForSEII2526APIClient") as string;
 
-builder.Services.AddScoped<AppForSEII2526APIClient>(sp => new AppForSEII2526APIClient(URI2API, new HttpClient()));
+//builder.Services.AddScoped<AppForSEII2526APIClient>(sp => new AppForSEII2526APIClient(URI2API, new HttpClient()));
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"];
+
+if (string.IsNullOrWhiteSpace(apiBaseUrl))
+{
+    throw new InvalidOperationException("ApiBaseUrl no está configurado en appsettings.json");
+}
+
+builder.Services.AddScoped<AppForSEII2526APIClient>(sp =>
+    new AppForSEII2526APIClient(apiBaseUrl!, new HttpClient()));
 
 //adding an In-memory state container service
 //https://learn.microsoft.com/en-us/aspnet/core/blazor/state-management/?view=aspnetcore-8.0#in-memory-state-container-service

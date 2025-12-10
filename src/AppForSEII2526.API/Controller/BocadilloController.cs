@@ -59,6 +59,39 @@ namespace AppForSEII2526.API
 
         }
 
+        [HttpGet] //Accion que responde a peticiones HTTP GET
+        [Route("[action]")]
+        //si todo va bien devolvemos una lista SelectBocadilloDTO
+        [ProducesResponseType(typeof(IList<SelectBocadilloDTO>), (int)HttpStatusCode.OK)]
+        //metodo que devuelve un ActionResult 
+        public async Task<ActionResult> GetBocadilloParaReseña(string? filtroNombre, float? filtroPvp)
+        {
+            var query = _context.Bocadillos
+                .AsNoTracking()
+                .Include(b => b.tipopan)
+                .Include(b => b.ComprasBocadillo).ThenInclude(cb => cb.Compra)
+                .AsQueryable();
+
+            //filtro por nombre
+            if (!string.IsNullOrWhiteSpace(filtroNombre))
+                query = query.Where(b => b.Nombre.Contains(filtroNombre));
+
+            //filtro por pvp
+            if (filtroPvp.HasValue)
+                query = query.Where(b => b.Pvp == filtroPvp.Value);
+
+            var bocadillos = await query
+                .OrderBy(b => b.Nombre)
+                .Select(b => new SelectBocadilloDTO(b.Id, b.Nombre, b.Tamano, b.tipopan.Nombre, b.Pvp))
+                .ToListAsync();
+
+            if (!bocadillos.Any())
+                return NotFound("No hay bocadillos que cumplan los requisitos");
+
+            return Ok(bocadillos);
+        }
+
+
 
     }
 }
