@@ -1,22 +1,27 @@
-﻿@using AppForSEII2526.Web
-@page "/resenya/selectbocadillos"
+﻿@page "/resenya/selectbocadillos"
 
+@using AppForSEII2526.Web
 @using AppForSEII2526.Web.API
 @inject AppForSEII2526APIClient apiclient
 @inject ILogger<SelectResenya> logger
 @inject ResenyaStateContainer resenyaState
+@inject NavigationManager navigation
 
 <h3>Seleccionar Bocadillos Para Reseña</h3>
 
 <div class="container-fluid">
 
+    <!-- ERRORES -->
     <div class="row alert alert-danger" role="alert" hidden="@hideErrors">
-        <p id="ErrorsShown">@errors</p>
+        <p>@errors</p>
     </div>
 
     <div class="row">
+
+        
         <div class="col-8">
 
+            
             <div class="row">
 
                 <div class="col">
@@ -39,8 +44,8 @@
                 </div>
 
                 <div class="col">
-                    <button type="button" class="btn btn-primary"
-                            id="buscarBocadillos"
+                    <button type="button"
+                            class="btn btn-primary"
                             @onclick="SearchBocadillos">
                         Buscar bocadillos
                     </button>
@@ -48,6 +53,7 @@
 
             </div>
 
+          
             <div class="row">
 
                 @if (bocadillos == null)
@@ -56,8 +62,10 @@
                 }
                 else
                 {
+                    <p>Resultados: @bocadillos.Count</p>
+
                     <div class="mh-100 table-responsive">
-                        <table class="table table-condensed table-hover" id="TablaBocadillos">
+                        <table class="table table-condensed table-hover" id="TableOfBocadillos">
                             <thead>
                                 <tr>
                                     <th>Nombre</th>
@@ -93,8 +101,10 @@
 
         </div>
 
+        
         <div class="col-2">
-            <h5>Selección</h5>
+
+            <h4>Selección</h4>
 
             @if (resenya.ResenyaBocadillo.Count == 0)
             {
@@ -105,62 +115,67 @@
                 <ul>
                     @foreach (var item in resenya.ResenyaBocadillo)
                     {
-                        <li>@item.BocadilloId — Puntuación: @item.Puntuacion</li>
+                        <li>@item.Nombre — Puntuación: @item.Puntuacion</li>
                     }
                 </ul>
+
+                
+                <button class="btn btn-primary mt-3"
+                        @onclick="CrearResenya"
+                        id="goToCreateResenya">
+                    Crear reseña
+                </button>
             }
+
         </div>
 
     </div>
 
 </div>
 
+
 @code {
 
-    // Datos cargados
     private ICollection<SelectBocadilloDTO>? bocadillos;
 
-    // Error UI
     private string errors = "";
     private bool hideErrors => errors.Length == 0;
 
-    // Filtros
     private string? filtroNombre { get; set; }
     private float? filtroPvp { get; set; }
 
-    // Estado de reseña
+    // State container
     private ResenyaForCreateDTO resenya => resenyaState.Resenya;
 
 
     private void AddBocadilloToResenya(SelectBocadilloDTO b)
     {
-        resenyaState.AddBocadillo(b.BocadilloID, 5);
+        resenyaState.AddBocadillo(b.BocadilloID, 1);  // Puntuación por defecto 1
     }
-
 
     private async Task SearchBocadillos()
     {
         try
         {
             bocadillos = await apiclient.GetBocadilloParaReseñaAsync(filtroNombre, filtroPvp);
-            errors = "";
         }
         catch (ApiException ex)
         {
             logger.LogError($"{DateTime.Now} Error: {ex}");
             errors = "Error while connecting to the system";
-            bocadillos = new List<SelectBocadilloDTO>();
         }
 
         StateHasChanged();
     }
 
-
-    protected override async Task OnInitializedAsync()
+    private void CrearResenya()
     {
-        
-        SearchBocadillos();
+        navigation.NavigateTo("/resenya/createresenya");
+    }
 
-        await Task.CompletedTask;
+    protected override Task OnInitializedAsync()
+    {
+        SearchBocadillos();
+        return base.OnInitializedAsync();
     }
 }
