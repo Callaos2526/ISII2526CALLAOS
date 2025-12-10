@@ -1,5 +1,5 @@
 ﻿
-using AppForSEII2526.API.DTOs.CompraBonoDTOs;
+using AppForSEII2526.Web.API;
 
 namespace AppForSEII2526.Web
 {
@@ -21,7 +21,7 @@ namespace AppForSEII2526.Web
         public event Action? OnChange;
         private void NotifyStateChanged() => OnChange?.Invoke();
 
-        public void AddProduct(BonoItemForCreateDTO item)
+        public void AddProduct(SelectBonoDTO item)
         {
             if (item == null) return;
 
@@ -29,22 +29,24 @@ namespace AppForSEII2526.Web
             var existing = Compra.BonoItem.FirstOrDefault(i => i.BonoId == item.BonoId);
             if (existing != null)
             {
-                existing.Cantidad += item.Cantidad;
+                existing.Cantidad += 1;
             }
             else
             {
-                Compra.BonoItem.Add(new BonoItemForCreateDTO(
-                    item.BonoId,
-                    item.Cantidad,
-                    item.Nombre,
-                    item.Precio,
-                    item.NumeroDeBocadillos,
-                    item.Tipo
-                ));
+                Compra.BonoItem.Add(new BonoItemForCreateDTO
+                {
+                    BonoId = item.BonoId,
+                    Cantidad = 1,
+                    Nombre = item.Nombre,
+                    Precio = item.Precio,
+                    NumeroDeBocadillos = item.NumeroDeBocadillos,
+                    Tipo = item.Tipo
+                });
             }
 
             NotifyStateChanged();
         }
+        
 
         // Eliminar un producto concreto del carrito
         public void RemoveItem(BonoItemForCreateDTO item)

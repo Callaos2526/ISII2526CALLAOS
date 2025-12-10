@@ -1,5 +1,166 @@
-﻿<h3>SelectBonoUI</h3>
+﻿@page "/ComprarBono/SelectBonoUI"
+@using AppForSEII2526.Web.API
+@inject AppForSEII2526APIClient apiclient
+@inject ILogger<SelectBonoUI> logger
+@inject BonoStateContainer bonoState
+@inject NavigationManager navigation
+
+<h3>Seleccionar Bono</h3>
+
+<div class="container-fluid">
+    <div class="row alert alert-danger" role="alert" hidden="@hideErrors">
+        <p id="ErrorsShown">Errors: @errors</p>
+    </div>
+
+    <div class="row">
+        <div class="col-8">
+            <div class="row">
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon1">Nombre</span>
+                        <input type="text" id="inputNombre" @bind="filtroNombre" class="form-control" placeholder="Nombre" aria-label="Nombre" aria-describedby="basic-addon1" />
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="basic-addon2">Tipo</span>
+                        <input type="text" id="inputTipo" @bind="filtroTipo" class="form-control" placeholder="Tipo" aria-label="Tipo" aria-describedby="basic-addon2" />
+                    </div>
+                </div>
+                <div class="col">
+                    <button type="button" class="btn btn-primary" @onclick="BuscarBonos" id="BuscarBonos">Buscar Bonos</button>
+                </div>
+            </div>
+
+            <div class="row">
+                @if (bonos == null)
+                {
+                    <p>Loading bonos....</p>
+                }
+                else
+                {
+                    <div class="mh-100 table-responsive">
+                        <table class="table table-condensed table-hover" id="TablaDeBonos">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Tipo</th>
+                                    <th>Nº Bocadillos</th>
+                                    <th>Precio</th>
+                                    <th>Añadir</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in bonos)
+                                {
+                                    <tr>
+                                        <td>@item.Nombre</td>
+                                        <td>@item.Tipo</td>
+                                        <td>@item.NumeroDeBocadillos</td>
+                                        <td>@item.Precio</td>
+                                        <td>
+                                            <button class="btn btn-outline-secondary" @onclick="@(() => AddBonoToCart(item))">Add</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-4">
+            <div class="col-12" hidden="@HideCart">
+                <div class="row"><h4>Carrito de la compra</h4></div>
+
+                @foreach (var item in compra.BonoItem)
+                {
+                    <div class="row mb-2">
+                        <div class="col">
+                            <button type="button" class="btn btn-light" @onclick="@(() => RemoveBonoItem(item))">
+                                x @item.Nombre - @item.Precio€ (x @item.Cantidad)
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                <div class="row mt-2">
+                    <div class="col">
+                        <p>Total: @bonoState.TotalPrice €</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <button type="button" class="btn btn-primary" @onclick="ProceedToCreatePurchase">Procesar compra</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12" hidden="@(compra.BonoItem.Count > 0)">
+                <p>El carrito está vacío</p>
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
+    private System.Collections.Generic.ICollection<SelectBonoDTO>? bonos;
+    private string errors = string.Empty;
+    private bool hideErrors => string.IsNullOrEmpty(errors);
 
+    private string filtroNombre { get; set; } = string.Empty;
+    private string filtroTipo { get; set; } = string.Empty;
+
+    private bool HideCart => !compra.BonoItem.Any();
+
+    // Exponer la compra desde el state container (igual que en SelectCompraMerch)
+    private CrearCompraDTO compra => bonoState.Compra;
+
+    private void ProceedToCreatePurchase()
+    {
+        navigation.NavigateTo("/SeleccionarBono/CreateCompra");
+    }
+
+    private void AddBonoToCart(SelectBonoDTO item)
+    {
+        try
+        {
+            // Igual que SelectCompraMerch: delegar la gestión al state container.
+            // BonoStateContainer debe exponer un método AddBono(SelectBonoDTO) que convierta a BonoItemForCreateDTO y actualice Totales.
+            bonoState.AddProduct(item);
+            errors = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error añadiendo bono al carrito");
+            errors = "Error añadiendo bono al carrito";
+        }
+        StateHasChanged();
+    }
+
+    private void RemoveBonoItem(BonoItemForCreateDTO item)
+    {
+        if (item == null) return;
+
+        // Como en SelectCompraMerch, delegar en el state container para mantener la lógica compartida.
+        bonoState.RemoveItem(item);
+        StateHasChanged();
+    }
+
+    private async Task BuscarBonos()
+    {
+        try
+        {
+            bonos = await apiclient.GetBonoParaCompraAsync(filtroNombre, filtroTipo);
+            errors = string.Empty;
+        }
+        catch (ApiException ex)
+        {
+            logger.LogError(ex, "Error buscando bonos");
+            errors = "Error while connecting to the system";
+        }
+        StateHasChanged();
+    }
 }
