@@ -67,24 +67,6 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-
-        //we check the user is logged in
-        string userName = "";
-        if (authenticationState is not null)
-        {
-            var authState = await authenticationState;
-            var user = authState?.User;
-
-            //we retrieve the id of the user logged in
-            if (user is not null)
-            {
-                if (user.Identity is not null && user.Identity.IsAuthenticated && user.IsInRole("User"))
-                {
-                    userName = user.Identity.Name;
-                }
-            }
-        }
-
         try
         {
             compra = await apiclient.GetCompraDetailAsync(CompraID);
@@ -93,14 +75,11 @@ else
         {
             compra = null;
         }
-        if ((compra == null))
+        if (compra == null)
         {
-            error = $"Error! No estas autorizado para ver esta compra o no existe ninguna compra con id={CompraID}";
+            error = $"Error! No existe ninguna compra con id={CompraID}";
         }
-
-
     }
-
 }
 
 
