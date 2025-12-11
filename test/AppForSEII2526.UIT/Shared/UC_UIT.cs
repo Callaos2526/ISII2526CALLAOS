@@ -24,7 +24,7 @@ namespace AppForSEII2526.UIT.Shared
             get
             {
                 //set url of your web page 
-                return "https://localhost:5063/";
+                return "https://localhost:7081/";
 
             }
         }
