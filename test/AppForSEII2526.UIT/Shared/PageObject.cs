@@ -171,4 +171,3 @@ namespace AppForSEII2526.UIT.Shared
             _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(seconds);
     }
 }
-

@@ -32,6 +32,9 @@ namespace AppForSEII2526.UIT.Shared
         public UC_UIT(ITestOutputHelper output)
         {
 
+        public UC_UIT(ITestOutputHelper output)
+        {
+
             //it initializes where the errors will be shown
             _output = output;
 
