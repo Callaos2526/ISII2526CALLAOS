@@ -26,7 +26,7 @@ namespace AppForSEII2526.Web
             if (item == null) return;
 
             // Si ya existe, incrementa cantidad; si no, lo añade
-            var existing = Compra.BonoItem.FirstOrDefault(i => i.BonoId == item.BonoId);
+            var existing = Compra.BonoItem.FirstOrDefault(i => i.BonoId == item.BonoID);
             if (existing != null)
             {
                 existing.Cantidad += 1;
@@ -35,7 +35,7 @@ namespace AppForSEII2526.Web
             {
                 Compra.BonoItem.Add(new BonoItemForCreateDTO
                 {
-                    BonoId = item.BonoId,
+                    BonoId = item.BonoID,
                     Cantidad = 1,
                     Nombre = item.Nombre,
                     Precio = item.Precio,
