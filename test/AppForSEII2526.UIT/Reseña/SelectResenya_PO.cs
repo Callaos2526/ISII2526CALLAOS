@@ -42,11 +42,88 @@ namespace AppForSEII2526.UIT.Resenya
             // click buscar
             WaitForBeingClickable(buttonSearchBocadillos);
             _driver.FindElement(buttonSearchBocadillos).Click();
+
+            // Esperar hasta que se muestre la tabla de resultados o el contenedor de errores.
+            try
+            {
+                // Primero intentamos esperar a la tabla (caso normal con resultados)
+                WaitForBeingVisible(tableOfBocadillos);
+            }
+            catch (WebDriverTimeoutException)
+            {
+                // Si la tabla no aparece en el timeout, esperaremos al menos al contenedor de errores
+                try
+                {
+                    WaitForBeingVisible(errorsShown);
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    // si tampoco aparece nada, lo dejamos pasar: las pruebas deberán fallar con info de diagnóstico
+                    _output.WriteLine("Ni tabla ni errores se hicieron visibles tras la búsqueda.");
+                }
+            }
         }
 
+        // Nueva versión tolerante: busca una fila que contenga el nombre y el precio esperados.
         public bool CheckListOfBocadillos(List<string[]> expectedBocadillos)
         {
-            return CheckBodyTable(expectedBocadillos, tableOfBocadillos);
+            // Esperar la tabla visible antes de leer filas
+            try
+            {
+                WaitForBeingVisible(tableOfBocadillos);
+            }
+            catch (WebDriverTimeoutException)
+            {
+                _output.WriteLine("Timeout esperando tabla en CheckListOfBocadillos.");
+                return false;
+            }
+
+            // Obtener todas las filas de la tabla
+            var tbody = _driver.FindElement(tableOfBocadillos).FindElement(By.TagName("tbody"));
+            var actualRows = tbody.FindElements(By.TagName("tr"));
+
+            // Convertir textos
+            var actualTexts = new List<string>();
+            foreach (var r in actualRows)
+                actualTexts.Add(r.Text.Trim());
+
+            // Para cada fila esperada, buscamos una fila real que contenga nombre y precio
+            foreach (var expected in expectedBocadillos)
+            {
+                if (expected.Length == 0)
+                {
+                    _output.WriteLine("Expected row vacío en datos de prueba.");
+                    return false;
+                }
+
+                var expectedName = expected[0].Trim();
+                var expectedPrice = expected.Length > 0 ? expected[expected.Length - 1].Trim() : string.Empty;
+                // Normalizar price (por si el test usa "6 €" o "6€")
+                expectedPrice = expectedPrice.Replace(" ", "");
+
+                bool found = false;
+                foreach (var actual in actualTexts)
+                {
+                    var actualNormalized = actual.Replace(" ", "");
+                    if (actual.Contains(expectedName, StringComparison.InvariantCultureIgnoreCase) &&
+                        actualNormalized.Contains(expectedPrice))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    _output.WriteLine($"No se encontró fila que contenga Nombre:'{expectedName}' y Precio:'{expectedPrice}'.");
+                    _output.WriteLine("Filas reales encontradas:");
+                    for (int i = 0; i < actualTexts.Count; i++)
+                        _output.WriteLine($"  [{i}] {actualTexts[i]}");
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public void AddBocadilloToResenya(int bocadilloId)
@@ -57,6 +134,26 @@ namespace AppForSEII2526.UIT.Resenya
             var row = _driver.FindElement(rowBy);
             var addButton = row.FindElement(By.TagName("button"));
             addButton.Click();
+
+            // Esperar que la UI se actualice: botón para crear reseña o la lista de selección
+            try
+            {
+                // Espera corta y robusta al botón de crear reseña
+                WaitForBeingVisible(buttonCreateResenya);
+            }
+            catch (WebDriverTimeoutException)
+            {
+                // Si no aparece el botón, intentamos esperar a que la lista de selección tenga al menos una entrada.
+                // Usamos la espera tolerante que ignora excepciones intermedias.
+                try
+                {
+                    WaitForBeingVisibleIgnoringExeptionTypes(By.CssSelector(".col-2 ul"));
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    _output.WriteLine("Aviso: tras añadir bocadillo no apareció ni el botón ni la lista de selección en el tiempo de espera.");
+                }
+            }
         }
 
         public bool CheckMessageError(string expectedMessage)

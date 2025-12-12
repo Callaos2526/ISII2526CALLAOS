@@ -151,6 +151,7 @@
     private void AddBocadilloToResenya(SelectBocadilloDTO b)
     {
         resenyaState.AddBocadillo(b.BocadilloID, 1);  // Puntuación por defecto 1
+        // ya no es necesario llamar a StateHasChanged() aquí si nos suscribimos a OnChange
     }
 
     private async Task SearchBocadillos()
@@ -175,7 +176,21 @@
 
     protected override Task OnInitializedAsync()
     {
+        // Suscribimos para que el componente se vuelva a renderizar cuando cambie el estado
+        resenyaState.OnChange += ResenyaState_OnChange;
+
         SearchBocadillos();
         return base.OnInitializedAsync();
+    }
+
+    private void ResenyaState_OnChange()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Anulamos la suscripción al desechar el componente
+        resenyaState.OnChange -= ResenyaState_OnChange;
     }
 }

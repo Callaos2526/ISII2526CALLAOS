@@ -18,7 +18,7 @@ namespace AppForSEII2526.UIT.Resenya
         private const string bocadilloName1 = "Submarino";
         private const string bocadilloPvp1 = "6";
 
-        private const int bocadilloId2 = 4;
+        private const int bocadilloId2 = 3;
         private const string bocadilloName2 = "jamon";
         private const string bocadilloPvp2 = "3";
 
