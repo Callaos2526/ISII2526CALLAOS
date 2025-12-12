@@ -12,10 +12,9 @@ namespace AppForSEII2526.UIT.Pedido
     {
         private readonly SelectBocadillosForPedido_PO selectBocadillosForPedido_PO;
 
-        // BocadilloID real (tú dijiste que el que quieres es el ID 1)
         private const string bocadilloId1 = "1";
 
-        // En tu HTML viste removeBocadillo_1, así que el ItemId es 1 en tu caso
+    
         private const string itemIdCarrito1 = "1";
 
         public SelectPedido_UIT(ITestOutputHelper output) : base(output)
@@ -25,19 +24,16 @@ namespace AppForSEII2526.UIT.Pedido
 
         private void Precondition_perform_login()
         {
-            // SOLO si tienes credenciales válidas
-            // Perform_login("elena@uclm.es", "Password1234%");
+            
         }
 
         private void InitialStepsForPedido()
         {
-            // OPCIÓN A: SIN LOGIN (recomendado para probar primero)
-            // (Si luego hace falta login, lo activas)
-            // Precondition_perform_login();
+            
 
             _driver.Navigate().GoToUrl(_URI + "Pedido/SelectBocadillosParaPedir");
 
-            // Esperar a que la tabla cargue
+          
             selectBocadillosForPedido_PO.WaitForBeingVisibleIgnoringExeptionTypes(By.Id("buscarBocadillos"));
             selectBocadillosForPedido_PO.WaitForBeingVisibleIgnoringExeptionTypes(By.Id("TableOfBocadillos"));
         }
@@ -66,7 +62,7 @@ namespace AppForSEII2526.UIT.Pedido
 
             selectBocadillosForPedido_PO.AddBocadilloToPedido(bocadilloId1);
 
-            // Quitar por ItemId (en tu caso es removeBocadillo_1)
+           
             selectBocadillosForPedido_PO.RemoveBocadilloFromPedidoByItemId(itemIdCarrito1);
 
             Assert.True(selectBocadillosForPedido_PO.PedidoNotAvailable());
