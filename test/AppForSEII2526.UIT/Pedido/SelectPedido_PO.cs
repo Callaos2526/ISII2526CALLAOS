@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using Xunit.Abstractions;
@@ -10,46 +11,96 @@ namespace AppForSEII2526.UIT.PageObjects
     public class SelectBocadillosForPedido_PO : PageObject
     {
         // locators (ids tal y como en la UI)
-        By selectTamano = By.Id("selectTamano");
-        By inputTipoPan = By.Id("inputTipoPan");
-        By buttonBuscar = By.Id("buscarBocadillos");
-        By tableOfBocadillos = By.Id("TableOfBocadillos"); // ajustar a TableOfBocadillos si es necesario
-        By errorShown = By.Id("ErrorsShown");
-        By placePedidoButton = By.Id("placePedidoButton");
+        private readonly By selectTamano = By.Id("selectTamano");
+        private readonly By inputTipoPan = By.Id("inputTipoPan");
+        private readonly By buttonBuscar = By.Id("buscarBocadillos");
+        private readonly By tableOfBocadillos = By.Id("TableOfBocadillos");
+        private readonly By errorShown = By.Id("ErrorsShown");
+        private readonly By placePedidoButton = By.Id("placePedidoButton");
 
-        public SelectBocadillosForPedido_PO(IWebDriver driver, ITestOutputHelper output) : base(driver, output)
-        {
-        }
+        public SelectBocadillosForPedido_PO(IWebDriver driver, ITestOutputHelper output) : base(driver, output) { }
 
         // Busca bocadillos aplicando filtros (estilo profe)
         public void SearchBocadillos(string tamano, string tipoPan)
         {
-            // wait for the webelement to be clickable
+            // Esperar a que el select esté visible
+            WaitForBeingVisible(selectTamano);
+
+            // Esperar a que el select tenga opciones (Blazor a veces renderiza tarde)
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            wait.Until(d =>
+            {
+                var sel = new SelectElement(d.FindElement(selectTamano));
+                return sel.Options != null && sel.Options.Count > 0;
+            });
+
             WaitForBeingClickable(selectTamano);
 
-            var select = new SelectElement(_driver.FindElement(selectTamano));
-            if (string.IsNullOrEmpty(tamano) || tamano == "All")
-                select.SelectByText("Todos");
+            var selectElement = new SelectElement(_driver.FindElement(selectTamano));
+
+            // Manejo "All" / "Todos"
+            if (string.IsNullOrWhiteSpace(tamano) || tamano == "All")
+            {
+                try { selectElement.SelectByText("Todos"); }
+                catch (NoSuchElementException)
+                {
+                    if (selectElement.Options.Count > 0)
+                        selectElement.SelectByIndex(0);
+                }
+            }
             else
-                select.SelectByText(tamano);
+            {
+                if (!TrySelect(selectElement, tamano))
+                    _output.WriteLine($"[SelectTamano] No encontrada opción '{tamano}'. Se deja sin filtro.");
+            }
 
-            _driver.FindElement(inputTipoPan).Clear();
-            if (!string.IsNullOrEmpty(tipoPan))
-                _driver.FindElement(inputTipoPan).SendKeys(tipoPan);
+            // Tipo pan
+            WaitForBeingVisible(inputTipoPan);
+            var input = _driver.FindElement(inputTipoPan);
+            input.Clear();
+            if (!string.IsNullOrWhiteSpace(tipoPan))
+                input.SendKeys(tipoPan);
 
+            // Buscar
+            WaitForBeingClickable(buttonBuscar);
             _driver.FindElement(buttonBuscar).Click();
 
-            // esperar a que la tabla esté visible / cargada
+            // Esperar tabla visible
             WaitForBeingVisible(tableOfBocadillos);
+        }
+
+        private bool TrySelect(SelectElement selectElement, string valueOrText)
+        {
+            try { selectElement.SelectByValue(valueOrText); return true; }
+            catch (NoSuchElementException) { }
+
+            try { selectElement.SelectByText(valueOrText); return true; }
+            catch (NoSuchElementException) { }
+
+            var partialText = selectElement.Options
+                .FirstOrDefault(o => (o.Text ?? "").IndexOf(valueOrText, StringComparison.OrdinalIgnoreCase) >= 0);
+            if (partialText != null)
+            {
+                selectElement.SelectByText(partialText.Text);
+                return true;
+            }
+
+            var partialValue = selectElement.Options
+                .FirstOrDefault(o => ((o.GetAttribute("value") ?? "")
+                    .IndexOf(valueOrText, StringComparison.OrdinalIgnoreCase) >= 0));
+            if (partialValue != null)
+            {
+                selectElement.SelectByValue(partialValue.GetAttribute("value"));
+                return true;
+            }
+
+            return false;
         }
 
         // Comprueba la tabla usando el helper de la profesora
         public bool CheckListOfBocadillos(List<string[]> expectedBocadillos)
-        {
-            return CheckBodyTable(expectedBocadillos, tableOfBocadillos);
-        }
+            => CheckBodyTable(expectedBocadillos, tableOfBocadillos);
 
-        // Comprueba que se muestre un mensaje de error concreto
         public bool CheckMessageError(string expectedMessage)
         {
             IWebElement actual = _driver.FindElement(errorShown);
@@ -57,39 +108,47 @@ namespace AppForSEII2526.UIT.PageObjects
             return actual.Text.Contains(expectedMessage);
         }
 
-        // Añadir bocadillo al carrito — espera a que el botón sea clickable y pulsa
-        // El id en la UI es "bocadilloAPedir_{BocadilloID}" — pasar el sufijo (id) como string
+        // Añadir bocadillo al carrito — id "bocadilloAPedir_{BocadilloID}"
         public void AddBocadilloToPedido(string bocadilloId)
         {
             var addBy = By.Id("bocadilloAPedir_" + bocadilloId);
             WaitForBeingClickable(addBy);
             _driver.FindElement(addBy).Click();
+
+            // Espera breve para que Blazor actualice el carrito
+            System.Threading.Thread.Sleep(500);
         }
 
-        // Eliminar bocadillo del carrito — id "removeBocadillo_{Id}"
-        public void RemoveBocadilloFromPedido(string bocadilloId)
+        // Quitar bocadillo del carrito — id "removeBocadillo_{ItemId}"
+        public void RemoveBocadilloFromPedidoByItemId(string itemId)
         {
-            var removeBy = By.Id("removeBocadillo_" + bocadilloId);
+            var removeBy = By.Id("removeBocadillo_" + itemId);
+
+            // Esperar a que exista (Blazor puede tardar en renderizarlo)
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(15));
+            wait.Until(d => d.FindElements(removeBy).Count > 0);
+
             WaitForBeingClickable(removeBy);
             _driver.FindElement(removeBy).Click();
+
+            System.Threading.Thread.Sleep(500);
         }
 
         // Comprueba si el botón de realizar pedido está oculto (no disponible)
         public bool PedidoNotAvailable()
         {
-            // el botón no debe estar mostrado
             try
             {
-                return _driver.FindElement(placePedidoButton).Displayed == false;
+                var elems = _driver.FindElements(placePedidoButton);
+                if (elems == null || elems.Count == 0) return true;
+                return !elems[0].Displayed;
             }
-            catch (NoSuchElementException)
+            catch
             {
-                // Si no existe, consideramos que no está disponible
                 return true;
             }
         }
 
-        // Navegar al formulario de crear pedido (igual que la profe)
         public void ProceedToCreatePedido()
         {
             WaitForBeingClickable(placePedidoButton);

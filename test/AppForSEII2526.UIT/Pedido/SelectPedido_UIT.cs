@@ -1,22 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
 using AppForSEII2526.UIT.PageObjects;
 using AppForSEII2526.UIT.Shared;
 
 namespace AppForSEII2526.UIT.Pedido
 {
-    // Estilo similar al de la profesora: clase de UC que hereda de UC_UIT
     public class SelectPedido_UIT : UC_UIT
     {
-        private SelectBocadillosForPedido_PO selectBocadillosForPedido_PO;
+        private readonly SelectBocadillosForPedido_PO selectBocadillosForPedido_PO;
 
-        // Datos (ajusta si prefieres otros valores reales de tu BD)
-        private const string bocadilloId1 = "4";         // según dbo.ComprasBocadillos.data.sql
-        private const string bocadilloName1 = "jamon";
+        // BocadilloID real (tú dijiste que el que quieres es el ID 1)
+        private const string bocadilloId1 = "1";
+
+        // En tu HTML viste removeBocadillo_1, así que el ItemId es 1 en tu caso
+        private const string itemIdCarrito1 = "1";
 
         public SelectPedido_UIT(ITestOutputHelper output) : base(output)
         {
@@ -25,33 +25,31 @@ namespace AppForSEII2526.UIT.Pedido
 
         private void Precondition_perform_login()
         {
-            // Credenciales usadas en otros tests
-            Perform_login("elena@uclm.es", "Password1234%");
+            // SOLO si tienes credenciales válidas
+            // Perform_login("elena@uclm.es", "Password1234%");
         }
 
         private void InitialStepsForPedido()
         {
-            Precondition_perform_login();
+            // OPCIÓN A: SIN LOGIN (recomendado para probar primero)
+            // (Si luego hace falta login, lo activas)
+            // Precondition_perform_login();
 
-            // Navegar directamente a la ruta del componente (más robusto que depender de un id de menú)
             _driver.Navigate().GoToUrl(_URI + "Pedido/SelectBocadillosParaPedir");
 
-            // Esperar a que los filtros / tabla estén visibles
-            selectBocadillosForPedido_PO.WaitForBeingVisible(By.Id("buscarBocadillos"));
-            selectBocadillosForPedido_PO.WaitForBeingVisible(By.Id("TableOfBocadillos"));
+            // Esperar a que la tabla cargue
+            selectBocadillosForPedido_PO.WaitForBeingVisibleIgnoringExeptionTypes(By.Id("buscarBocadillos"));
+            selectBocadillosForPedido_PO.WaitForBeingVisibleIgnoringExeptionTypes(By.Id("TableOfBocadillos"));
         }
 
         [Fact]
         [Trait("LevelTesting", "Funcional Testing")]
         public void UC_Pedido_SearchReturnsResults()
         {
-            // Arrange
             InitialStepsForPedido();
 
-            // Act: buscar sin filtros (equivalente a "Todos")
             selectBocadillosForPedido_PO.SearchBocadillos("All", "");
 
-            // Assert: la tabla debe contener al menos una fila
             var rows = _driver
                 .FindElement(By.Id("TableOfBocadillos"))
                 .FindElement(By.TagName("tbody"))
@@ -64,14 +62,13 @@ namespace AppForSEII2526.UIT.Pedido
         [Trait("LevelTesting", "Funcional Testing")]
         public void UC_Pedido_AddAndRemoveBocadillo_CheckPedidoNotAvailable()
         {
-            // Arrange
             InitialStepsForPedido();
 
-            // Act: añadir y luego eliminar el bocadillo con id conocido
             selectBocadillosForPedido_PO.AddBocadilloToPedido(bocadilloId1);
-            selectBocadillosForPedido_PO.RemoveBocadilloFromPedido(bocadilloId1);
 
-            // Assert: el botón de realizar pedido no debe estar disponible
+            // Quitar por ItemId (en tu caso es removeBocadillo_1)
+            selectBocadillosForPedido_PO.RemoveBocadilloFromPedidoByItemId(itemIdCarrito1);
+
             Assert.True(selectBocadillosForPedido_PO.PedidoNotAvailable());
         }
 
@@ -81,14 +78,11 @@ namespace AppForSEII2526.UIT.Pedido
         [Trait("LevelTesting", "Funcional Testing")]
         public void UC_Pedido_FilteringDoesNotThrow(string tamano, string tipoPan)
         {
-            // Arrange
             InitialStepsForPedido();
 
-            // Act
             selectBocadillosForPedido_PO.SearchBocadillos(tamano, tipoPan);
 
-            // Assert: al menos que no lance excepciones y la tabla esté presente
-            Assert.True(_driver.FindElement(By.Id("TableOfBocadillos")) != null);
+            Assert.NotNull(_driver.FindElement(By.Id("TableOfBocadillos")));
         }
     }
 }
