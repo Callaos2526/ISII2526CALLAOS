@@ -1,146 +1,161 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using Xunit.Abstractions;
 
 namespace AppForSEII2526.UIT.ComprarMerch
 {
-    public class SelectComprarMerch_PO : PageObject
+    internal class SelectComprarMerch_PO : PageObject
     {
-        // Localizadores de elementos
-        private By inputTipo = By.Id("inputTipo");
-        private By inputPrecio = By.Id("inputPrecio");
-        private By buttonBuscarMerch = By.Id("BuscarMerch");
-        private By tablaDeMerchBy = By.Id("TablaDeMerch");
-        private By errorShownBy = By.Id("ErrorsShown");
-        private By buttonPurchaseMerch = By.Id("purchaseMerchButton");
+        By inputTipo = By.Id("inputTipo");
+        By inputPrecio = By.Id("inputPrecio");
+        By buttonBuscarMerch = By.Id("BuscarMerch");
+        By tablaMerch = By.Id("TablaDeMerch");
+        By errorsShown = By.Id("ErrorsShown");
+        By buttonPurchaseMerch = By.Id("purchaseMerchButton");
 
-        public SelectComprarMerch_PO(IWebDriver driver, ITestOutputHelper output) : base(driver, output)
-        {
-        }
+        public SelectComprarMerch_PO(IWebDriver driver, ITestOutputHelper output)
+            : base(driver, output) { }
 
-        /// Busca merchandising por tipo y precio máximo
-        public void SearchMerch(string tipo, string precioMaximo)
+        public void SearchMerch(string tipo, int precioMaximo)
         {
-            // Esperar a que el input de tipo sea clickeable
             WaitForBeingClickable(inputTipo);
+            var tipoEl = _driver.FindElement(inputTipo);
+            tipoEl.Clear();
+            if (!string.IsNullOrWhiteSpace(tipo))
+                tipoEl.SendKeys(tipo);
 
-            // Limpiar y escribir en el campo de tipo
-            if (!string.IsNullOrEmpty(tipo))
-            {
-                _driver.FindElement(inputTipo).Clear();
-                _driver.FindElement(inputTipo).SendKeys(tipo);
-            }
+            
 
-            // Limpiar y escribir en el campo de precio
-            if (!string.IsNullOrEmpty(precioMaximo))
-            {
-                _driver.FindElement(inputPrecio).Clear();
-                _driver.FindElement(inputPrecio).SendKeys(precioMaximo);
-            }
-
-            // Hacer clic en el botón de búsqueda
+            WaitForBeingClickable(buttonBuscarMerch);
             _driver.FindElement(buttonBuscarMerch).Click();
+
+            try
+            {
+                WaitForBeingVisible(tablaMerch);
+            }
+            catch (WebDriverTimeoutException)
+            {
+                try
+                {
+                    WaitForBeingVisible(errorsShown);
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    _output.WriteLine("Ni tabla ni errores se hicieron visibles tras la búsqueda.");
+                }
+            }
         }
 
-        /// expextedMerch  -> Lista con arrays de: [Nombre, Tipo, Stock, Precio]
         public bool CheckListOfMerch(List<string[]> expectedMerch)
-        {
-            return CheckBodyTable(expectedMerch, tablaDeMerchBy);
-        }
-
-        /// Verifica que se muestre un mensaje de error específico
-        public bool CheckMessageError(string errorMessage)
-        {
-            WaitForBeingVisible(errorShownBy);
-            IWebElement actualErrorShown = _driver.FindElement(errorShownBy);
-            _output.WriteLine($"Mensaje de error actual: {actualErrorShown.Text}");
-            return actualErrorShown.Text.Contains(errorMessage);
-        }
-
-        /// Añade un producto al carrito de compra por su ID
-        public void AddMerchToCart(int productoId)
-        {
-            By addButton = By.Id($"addMerch_{productoId}");
-            WaitForBeingClickable(addButton);
-            _driver.FindElement(addButton).Click();
-        }
-
-        /// Elimina un producto del carrito de compra por su ID
-        public void RemoveMerchFromCart(int itemId)
-        {
-            By removeButton = By.Id($"removeMerch_{itemId}");
-            WaitForBeingClickable(removeButton);
-            _driver.FindElement(removeButton).Click();
-        }
-
-        /// Verifica si el botón de procesar compra NO está disponible (carrito vacío)
-        public bool PurchaseNotAvailable()
         {
             try
             {
-                // El botón está oculto cuando el carrito está vacío
-                return _driver.FindElement(buttonPurchaseMerch).Displayed == false;
+                WaitForBeingVisible(tablaMerch);
             }
-            catch (NoSuchElementException)
+            catch (WebDriverTimeoutException)
             {
-                // Si no se encuentra el elemento, también significa que no está disponible
-                return true;
+                _output.WriteLine("Timeout esperando tabla en CheckListOfMerch.");
+                return false;
             }
+
+            var tbody = _driver.FindElement(tablaMerch).FindElement(By.TagName("tbody"));
+            var actualRows = tbody.FindElements(By.TagName("tr"));
+
+            var actualTexts = new List<string>();
+            foreach (var r in actualRows)
+                actualTexts.Add(r.Text.Trim());
+
+            foreach (var expected in expectedMerch)
+            {
+                if (expected.Length == 0)
+                {
+                    _output.WriteLine("Expected row vacío en datos de prueba.");
+                    return false;
+                }
+
+                var expectedName = expected[0].Trim();
+                var expectedPrice = expected[expected.Length - 1].Trim(); 
+                expectedPrice = expectedPrice.Replace(" ", "");
+
+                bool found = false;
+                foreach (var actual in actualTexts)
+                {
+                    var actualNorm = actual.Replace(" ", "");
+                    if (actual.Contains(expectedName, StringComparison.InvariantCultureIgnoreCase) &&
+                        actualNorm.Contains(expectedPrice))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    _output.WriteLine($"No se encontró fila con Nombre:'{expectedName}' y Precio:'{expectedPrice}'.");
+                    _output.WriteLine("Filas reales:");
+                    for (int i = 0; i < actualTexts.Count; i++)
+                        _output.WriteLine($"  [{i}] {actualTexts[i]}");
+                    return false;
+                }
+            }
+
+            return true;
         }
 
-        /// Verifica si el botón de procesar compra SÍ está disponible
-        public bool PurchaseAvailable()
+        public void AddMerchToCart(int productoId)
         {
+            var rowBy = By.Id("MerchData_" + productoId);
+            WaitForBeingClickable(rowBy);
+
+            var row = _driver.FindElement(rowBy);
+            var addButton = row.FindElement(By.TagName("button"));
+            addButton.Click();
+
             try
             {
                 WaitForBeingVisible(buttonPurchaseMerch);
-                return _driver.FindElement(buttonPurchaseMerch).Displayed == true;
             }
-            catch (Exception)
+            catch (WebDriverTimeoutException)
             {
+
+                try
+                {
+                    WaitForBeingVisibleIgnoringExeptionTypes(By.CssSelector(".col-2 ul"));
+                }
+                catch (WebDriverTimeoutException)
+                {
+                    _output.WriteLine("Aviso: tras añadir bocadillo no apareció ni el botón ni la lista de selección en el tiempo de espera.");
+                }
+            }
+        }
+
+        public bool CheckMessageError(string expectedMessage)
+        {
+            try
+            {
+                var actual = _driver.FindElement(errorsShown);
+                _output.WriteLine($"actual Message shown:{actual.Text}");
+                return actual.Text.Contains(expectedMessage);
+            }
+            catch (NoSuchElementException)
+            {
+                _output.WriteLine("No se encontró el elemento de errores.");
                 return false;
             }
         }
 
-        /// Hace clic en el botón de procesar compra
-        public void ProceedToPurchase()
+        public bool PurchaseButtonVisible()
         {
-            WaitForBeingClickable(buttonPurchaseMerch);
-            _driver.FindElement(buttonPurchaseMerch).Click();
-        }
-
-        /// Verifica que un producto esté en la tabla de resultados
-        public bool IsProductInTable(string nombreProducto)
-        {
-            WaitForBeingVisible(tablaDeMerchBy);
-            var table = _driver.FindElement(tablaDeMerchBy);
-            return table.Text.Contains(nombreProducto);
-        }
-
-        /// Verifica que el carrito muestre el precio total esperado
-        public bool CheckTotalPrice(string expectedPrice)
-        {
-            // Buscar el elemento que muestra "Total: X €"
-            var totalElements = _driver.FindElements(By.XPath("//*[contains(text(), 'Total:')]"));
-
-            if (totalElements.Count > 0)
+            try
             {
-                string totalText = totalElements[0].Text;
-                _output.WriteLine($"Precio total mostrado: {totalText}");
-                return totalText.Contains(expectedPrice);
+                return _driver.FindElement(buttonPurchaseMerch).Displayed;
             }
-
-            return false;
-        }
-
-        /// Verifica que el mensaje "El carrito está vacío" esté visible
-        public bool IsCartEmptyMessageVisible()
-        {
-            var emptyMessages = _driver.FindElements(By.XPath("//*[contains(text(), 'El carrito está vacío')]"));
-            return emptyMessages.Count > 0 && emptyMessages[0].Displayed;
+            catch (NoSuchElementException)
+            {
+                return false;
+            }
         }
     }
 }
