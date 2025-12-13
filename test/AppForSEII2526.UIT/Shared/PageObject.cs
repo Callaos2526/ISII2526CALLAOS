@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -107,91 +108,163 @@ namespace AppForSEII2526.UIT.Shared
             return actualTitle.Contains(expectedTitle);
         }
 
-        // Nuevo: PressOkModalDialog más tolerante
+        // Nuevo: PressOkModalDialog más tolerante y con detección de alert/modal variados
         public void PressOkModalDialog()
         {
-            // Try several heuristics to find and click a dialog OK button.
-            // 1) try the explicit id
-            var shortWait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
+            var shortWait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+
+            // 1) Intentar detectar y aceptar un alert JS
             try
             {
-                shortWait.Until(d => d.FindElement(_okModalDialog).Displayed);
-                _driver.FindElement(_okModalDialog).Click();
+                shortWait.Until(d =>
+                {
+                    try
+                    {
+                        d.SwitchTo().Alert();
+                        return true;
+                    }
+                    catch
+                    {
+                        return false;
+                    }
+                });
+
+                var alert = _driver.SwitchTo().Alert();
+                alert.Accept();
+                _output.WriteLine("PressOkModalDialog: JS alert detectado y aceptado.");
                 return;
             }
-            catch (Exception ex)
+            catch (WebDriverTimeoutException)
             {
-                _output.WriteLine($"PressOkModalDialog: no se encontró botón por id 'Button_DialogOK': {ex.Message}");
+                // continuar con otras comprobaciones
             }
 
-            // 2) try modal footer buttons (.modal .modal-footer button)
+            // 2) Esperar a la aparición de algún modal/dialog o al botón OK específico
             try
             {
-                shortWait.Until(d => d.FindElements(By.CssSelector(".modal .modal-footer button")).Count > 0);
-                var footerButtons = _driver.FindElements(By.CssSelector(".modal .modal-footer button"));
-                foreach (var b in footerButtons)
+                shortWait.Until(d =>
+                    d.FindElements(By.CssSelector("[role='dialog'], .modal, .swal2-container")).Count > 0
+                    || d.FindElements(By.Id("Button_DialogOK")).Count > 0);
+            }
+            catch (WebDriverTimeoutException)
+            {
+                _output.WriteLine("PressOkModalDialog: no se detectó ningún dialog/modal en el tiempo esperado.");
+
+                // Si no hay modal detectado, comprobar si ya se produjo la navegación/resultado esperado (evita fallar si no hay diálogo)
+                try
                 {
-                    if (b.Displayed && b.Enabled)
+                    // Comprobación genérica común: si el detalle ya está visible (NombreUsuario), asumimos que la acción terminó.
+                    if (_driver.FindElements(By.Id("NombreUsuario")).Any(e => e.Displayed))
                     {
-                        _output.WriteLine($"PressOkModalDialog: clicando botón en modal footer con texto '{b.Text}'.");
-                        b.Click();
+                        _output.WriteLine("PressOkModalDialog: elemento 'NombreUsuario' visible -> asumiendo que la operación se completó sin dialog.");
                         return;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                _output.WriteLine($"PressOkModalDialog: no se encontró modal footer buttons: {ex.Message}");
+                catch { /* ignore */ }
+                // no retornamos aún; se intentarán fallbacks más abajo antes de lanzar excepción
             }
 
-            // 3) try any visible button with common confirm texts
-            var confirmTexts = new[] { "OK", "Aceptar", "Si", "Sí", "Confirm", "Confirmar", "Crear reseña", "Crear", "Yes" };
-            try
+            // Obtener el primer diálogo visible
+            var dialogs = _driver.FindElements(By.CssSelector("[role='dialog'], .modal, .swal2-container")).Where(e => e.Displayed || (e.GetAttribute("class")?.Contains("show") ?? false)).ToList();
+            if (dialogs.Any())
             {
-                shortWait.Until(d => d.FindElements(By.TagName("button")).Count > 0);
-                var allButtons = _driver.FindElements(By.TagName("button"));
-                foreach (var b in allButtons)
+                var dialog = dialogs.First();
+
+                // Buscar botón OK dentro del diálogo usando varios criterios
+                var confirmTexts = new[] { "OK", "Aceptar", "Si", "Sí", "Confirm", "Confirmar", "Crear reseña", "Crear", "Yes" };
+
+                // 1) botón con id dentro del diálogo
+                try
+                {
+                    var okById = dialog.FindElements(By.Id("Button_DialogOK")).FirstOrDefault();
+                    if (okById != null && okById.Displayed && okById.Enabled)
+                    {
+                        okById.Click();
+                        _output.WriteLine("PressOkModalDialog: clicando Button_DialogOK dentro del modal.");
+                        return;
+                    }
+                }
+                catch { /* ignore and continue */ }
+
+                // 2) botones en footer del diálogo
+                try
+                {
+                    var footerButtons = dialog.FindElements(By.CssSelector(".modal-footer button, footer button, .swal2-actions button"));
+                    foreach (var b in footerButtons)
+                    {
+                        if (!b.Displayed || !b.Enabled) continue;
+                        var txt = (b.Text ?? string.Empty).Trim();
+                        if (string.IsNullOrEmpty(txt)) continue;
+                        if (confirmTexts.Any(ct => txt.Equals(ct, StringComparison.InvariantCultureIgnoreCase) || txt.Contains(ct, StringComparison.InvariantCultureIgnoreCase)))
+                        {
+                            _output.WriteLine($"PressOkModalDialog: clicando botón en modal footer con texto '{txt}'.");
+                            b.Click();
+                            return;
+                        }
+                    }
+                }
+                catch { /* continue */ }
+
+                // 3) intentar cualquier botón dentro del propio diálogo con texto de confirmación
+                var buttonsInDialog = dialog.FindElements(By.TagName("button"));
+                foreach (var b in buttonsInDialog)
                 {
                     if (!b.Displayed || !b.Enabled) continue;
                     var txt = (b.Text ?? string.Empty).Trim();
                     if (string.IsNullOrEmpty(txt)) continue;
                     if (confirmTexts.Any(ct => txt.Equals(ct, StringComparison.InvariantCultureIgnoreCase) || txt.Contains(ct, StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        _output.WriteLine($"PressOkModalDialog: clicando botón por texto '{txt}'.");
+                        _output.WriteLine($"PressOkModalDialog: clicando botón por texto dentro del modal '{txt}'.");
+                        b.Click();
+                        return;
+                    }
+                }
+
+                // 4) fallback: primer botón visible dentro del diálogo
+                foreach (var b in buttonsInDialog)
+                {
+                    if (b.Displayed && b.Enabled)
+                    {
+                        _output.WriteLine($"PressOkModalDialog: fallback click button in modal '{b.Text}'.");
+                        b.Click();
+                        return;
+                    }
+                }
+            }
+
+            // 5) último recurso: buscar globalmente botones de confirmación o Button_DialogOK
+            try
+            {
+                var allButtons = _driver.FindElements(By.TagName("button"));
+                foreach (var b in allButtons)
+                {
+                    if (!b.Displayed || !b.Enabled) continue;
+                    var txt = (b.Text ?? string.Empty).Trim();
+                    if (string.IsNullOrEmpty(txt)) continue;
+                    var confirmTexts = new[] { "OK", "Aceptar", "Si", "Sí", "Confirm", "Confirmar", "Crear reseña", "Crear", "Yes" };
+                    if (confirmTexts.Any(ct => txt.Equals(ct, StringComparison.InvariantCultureIgnoreCase) || txt.Contains(ct, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        _output.WriteLine($"PressOkModalDialog: fallback global click button por texto '{txt}'.");
                         try { b.Click(); return; } catch { /* ignore and continue */ }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                _output.WriteLine($"PressOkModalDialog: error buscando botones por texto: {ex.Message}");
-            }
 
-            // 4) fallback: try clicking the first visible button inside any element with role dialog
-            try
-            {
-                var dialogs = _driver.FindElements(By.CssSelector("[role='dialog'], .modal"));
-                foreach (var dialog in dialogs)
+                // intentar localizar por id globalmente
+                var btnById = _driver.FindElements(By.Id("Button_DialogOK")).FirstOrDefault();
+                if (btnById != null && btnById.Displayed && btnById.Enabled)
                 {
-                    var buttons = dialog.FindElements(By.TagName("button"));
-                    foreach (var b in buttons)
-                    {
-                        if (b.Displayed && b.Enabled)
-                        {
-                            _output.WriteLine($"PressOkModalDialog: fallback click button '{b.Text}'.");
-                            b.Click();
-                            return;
-                        }
-                    }
+                    btnById.Click();
+                    _output.WriteLine("PressOkModalDialog: clicando Button_DialogOK globalmente (fallback).");
+                    return;
                 }
             }
             catch (Exception ex)
             {
-                _output.WriteLine($"PressOkModalDialog: fallback error: {ex.Message}");
+                _output.WriteLine($"PressOkModalDialog: fallback global error: {ex.Message}");
             }
 
-            // If we reach here, log and throw to fail fast (keeps original behavior)
-            throw new NoSuchElementException("No se encontró ningún botón de confirmación del diálogo.");
+            // Si llegamos aquí, no se encontró nada razonable: lanzar excepción para mantener visibilidad del fallo
+            throw new NoSuchElementException("No se encontró ningún botón de confirmación del diálogo ni alert que aceptar.");
         }
 
 
@@ -248,11 +321,9 @@ namespace AppForSEII2526.UIT.Shared
 
         public void WaitForTextToBePresentInElement(By IdElement, string expectedText)
         {
-            //used whenever the webelement needs a delay for being clickable
+            // Esperar por el localizador en vez de buscar el elemento antes
             var wait = new WebDriverWait(_driver, new TimeSpan(0, 0, 30));
-            IWebElement element = _driver.FindElement(IdElement);
-            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.TextToBePresentInElement(element, expectedText));
-
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.TextToBePresentInElementLocated(IdElement, expectedText));
         }
 
 

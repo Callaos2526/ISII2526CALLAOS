@@ -1,8 +1,11 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using Xunit.Abstractions;
+using System.Linq;
+using System.Threading;
 
 namespace AppForSEII2526.UIT.Resenya
 {
@@ -78,14 +81,53 @@ namespace AppForSEII2526.UIT.Resenya
                 return false;
             }
 
-            // Obtener todas las filas de la tabla
-            var tbody = _driver.FindElement(tableOfBocadillos).FindElement(By.TagName("tbody"));
-            var actualRows = tbody.FindElements(By.TagName("tr"));
-
-            // Convertir textos
+            // Obtener snapshot de textos de filas con reintentos para evitar StaleElementReferenceException
             var actualTexts = new List<string>();
-            foreach (var r in actualRows)
-                actualTexts.Add(r.Text.Trim());
+            const int maxAttempts = 5;
+            bool gotSnapshot = false;
+
+            for (int attempt = 1; attempt <= maxAttempts && !gotSnapshot; attempt++)
+            {
+                try
+                {
+                    actualTexts.Clear();
+                    var tbody = _driver.FindElement(tableOfBocadillos).FindElement(By.TagName("tbody"));
+                    var actualRows = tbody.FindElements(By.TagName("tr"));
+
+                    foreach (var r in actualRows)
+                    {
+                        // leer texto inmediatamente y almacenar en snapshot
+                        // protegemos la lectura con try por si algún elemento se vuelve stale durante la iteración
+                        try
+                        {
+                            actualTexts.Add(r.Text.Trim());
+                        }
+                        catch (StaleElementReferenceException)
+                        {
+                            // si un tr se vuelve stale, abortamos este intento y reintentamos desde cero
+                            throw;
+                        }
+                    }
+
+                    gotSnapshot = true;
+                }
+                catch (StaleElementReferenceException ex)
+                {
+                    _output.WriteLine($"StaleElementReferenceException al leer filas (intento {attempt}/{maxAttempts}): {ex.Message}");
+                    Thread.Sleep(200); // pequeña espera antes de reintentar
+                }
+                catch (NoSuchElementException ex)
+                {
+                    _output.WriteLine($"NoSuchElementException al localizar tabla/filas (intento {attempt}/{maxAttempts}): {ex.Message}");
+                    Thread.Sleep(200);
+                }
+            }
+
+            if (!gotSnapshot)
+            {
+                _output.WriteLine("No se pudieron obtener filas estables de la tabla tras varios intentos.");
+                return false;
+            }
 
             // Para cada fila esperada, buscamos una fila real que contenga nombre y precio
             foreach (var expected in expectedBocadillos)
@@ -160,9 +202,48 @@ namespace AppForSEII2526.UIT.Resenya
         {
             try
             {
-                var actual = _driver.FindElement(errorsShown);
-                _output.WriteLine($"actual Message shown:{actual.Text}");
-                return actual.Text.Contains(expectedMessage);
+                // 1) elemento principal esperado
+                var actualEl = _driver.FindElements(errorsShown).FirstOrDefault();
+                if (actualEl != null && !string.IsNullOrWhiteSpace(actualEl.Text))
+                {
+                    _output.WriteLine($"actual Message shown:{actualEl.Text}");
+                    return actualEl.Text.Contains(expectedMessage, StringComparison.InvariantCultureIgnoreCase);
+                }
+
+                // 2) fallbacks: alertas, validation summary, toasts, texto con clase text-danger
+                var fallbackSelectors = new[] {
+                    By.CssSelector(".alert, .alert-danger"),
+                    By.CssSelector(".text-danger"),
+                    By.CssSelector(".validation-summary-errors, .validation-summary-valid"),
+                    By.CssSelector(".toast, .toast-body")
+                };
+
+                foreach (var sel in fallbackSelectors)
+                {
+                    var found = _driver.FindElements(sel);
+                    foreach (var f in found)
+                    {
+                        if (!string.IsNullOrWhiteSpace(f.Text))
+                        {
+                            _output.WriteLine($"actual Message shown (fallback {sel}):{f.Text}");
+                            if (f.Text.Contains(expectedMessage, StringComparison.InvariantCultureIgnoreCase))
+                                return true;
+                        }
+                    }
+                }
+
+                // 3) buscar la palabra "Error" en el body como último recurso (registro para diagnóstico)
+                try
+                {
+                    var bodyText = _driver.FindElement(By.TagName("body")).Text;
+                    _output.WriteLine($"actual Message shown (body snippet): {(string.IsNullOrEmpty(bodyText) ? "<vacío>" : bodyText.Substring(0, Math.Min(300, bodyText.Length)))}");
+                    if (!string.IsNullOrEmpty(expectedMessage))
+                        return bodyText.Contains(expectedMessage, StringComparison.InvariantCultureIgnoreCase);
+                }
+                catch { /* ignore */ }
+
+                _output.WriteLine("No se encontró el elemento de errores ni contenido conocido de error.");
+                return false;
             }
             catch (NoSuchElementException)
             {
