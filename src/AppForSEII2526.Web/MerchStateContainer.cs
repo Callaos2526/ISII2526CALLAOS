@@ -24,11 +24,11 @@ namespace AppForSEII2526.Web
         {
             if (item == null) return;
 
-            // Si ya existe, incrementa cantidad; si no, lo añade
             var existing = Compra.MerchItems.FirstOrDefault(i => i.Id == item.ProductoId);
             if (existing != null)
             {
-                existing.Cantidad += item.Stock;
+                // sumar de uno en uno
+                existing.Cantidad += 1;
             }
             else
             {
@@ -38,12 +38,13 @@ namespace AppForSEII2526.Web
                     NombreProducto = item.NombreProducto,
                     Pvp = item.Pvp,
                     TipoProducto = item.TipoProducto,
-                    Cantidad = item.Stock
+                    Cantidad = 1
                 });
             }
 
             NotifyStateChanged();
         }
+
         // Actualiza la cantidad de un producto en el carrito
         public void UpdateQuantity(int productId, int newQuantity)
         {
