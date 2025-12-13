@@ -1,5 +1,4 @@
-﻿// DetailCompraMerch_UIT.cs
-using AppForSEII2526.UIT.ComprarMerch;
+﻿using AppForSEII2526.UIT.ComprarMerch;
 namespace AppForSEII2526.UIT.ComprarMerch
 {
     public class DetailCompraMerch_UIT : UC_UIT
