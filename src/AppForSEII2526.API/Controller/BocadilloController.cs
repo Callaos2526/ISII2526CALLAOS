@@ -78,7 +78,7 @@ namespace AppForSEII2526.API
 
             //filtro por pvp
             if (filtroPvp.HasValue)
-                query = query.Where(b => b.Pvp == filtroPvp.Value);
+                query = query.Where(b => b.Pvp <= filtroPvp.Value);
 
             var bocadillos = await query
                 .OrderBy(b => b.Nombre)

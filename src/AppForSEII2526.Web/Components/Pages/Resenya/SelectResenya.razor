@@ -13,7 +13,7 @@
 
     <!-- ERRORES -->
     <div class="row alert alert-danger" role="alert" hidden="@hideErrors">
-        <p>@errors</p>
+        <p id="ErrorsShown">@errors</p>
     </div>
 
     <div class="row">
@@ -27,7 +27,7 @@
                 <div class="col">
                     <div class="input-group mb-3">
                         <span class="input-group-text">Nombre</span>
-                        <input type="text" class="form-control"
+                        <input type="text" id="inputNombre" class="form-control"
                                @bind="filtroNombre"
                                placeholder="Nombre del bocadillo" />
                     </div>
@@ -36,7 +36,7 @@
                 <div class="col">
                     <div class="input-group mb-3">
                         <span class="input-group-text">PVP</span>
-                        <input type="number" step="0.1"
+                        <input type="number" id="inputPvp" step="0.1"
                                class="form-control"
                                @bind="filtroPvp"
                                placeholder="Precio exacto" />
@@ -44,7 +44,7 @@
                 </div>
 
                 <div class="col">
-                    <button type="button"
+                    <button type="button" id="searchBocadillos"
                             class="btn btn-primary"
                             @onclick="SearchBocadillos">
                         Buscar bocadillos
@@ -151,6 +151,7 @@
     private void AddBocadilloToResenya(SelectBocadilloDTO b)
     {
         resenyaState.AddBocadillo(b.BocadilloID, 1);  // Puntuación por defecto 1
+        // ya no es necesario llamar a StateHasChanged() aquí si nos suscribimos a OnChange
     }
 
     private async Task SearchBocadillos()
@@ -175,7 +176,21 @@
 
     protected override Task OnInitializedAsync()
     {
+        // Suscribimos para que el componente se vuelva a renderizar cuando cambie el estado
+        resenyaState.OnChange += ResenyaState_OnChange;
+
         SearchBocadillos();
         return base.OnInitializedAsync();
+    }
+
+    private void ResenyaState_OnChange()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Anulamos la suscripción al desechar el componente
+        resenyaState.OnChange -= ResenyaState_OnChange;
     }
 }

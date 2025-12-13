@@ -69,6 +69,62 @@
         }
       }
     },
+    "/api/Bocadillo/GetBocadilloParaReseña": {
+      "get": {
+        "tags": [
+          "Bocadillo"
+        ],
+        "operationId": "GetBocadilloParaReseña",
+        "parameters": [
+          {
+            "name": "filtroNombre",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "filtroPvp",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "float"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SelectBocadilloDTO"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SelectBocadilloDTO"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SelectBocadilloDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/BonoControlador/GetBonoParaCompra": {
       "get": {
         "tags": [
@@ -1415,6 +1471,10 @@
       "SelectBonoDTO": {
         "type": "object",
         "properties": {
+          "bonoID": {
+            "type": "integer",
+            "format": "int32"
+          },
           "nombre": {
             "type": "string",
             "nullable": true
