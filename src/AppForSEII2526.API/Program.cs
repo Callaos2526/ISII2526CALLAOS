@@ -1,14 +1,16 @@
-﻿using Microsoft.Data.Sqlite;
-using System.Data.Common;
+﻿using AppForSEII2526.API.Logging;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Microsoft.AspNetCore.Identity;
+using System.Data.Common;
+using System.Linq;
 using System.Reflection;
 using System.Text.Json.Serialization;
-using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.AddRabbitMQ(builder.Configuration.GetSection("RabbitMQ"));
 
 // Add services to the container.
 builder.Services.AddControllers()
