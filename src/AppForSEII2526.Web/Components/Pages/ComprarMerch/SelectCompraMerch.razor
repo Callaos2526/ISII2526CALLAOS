@@ -110,13 +110,20 @@
     private string filtroTipo { get; set; } = string.Empty;
     private int filtroPrecio { get; set; } = 0;
     private bool HideRentingCart => !compra.MerchItems.Any();
+    private ComprarMerchCreateDTO compra => merchState.Compra;
+
+    private bool hiddenRentingCart = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Carga inicial: filtroPrecio = 0 -> la API no filtra por precio
+        await BuscarMerchInternal();
+    }
+
     private void ProceedToCreatePurchase()
     {
         navigation.NavigateTo("/SeleccionarMerch/CreateCompraMerch");
     }
-    private ComprarMerchCreateDTO compra => merchState.Compra;
-
-    private bool hiddenRentingCart = true;
 
     private void AddMerchToCart(ComprarMerchandaisingDTO item)
     {
@@ -134,7 +141,14 @@
             hiddenRentingCart = true;
         }
     }
+
     public async void BuscarMerch()
+    {
+        await BuscarMerchInternal();
+        StateHasChanged();
+    }
+
+    private async Task BuscarMerchInternal()
     {
         try
         {
@@ -145,7 +159,7 @@
         {
             logger.LogError($"{DateTime.Now} Error: {ex}");
             errors = "Error while connecting to the system";
+            merch = Array.Empty<ComprarMerchandaisingDTO>();
         }
-        StateHasChanged();
     }
 }

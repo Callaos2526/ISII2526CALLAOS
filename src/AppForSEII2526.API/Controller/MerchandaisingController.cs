@@ -1,6 +1,7 @@
 ﻿using AppForSEII2526.API.DTOs.ComprarMerchDTOs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace AppForSEII2526.API.Controllers
 {
@@ -23,8 +24,8 @@ namespace AppForSEII2526.API.Controllers
         {
             IList<ComprarMerchandaisingDTO> productos = await _context.Producto
             .Where(producto => (filtroTipo == null || producto.TipoProducto.NombreProducto.Contains(filtroTipo)) &&
-                               (filtroPrecio == null || producto.PVP <= filtroPrecio) && 
-                                producto.Stock > 0)
+               (!filtroPrecio.HasValue || filtroPrecio.Value <= 0 || producto.PVP <= filtroPrecio.Value) &&
+               producto.Stock > 0)
             .OrderBy(producto => producto.NombreProducto)
             .Select(p => new ComprarMerchandaisingDTO(
                 p.Productoid,
