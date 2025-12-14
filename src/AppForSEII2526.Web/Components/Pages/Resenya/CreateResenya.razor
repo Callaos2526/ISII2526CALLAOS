@@ -1,131 +1,112 @@
 ﻿@page "/resenya/createresenya"
 @inject NavigationManager navigation
-@using AppForSEII2526.Web.Components
+@using AppForSEII2526.Web.Components.Shared
 @using AppForSEII2526.Web.API
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @inject AppForSEII2526APIClient apiclient
 @inject ILogger<CreateResenya> logger
 @inject ResenyaStateContainer resenyaState
 
 <h3>Crear Reseña</h3>
 
-<EditForm Model="resenya" OnValidSubmit="OpenDialog">
-    <div class="row">
-        <DataAnnotationsValidator />
-        <ValidationSummary class="row alert alert-danger" />
-    </div>
-
-    <div class="row alert alert-danger" role="alert" hidden="@hideErrors">
-        <p id="ErrorsShown">Errores: @messageError</p>
-    </div>
+<EditForm Model="resenya" OnSubmit="OpenDialog">
+    <DataAnnotationsValidator />
+    <ValidationSummary class="alert alert-danger" />
 
     <div class="row g-3">
         <div class="col-md">
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="resenya.NombreUsuario" class="form-control" id="NombreUsuario" />
-                <label for="NombreUsuario">Nombre usuario (opcional)</label>
-            </div>
+            <InputText @bind-Value="resenya.NombreUsuario"
+                       class="form-control"
+                       id="NombreUsuario"
+                       placeholder="Nombre usuario (opcional)" />
         </div>
 
         <div class="col-md">
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="resenya.Titulo" class="form-control" id="Titulo" />
-                <label for="Titulo">Título</label>
-            </div>
+            <InputText @bind-Value="resenya.Titulo"
+                       class="form-control"
+                       id="Titulo"
+                       placeholder="Título" />
         </div>
     </div>
 
-    <div class="row g-3">
+    <div class="row g-3 mt-2">
         <div class="col-md-6">
-            <div class="form-floating mb-3">
-                <InputTextArea @bind-Value="resenya.Descripcion" class="form-control" id="Descripcion" />
-                <label for="Descripcion">Descripción</label>
-            </div>
+            <InputTextArea @bind-Value="resenya.Descripcion"
+                           class="form-control"
+                           id="Descripcion"
+                           placeholder="Descripción" />
         </div>
 
         <div class="col-md-3">
-            <div class="form-floating mb-3">
-                <InputSelect class="form-select" @bind-Value="resenya.Valoracion" id="Valoracion">
-                    <option value="Uno">Uno</option>
-                    <option value="Dos">Dos</option>
-                    <option value="Tres">Tres</option>
-                    <option value="Cuatro">Cuatro</option>
-                    <option value="Cinco">Cinco</option>
-                </InputSelect>
-                <label for="Valoracion">Valoración General</label>
-            </div>
+            <InputSelect class="form-select"
+                         @bind-Value="resenya.Valoracion"
+                         id="Valoracion">
+                <option value="Uno">Uno</option>
+                <option value="Dos">Dos</option>
+                <option value="Tres">Tres</option>
+                <option value="Cuatro">Cuatro</option>
+                <option value="Cinco">Cinco</option>
+            </InputSelect>
         </div>
 
         <div class="col-md">
-            <div class="form-floating">
-                <button class="btn btn-primary" type="submit" id="Submit">
-                    Crear reseña
-                </button>
-            </div>
+            <button class="btn btn-primary"
+                    type="submit"
+                    id="Submit">
+                Crear reseña
+            </button>
         </div>
     </div>
 
-    <h4>Detalle de la reseña</h4>
+    <h4 class="mt-4">Detalle de la reseña</h4>
+    <p><b>Número de bocadillos:</b> @resenya.ResenyaBocadillo.Count</p>
 
-    <p><b>Número de bocadillos:</b> @resenya.NumeroDeBocadillos</p>
+    <button class="btn btn-outline-primary"
+            type="button"
+            id="ModifyBocadillos"
+            @onclick="ModifyItems">
+        Modificar bocadillos
+    </button>
 
-    <p>
-        
-        <button class="btn btn-outline-primary"
-                id="ModifyBocadillos"
-                @onclick="ModifyItems">
-            Modificar bocadillos
-        </button>
-    </p>
-
-    <div class="mh-100 table-responsive">
-        <table class="table table-condensed table-hover" id="TableOfResenyaItems">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Precio</th>
-                    <th>Tamaño</th>
-                    <th>Puntuación</th>
+    <table class="table mt-3" id="TableOfResenyaItems">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Tamaño</th>
+                <th>Puntuación</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in resenya.ResenyaBocadillo)
+            {
+                <tr id="BocadilloData_@item.BocadilloId">
+                    <td>@item.Nombre</td>
+                    <td>@item.Pvp €</td>
+                    <td>@item.Tamano</td>
+                    <td>
+                        <InputNumber @bind-Value="item.Puntuacion"
+                                     min="1" max="10"
+                                     class="form-control" />
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in resenya.ResenyaBocadillo)
-                {
-                    <tr id="BocadilloData_@item.BocadilloId">
-                        <td>@item.Nombre</td>
-                        <td>@item.Pvp €</td>
-                        <td>@item.Tamano</td>
-                        <td>
-                            <InputNumber @bind-Value="item.Puntuacion"
-                                         class="form-control"
-                                         min="1" max="10"
-                                         id="@($"puntuacion_{item.BocadilloId}")" />
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+            }
+        </tbody>
+    </table>
 </EditForm>
 
 @if (DialogIsOpen)
 {
     <Dialog Caption="Crear reseña"
             Message="¿Deseas enviar esta reseña?"
-            OnClose="@OnDialogClose"
-            Type="Dialog.Category.SaveNot">
-    </Dialog>
+            OnClose="OnDialogClose"
+            Type="Dialog.Category.SaveNot" />
 }
 
 @code {
-    private string messageError = "";
-    private bool hideErrors => messageError.Length == 0;
     private bool DialogIsOpen;
     private ResenyaForCreateDTO resenya => resenyaState.Resenya;
-
-    private void ModifyItems()
-    {
-        navigation.NavigateTo("/resenya/selectbocadillos");
-    }
 
     private void OpenDialog()
     {
@@ -136,18 +117,18 @@
     {
         DialogIsOpen = false;
 
-        if (isOk && resenya.ResenyaBocadillo.Count > 0)
-        {
-            try
-            {
-                var created = await apiclient.CreateResenyaAsync(resenya);
-                resenyaState.ResenyaProcessed();
-                navigation.NavigateTo($"/resenya/detailresenya/?ResenyaID={created.Id}");
-            }
-            catch (ApiException)
-            {
-                messageError = "Error al procesar la reseña, por favor inténtalo más tarde.";
-            }
-        }
+        if (!isOk) return;
+
+        if (resenya.ResenyaBocadillo.Count == 0)
+            return;
+
+        var created = await apiclient.CreateResenyaAsync(resenya);
+        resenyaState.ResenyaProcessed();
+        navigation.NavigateTo($"/resenya/detailresenya/?ResenyaID={created.Id}");
+    }
+
+    private void ModifyItems()
+    {
+        navigation.NavigateTo("/resenya/selectbocadillos");
     }
 }

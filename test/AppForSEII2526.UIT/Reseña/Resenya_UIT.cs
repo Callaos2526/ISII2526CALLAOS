@@ -1,6 +1,7 @@
 ﻿using Xunit;
 using Xunit.Abstractions;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Support.UI;
 using System;
 using System.Collections.Generic;
 
@@ -44,15 +45,22 @@ namespace AppForSEII2526.UIT.Resenya
             selectPO.WaitForBeingVisible(By.Id("TableOfBocadillos"));
         }
 
-        private void PrepareStateWithOneBocadillo()
+        /// <summary>
+        /// PREPARA ESTADO y entra a CREATE usando el botón real (NO GoToUrl),
+        /// para no perder el Scoped state container en Blazor.
+        /// </summary>
+        private void PrepareStateAndNavigateToCreate_ByButton()
         {
             NavigateToSelectResenya();
-            selectPO.AddBocadillo(bocadilloId);
-        }
 
-        private void NavigateToCreateResenya()
-        {
-            _driver.Navigate().GoToUrl(_URI + "resenya/createresenya");
+            // añade bocadillo y espera que aparezca el botón
+            selectPO.AddBocadillo(bocadilloId);
+            selectPO.WaitForBeingVisible(By.Id("goToCreateResenya"));
+
+            // IMPORTANTÍSIMO: entrar a Create como usuario, pulsando el botón
+            _driver.FindElement(By.Id("goToCreateResenya")).Click();
+
+            // ya estamos en create
             createPO.WaitForBeingVisible(By.Id("Submit"));
         }
 
@@ -106,8 +114,8 @@ namespace AppForSEII2526.UIT.Resenya
         [Trait("LevelTesting", "Funcional Testing")]
         public void UC_Resenya_Create_OK()
         {
-            PrepareStateWithOneBocadillo();
-            NavigateToCreateResenya();
+            // Entra a Create SIN perder estado
+            PrepareStateAndNavigateToCreate_ByButton();
 
             createPO.FillInResenyaInfo(
                 usuario,
@@ -117,7 +125,21 @@ namespace AppForSEII2526.UIT.Resenya
             );
 
             createPO.PressCreateResenya();
-            createPO.ConfirmDialog();
+
+            // Esperar el modal y pulsar SAVE (el azul)
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+
+            // Botón exactamente "Save" (no "Don't Save")
+            var saveBtn = wait.Until(d =>
+            {
+                var el = d.FindElement(By.XPath("//button[normalize-space()='Save']"));
+                return (el.Displayed && el.Enabled) ? el : null;
+            });
+
+            saveBtn.Click();
+
+            // Esperar navegación al detalle
+            wait.Until(d => d.Url.Contains("detailresenya"));
 
             Assert.True(
                 _driver.Url.Contains("detailresenya"),
@@ -129,10 +151,14 @@ namespace AppForSEII2526.UIT.Resenya
         [Trait("LevelTesting", "Funcional Testing")]
         public void UC_Resenya_Create_ModifyBocadillos_NavigatesToSelect()
         {
-            PrepareStateWithOneBocadillo();
-            NavigateToCreateResenya();
+            // Entra a Create SIN perder estado
+            PrepareStateAndNavigateToCreate_ByButton();
 
             createPO.PressModifyBocadillos();
+
+            // aquí puede tardar un pelín la navegación
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+            wait.Until(d => d.Url.Contains("selectbocadillos"));
 
             Assert.True(_driver.Url.Contains("selectbocadillos"));
         }
