@@ -1,48 +1,85 @@
 ﻿using OpenQA.Selenium;
-using System.Threading;
+using System;
+using System.Collections.Generic;
+using Xunit.Abstractions;
 
 namespace AppForSEII2526.UIT.PageObjects
 {
     public class DetailPedido_PO : PageObject
     {
-        private By _nombreClienteBy = By.Id("NameSurname");
-        private By _metodoPagoBy = By.Id("PaymentMethod");
-        private By _fechaPedidoBy = By.Id("FechaPedido");
-        private By _bocadillosPedidoBy = By.Id("BocadillosPedido");
-        private By _totalPriceBy = By.Id("TotalPrice");
+        private readonly By _nombreClienteBy = By.Id("NameSurname");
+        private readonly By _metodoPagoBy = By.Id("PaymentMethod");
+        private readonly By _fechaPedidoBy = By.Id("FechaPedido");
+        private readonly By _bocadillosPedidoBy = By.Id("BocadillosPedido");
+        private readonly By _totalPriceBy = By.Id("TotalPrice");
 
         public DetailPedido_PO(IWebDriver driver, ITestOutputHelper output) : base(driver, output) { }
 
-        // Métodos para interactuar con los elementos de la página
+        public bool CheckPedidoDetail(string nombreCliente, DateTime fechaPedido, string metodoPago, string totalPrice)
+        {
+            WaitForBeingVisible(_totalPriceBy);
+
+            bool result = true;
+
+            result = result && _driver.FindElement(_nombreClienteBy).Text.Contains(nombreCliente);
+            result = result && _driver.FindElement(_metodoPagoBy).Text.Contains(metodoPago);
+            result = result && _driver.FindElement(_totalPriceBy).Text.Contains(totalPrice);
+
+          
+            try
+            {
+                var actualFecha = DateTime.Parse(_driver.FindElement(_fechaPedidoBy).Text);
+                result = result && ((actualFecha - fechaPedido).Duration() < new TimeSpan(0, 1, 0));
+            }
+            catch
+            {
+                
+                result = false;
+            }
+
+            return result;
+        }
+
+        public bool CheckListOfBocadillos(List<string[]> expectedItems)
+        {
+            return CheckBodyTable(expectedItems, _bocadillosPedidoBy);
+        }
+
 
         public string GetNombreCliente()
-        {
-            return _driver.FindElement(_nombreClienteBy).Text;
-        }
+            => _driver.FindElement(_nombreClienteBy).Text;
 
         public string GetMetodoPago()
-        {
-            return _driver.FindElement(_metodoPagoBy).Text;
-        }
+            => _driver.FindElement(_metodoPagoBy).Text;
 
         public string GetFechaPedido()
-        {
-            return _driver.FindElement(_fechaPedidoBy).Text;
-        }
+            => _driver.FindElement(_fechaPedidoBy).Text;
 
         public string GetTotalPrice()
-        {
-            return _driver.FindElement(_totalPriceBy).Text;
-        }
+            => _driver.FindElement(_totalPriceBy).Text;
 
         public bool IsBocadillosVisible()
         {
-            return _driver.FindElement(_bocadillosPedidoBy).Displayed;
+            try
+            {
+                return _driver.FindElement(_bocadillosPedidoBy).Displayed;
+            }
+            catch (NoSuchElementException)
+            {
+                return false;
+            }
         }
 
         public bool IsTotalPriceVisible()
         {
-            return _driver.FindElement(_totalPriceBy).Displayed;
+            try
+            {
+                return _driver.FindElement(_totalPriceBy).Displayed;
+            }
+            catch (NoSuchElementException)
+            {
+                return false;
+            }
         }
     }
 }
