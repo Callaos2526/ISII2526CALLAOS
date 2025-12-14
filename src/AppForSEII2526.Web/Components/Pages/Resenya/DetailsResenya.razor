@@ -12,7 +12,9 @@
 
 @if (resenya == null)
 {
-    <p id="ErrorMessage">@error</p>
+    <div class="alert alert-danger" role="alert" id="ErrorMessage">
+        Error: @error
+    </div>
 }
 else
 {
