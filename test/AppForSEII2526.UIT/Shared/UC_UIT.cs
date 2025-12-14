@@ -35,6 +35,7 @@ namespace AppForSEII2526.UIT.Shared
         {
 
             //it initializes where the errors will be shown
+            //it initializes where the errors will be shown
             _output = output;
 
             switch (_browser)
