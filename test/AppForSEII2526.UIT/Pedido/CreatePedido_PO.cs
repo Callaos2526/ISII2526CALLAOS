@@ -18,8 +18,7 @@ namespace AppForSEII2526.UIT.PageObjects
         private readonly By _tableOfPedidoItemsBy = By.Id("TableOfPedidoItems");
         private readonly By _errorsShownBy = By.Id("ErrorsShown");
         private readonly string _cantidadInputFormat = "cantidad_{0}";
-    
-        
+
         private IWebElement _name() => _driver.FindElement(_nameBy);
         private IWebElement _surname1() => _driver.FindElement(_surname1By);
         private IWebElement _surname2() => _driver.FindElement(_surname2By);
@@ -29,7 +28,7 @@ namespace AppForSEII2526.UIT.PageObjects
 
         public CreatePedido_PO(IWebDriver driver, ITestOutputHelper output) : base(driver, output) { }
 
-        
+        // Métodos originales
         public void FillInPedidoInfo(string nombre, string apellido1, string apellido2, string metodoPago)
         {
             WaitForBeingVisible(_nameBy);
@@ -42,7 +41,6 @@ namespace AppForSEII2526.UIT.PageObjects
             _surname2().Clear();
             _surname2().SendKeys(apellido2 ?? string.Empty);
 
-         
             var select = new SelectElement(_metodoPago());
             try
             {
@@ -55,7 +53,6 @@ namespace AppForSEII2526.UIT.PageObjects
             }
         }
 
-       
         public void FillInCantidadItem(int itemId, int cantidad)
         {
             var id = string.Format(_cantidadInputFormat, itemId);
@@ -66,32 +63,27 @@ namespace AppForSEII2526.UIT.PageObjects
             input.SendKeys(cantidad.ToString(CultureInfo.InvariantCulture));
         }
 
-      
         public void PressRealizarPedido()
         {
             WaitForBeingClickable(_submitBy);
             _submit().Click();
         }
 
-       
         public void PressModificarBocadillos()
         {
             WaitForBeingClickable(_modifyBocadillosBy);
             _modifyBocadillos().Click();
         }
 
-       
         public bool CheckListOfPedidoItems(List<string[]> expectedItems)
         {
             return CheckBodyTable(expectedItems, _tableOfPedidoItemsBy);
         }
 
-        
         public bool CheckValidationError(string expectedError)
         {
             try
             {
-              
                 var elems = _driver.FindElements(_errorsShownBy);
                 if (elems.Count > 0)
                 {
@@ -100,7 +92,6 @@ namespace AppForSEII2526.UIT.PageObjects
                     return txt.Contains(expectedError);
                 }
 
-               
                 return _driver.PageSource.Contains(expectedError);
             }
             catch
@@ -109,7 +100,6 @@ namespace AppForSEII2526.UIT.PageObjects
             }
         }
 
-        
         public string GetErrorsText()
         {
             try
@@ -123,7 +113,6 @@ namespace AppForSEII2526.UIT.PageObjects
             }
         }
 
-       
         public bool TableOfPedidoItemsVisible()
         {
             try
@@ -134,6 +123,79 @@ namespace AppForSEII2526.UIT.PageObjects
             catch
             {
                 return false;
+            }
+        }
+
+        // --- Wrappers / compatibilidad con los tests existentes ---
+
+        public void SetNombre(string nombre)
+        {
+            WaitForBeingVisible(_nameBy);
+            _name().Clear();
+            _name().SendKeys(nombre ?? string.Empty);
+        }
+
+        public void SetPrimerApellido(string apellido1)
+        {
+            WaitForBeingVisible(_surname1By);
+            _surname1().Clear();
+            _surname1().SendKeys(apellido1 ?? string.Empty);
+        }
+
+        public void SetSegundoApellido(string apellido2)
+        {
+            WaitForBeingVisible(_surname2By);
+            _surname2().Clear();
+            _surname2().SendKeys(apellido2 ?? string.Empty);
+        }
+
+        public void SeleccionarMetodoPagoPorTexto(string metodo)
+        {
+            WaitForBeingVisible(_metodoPagoBy);
+            var select = new SelectElement(_metodoPago());
+            try
+            {
+                select.SelectByText(metodo);
+            }
+            catch (NoSuchElementException)
+            {
+                if (select.Options.Count > 0) select.SelectByIndex(0);
+            }
+        }
+
+        public void ClickSubmit()
+        {
+            PressRealizarPedido();
+        }
+
+        public bool IsSubmitEnabled()
+        {
+            try
+            {
+                return _submit().Enabled;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public void ConfirmDialogOk(int timeoutSeconds = 10)
+        {
+            try
+            {
+                // usa helper de PageObject que maneja varios casos
+                PressOkModalDialog();
+            }
+            catch
+            {
+                // fallback: intentar botón en modal footer
+                try
+                {
+                    var btns = _driver.FindElements(By.CssSelector(".modal-footer button"));
+                    if (btns.Count > 0 && btns[0].Displayed && btns[0].Enabled) btns[0].Click();
+                }
+                catch { /* ignorar */ }
             }
         }
     }
