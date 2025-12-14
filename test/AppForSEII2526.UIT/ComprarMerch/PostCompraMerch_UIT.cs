@@ -55,7 +55,7 @@ namespace AppForSEII2526.UIT.ComprarMerch
             create_PO.PressRealizarCompra();
             create_PO.ConfirmDialog(true);
 
-            // Assert: esperar navegación a DetailsCompraMerch por URL
+            // Assert: esperar navegación a DetailsCompraMerch 
             var wait = new WebDriverWait(_driver, System.TimeSpan.FromSeconds(5));
             wait.Until(d => d.Url.Contains("DetailsCompraMerch"));
 
@@ -80,7 +80,6 @@ namespace AppForSEII2526.UIT.ComprarMerch
 
             // Act: intentar enviar el formulario
             create_PO.PressRealizarCompra();
-            // NO llamamos a create_PO.ConfirmDialog(true);
 
             // Assert: se muestran errores de validación
             Assert.True(create_PO.CheckValidationError("The Nombre field is required."));

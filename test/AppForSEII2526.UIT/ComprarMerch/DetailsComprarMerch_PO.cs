@@ -18,7 +18,6 @@ namespace AppForSEII2526.UIT.ComprarMerch
             string metodoPago,
             int cantidadTotal)
         {
-            // Esperar a que se cargue el bloque de datos
             WaitForBeingVisible(By.Id("NombreApellidos"));
 
             bool result = true;

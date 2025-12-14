@@ -50,7 +50,6 @@ namespace AppForSEII2526.UIT.ComprarMerch
         {
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
 
-            // Esperar a que aparezca algún elemento del modal (por ejemplo el botón "Save")
             var saveButton = wait.Until(
                 ExpectedConditions.ElementIsVisible(By.XPath("//button[contains(., 'Save')]"))
             );
@@ -79,7 +78,6 @@ namespace AppForSEII2526.UIT.ComprarMerch
 
         public bool CheckValidationError(string expectedError)
         {
-            // Esperar un poco a que Blazor renderice la validación
             System.Threading.Thread.Sleep(500);
 
             return _driver.PageSource.Contains(expectedError);
@@ -88,7 +86,12 @@ namespace AppForSEII2526.UIT.ComprarMerch
 
         public bool SubmitButtonEnabled()
         {
-            return _driver.FindElement(_submitBy).Enabled;
+            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(_driver, TimeSpan.FromSeconds(5));
+            wait.Until(SeleniumExtras.WaitHelpers.ExpectedConditions.ElementExists(_submitBy));
+
+            var submit = _driver.FindElement(_submitBy);
+            return submit.Enabled;
         }
+
     }
 }
