@@ -139,18 +139,27 @@
 
     private async Task OnDialogClose(bool isOk)
     {
-
         DialogIsOpen = false;
         if (isOk)
         {
-            // Process the data introduced by the user if they are valid
             if (compra.MerchItems.Count > 0)
             {
                 try
                 {
                     var created = await apiclient.CrearCompraMerchAsync(compra);
-                    merchState.compraProcesada();
-                    navigation.NavigateTo($"/SeleccionarMerch/DetailsCompraMerch?CompraID={created.Id}");
+
+                    logger.LogInformation($"Compra creada con ID: {created.Id}");
+
+                    if (created != null && created.Id > 0)
+                    {
+                        navigation.NavigateTo($"/SeleccionarMerch/DetailsCompraMerch?CompraID={created.Id}");
+                        merchState.compraProcesada();
+                    }
+                    else
+                    {
+                        mensajeError = "Error: La compra no se guardó correctamente";
+                        logger.LogError("La API devolvió Id = 0");
+                    }
                 }
                 catch (ApiException<ValidationProblemDetails> apiexceptionvalidation)
                 {
@@ -159,22 +168,20 @@
                         mensajeError = "";
                         foreach (var errors in apiexceptionvalidation.Result.Errors.Values)
                         {
-                            mensajeError = string.Join("(*) ",
-                                mensajeError,
-                                string.Join(" (*) ", errors));
+                            mensajeError = string.Join("(*) ", mensajeError, string.Join(" (*) ", errors));
                         }
                     }
+                    logger.LogError($"Validation error: {mensajeError}");
                 }
-                catch (ApiException)
+                catch (ApiException ex)
                 {
-                    //we need to inform user that there was some other error while processing the request
-                    mensajeError = "Error al procesar el pedido, ¡inténtalo más tarde!";
+                    mensajeError = $"Error al procesar el pedido: {ex.Message}";
+                    logger.LogError($"API Exception: Status={ex.StatusCode}, Response={ex.Response}");
                 }
             }
-
-
         }
     }
+
     protected override async Task OnInitializedAsync()
     {
 
