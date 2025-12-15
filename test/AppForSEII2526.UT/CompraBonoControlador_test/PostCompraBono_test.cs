@@ -22,7 +22,9 @@ namespace AppForSEII2526.UT.CompraBonoControlador_test
         private const string _tipo1Nombre = "Normal";
         private const string _bono2Nombre = "Bono Pequeño";
         private const string _tipo2Nombre = "Sin gluten";
+        //////////////EXAMEN SPRINT 2////////////////////
         private const string _tipo3Nombre = "Integral";
+        /////////////////////////////////////////////////
 
         public PostCompraBono_test()
         {
@@ -67,10 +69,11 @@ namespace AppForSEII2526.UT.CompraBonoControlador_test
                 DateTime.Today, _metodoPago,
                 new List<BonoItemForCreateDTO>() { new BonoItemForCreateDTO(2, 5, _bono2Nombre, 10.0, 2, _tipo2Nombre) });
 
+            //////////////EXAMEN SPRINT 2////////////////////
             var compraBonoTipoIntegral = new CrearCompraDTO(0, _clienteNombre, _clienteApellido1, _clienteApellido2,
                 DateTime.Today, _metodoPago,
                 new List<BonoItemForCreateDTO>() { new BonoItemForCreateDTO(3, 5, _bono2Nombre, 10.0, 5, _tipo3Nombre) });//int bonoId, int cantidad, string nombre, double precio, int numeroDeBocadillos, string tipo
-
+            /////////////////////////////////////////////////
             var allTests = new List<object[]>
             {
                 new object[] { compraSinBonos, "Error! Debes seleccionar algún bono" },
@@ -78,7 +81,9 @@ namespace AppForSEII2526.UT.CompraBonoControlador_test
                 new object[] { compraApellidosVacios, "Error! Los apellidos son obligatorios" },
                 new object[] { compraMetodoPagoInvalido, "Error! Método de pago no existe" },
                 new object[] { compraBonoNoDisponible, "Error, no hay suficiente stock del bono" },
+            //////////////EXAMEN SPRINT 2////////////////////
                 new object[] { compraBonoTipoIntegral, "Error, no tenemos bocadillos integrales" },
+            //////////////////////////////////////////////////
             };
 
             return allTests;

@@ -152,11 +152,13 @@ namespace LosDelEspacio.API.Controllers
                     continue;
                 }
 
+                //////////////EXAMEN SPRINT 2////////////////////
                 if (item.Tipo == null || item.Tipo.Contains("Integral"))
                 {
                     ModelState.AddModelError("Bonos", $"Error, no tenemos bocadillos integrales");
                     continue;
                 }
+                /////////////////////////////////////////////////
 
                 // Actualizamos stock y añadimos el item a la compra
                 bonoEntity.CantidadDisponible -= item.Cantidad;
