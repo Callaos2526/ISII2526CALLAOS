@@ -133,6 +133,7 @@ namespace LosDelEspacio.API.Controllers
                     .Include(b => b.TipoBocadillos)
                     .FirstOrDefaultAsync(b => b.BonoId == item.BonoId);
 
+
                 if (bonoEntity == null)
                 {
                     ModelState.AddModelError("Bonos", $"Error, el bono '{item?.BonoId}' no existe en nuestra tienda");
@@ -148,6 +149,12 @@ namespace LosDelEspacio.API.Controllers
                 if (bonoEntity.CantidadDisponible < item.Cantidad)
                 {
                     ModelState.AddModelError("Bonos", $"Error, no hay suficiente stock del bono '{bonoEntity.Nombre}'. Disponibles: {bonoEntity.CantidadDisponible}, solicitados: {item.Cantidad}");
+                    continue;
+                }
+
+                if (item.Tipo == null || item.Tipo.Contains("Integral"))
+                {
+                    ModelState.AddModelError("Bonos", $"Error, no tenemos bocadillos integrales");
                     continue;
                 }
 
