@@ -13,7 +13,7 @@ namespace AppForSEII2526.UIT.PageObjects
         private readonly By _surname1By = By.Id("Surname1");
         private readonly By _surname2By = By.Id("Surname2");
         private readonly By _metodoPagoBy = By.Id("MetodoPago");
-        private readonly By _submitBy = By.Id("SubmitPedido");
+        private readonly By _submitBy = By.Id("SubmitPedido"); //boton para enviar el pedido
         private readonly By _modifyBocadillosBy = By.Id("ModifyBocadillos");
         private readonly By _tableOfPedidoItemsBy = By.Id("TableOfPedidoItems");
         private readonly By _errorsShownBy = By.Id("ErrorsShown");
@@ -28,10 +28,8 @@ namespace AppForSEII2526.UIT.PageObjects
 
         public CreatePedido_PO(IWebDriver driver, ITestOutputHelper output) : base(driver, output) { }
 
-        // =====================================================
-        // ================== MÉTODOS BASE ======================
-        // =====================================================
-
+      
+        //Rellena los campos del formulario de creacion de pedido con los datos proporcionados
         public void FillInPedidoInfo(string nombre, string apellido1, string apellido2, string metodoPago)
         {
             WaitForBeingVisible(_nameBy);
@@ -44,7 +42,7 @@ namespace AppForSEII2526.UIT.PageObjects
             _surname2().Clear();
             _surname2().SendKeys(apellido2 ?? string.Empty);
 
-            var select = new SelectElement(_metodoPago());
+            var select = new SelectElement(_metodoPago()); //selecciona metodo pago en desplegable
             try
             {
                 select.SelectByText(metodoPago);
@@ -56,7 +54,9 @@ namespace AppForSEII2526.UIT.PageObjects
             }
         }
 
-        public void FillInCantidadItem(int itemId, int cantidad)
+
+        //Rellenar campo de cantidad para un articulo especif., buscando el campo con su id
+        public void FillInCantidadItem(int itemId, int cantidad) 
         {
             var id = string.Format(_cantidadInputFormat, itemId);
             var by = By.Id(id);
@@ -67,34 +67,40 @@ namespace AppForSEII2526.UIT.PageObjects
             input.SendKeys(cantidad.ToString(CultureInfo.InvariantCulture));
         }
 
+        //Hace click en bton Realizar Pedido, completando proceso de compra 
         public void PressRealizarPedido()
         {
             WaitForBeingClickable(_submitBy);
             _submit().Click();
         }
 
+        //Hace click en bton Modificar Bocadillos
         public void PressModificarBocadillos()
         {
             WaitForBeingClickable(_modifyBocadillosBy);
             _modifyBocadillos().Click();
         }
 
+        //Verifica que los articulos de la tabla de la web coinciden con los articulos esperados
         public bool CheckListOfPedidoItems(List<string[]> expectedItems)
         {
             return CheckBodyTable(expectedItems, _tableOfPedidoItemsBy);
         }
 
+
+        //Comprueba si se muestra un error especifico en la pagina
         public bool CheckValidationError(string expectedError)
         {
             try
             {
+                //busca elementos de error en la pagina
                 var elems = _driver.FindElements(_errorsShownBy);
                 if (elems.Count > 0)
                 {
                     var txt = elems[0].Text ?? string.Empty;
                     _output?.WriteLine($"ErrorsShown: {txt}");
-                    return txt.Contains(expectedError);
-                }
+                    return txt.Contains(expectedError);//compara el mensaje de error mostrado con el mensaje esperado
+                } 
 
                 return _driver.PageSource.Contains(expectedError);
             }
@@ -104,6 +110,7 @@ namespace AppForSEII2526.UIT.PageObjects
             }
         }
 
+        //Busca texto de los errores mostrados en la pagina si los hay
         public string GetErrorsText()
         {
             try
@@ -129,10 +136,6 @@ namespace AppForSEII2526.UIT.PageObjects
                 return false;
             }
         }
-
-        // =====================================================
-        // ============ WRAPPERS PARA TUS TESTS =================
-        // =====================================================
 
         public void SetNombre(string nombre)
         {
@@ -170,8 +173,11 @@ namespace AppForSEII2526.UIT.PageObjects
             }
         }
 
+
+        
         public void ClickSubmit() => PressRealizarPedido();
 
+        //Verifica si bon de enviar esta habilitado 
         public bool IsSubmitEnabled()
         {
             try { return _submit().Enabled; }
@@ -182,52 +188,50 @@ namespace AppForSEII2526.UIT.PageObjects
         {
             try
             {
-                // helper heredado (si lo tienes en PageObject)
+               
                 PressOkModalDialog();
             }
             catch
             {
-                // fallback genérico
+                
                 try
                 {
                     var btns = _driver.FindElements(By.CssSelector(".modal-footer button"));
                     if (btns.Count > 0 && btns[0].Displayed && btns[0].Enabled)
                         btns[0].Click();
                 }
-                catch { /* ignorar */ }
+                catch {  }
             }
         }
 
-        // =====================================================
-        // ======= CONFIRMACIÓN "SAVE" DEL MODAL (AZUL) =========
-        // =====================================================
-
+  
+        //
         public void PressSaveConfirmation(int timeoutSeconds = 10)
         {
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(timeoutSeconds));
 
-            // Esperar aparición de algún modal/dialog común (no es obligatoria la detección)
+           
             try
             {
                 wait.Until(d => d.FindElements(By.CssSelector(".modal, [role='dialog'], .blazored-modal")).Count > 0);
             }
-            catch { /* continuar con intentos */ }
+            catch {  }
 
-            // Intento principal: localizar el botón por id definitivo que renderiza Dialog.razor
+            
             try
             {
-                // esperar presencia en DOM
+                
                 wait.Until(d => d.FindElements(By.Id("Button_DialogOK")).Count > 0);
 
                 var okBtn = _driver.FindElement(By.Id("Button_DialogOK"));
 
-                // si no está visible, hacer scroll into view
+               
                 if (!okBtn.Displayed)
                 {
                     try { ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].scrollIntoView(true);", okBtn); } catch { }
                 }
 
-                // intentar click nativo, si falla usar JS click (salta overlays)
+                
                 try
                 {
                     okBtn.Click();
@@ -241,10 +245,10 @@ namespace AppForSEII2526.UIT.PageObjects
             }
             catch
             {
-                // siguiente fallback
+                
             }
 
-            // Fallback: buscar botón por texto "Save" / "Guardar" dentro del modal y forzar click JS
+            
             try
             {
                 var texts = new[] { "Save", "Guardar", "Guardar pedido", "Aceptar" };
@@ -265,12 +269,11 @@ namespace AppForSEII2526.UIT.PageObjects
                             try { btn.Click(); return; } catch { ((IJavaScriptExecutor)_driver).ExecuteScript("arguments[0].click();", btn); return; }
                         }
                     }
-                    catch { /* probar siguiente texto */ }
+                    catch {  }
                 }
             }
-            catch { /* continuar */ }
+            catch { }
 
-            // Último recurso: cualquier botón .btn-primary visible
             try
             {
                 var prim = _driver.FindElements(By.CssSelector("button.btn-primary"));
@@ -282,9 +285,9 @@ namespace AppForSEII2526.UIT.PageObjects
                     }
                 }
             }
-            catch { /* nada más */ }
+            catch {  }
 
-            // No se consiguió
+            
             throw new NoSuchElementException("No se pudo localizar ni pulsar el botón de confirmación del modal (Button_DialogOK / 'Save'). Comprueba en DevTools que el modal está visible y que el id 'Button_DialogOK' existe.");
         }
     }

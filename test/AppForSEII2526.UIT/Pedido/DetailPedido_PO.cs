@@ -15,14 +15,15 @@ namespace AppForSEII2526.UIT.PageObjects
 
         public DetailPedido_PO(IWebDriver driver, ITestOutputHelper output) : base(driver, output) { }
 
+        //mira que detalles del pedido coincidan con los esperados
         public bool CheckPedidoDetail(string nombreCliente, DateTime fechaPedido, string metodoPago, string totalPrice)
         {
             WaitForBeingVisible(_totalPriceBy);
 
             bool result = true;
-
-            result = result && _driver.FindElement(_nombreClienteBy).Text.Contains(nombreCliente);
-            result = result && _driver.FindElement(_metodoPagoBy).Text.Contains(metodoPago);
+            // Comprobaciones de texto 
+            result = result && _driver.FindElement(_nombreClienteBy).Text.Contains(nombreCliente); //mira que nombre cliente en la pagina contiene nombre esperado
+            result = result && _driver.FindElement(_metodoPagoBy).Text.Contains(metodoPago); //mira que metodo de pago en pagina contiene valor esperado
             result = result && _driver.FindElement(_totalPriceBy).Text.Contains(totalPrice);
 
           
@@ -40,12 +41,14 @@ namespace AppForSEII2526.UIT.PageObjects
             return result;
         }
 
+        //verifica que la lista de bocadillos seleccionados en pedido sea la esperada
         public bool CheckListOfBocadillos(List<string[]> expectedItems)
         {
             return CheckBodyTable(expectedItems, _bocadillosPedidoBy);
         }
 
 
+        //Metodos para obtener los detalles del pedido mostrados en la UI
         public string GetNombreCliente()
             => _driver.FindElement(_nombreClienteBy).Text;
 
@@ -58,6 +61,8 @@ namespace AppForSEII2526.UIT.PageObjects
         public string GetTotalPrice()
             => _driver.FindElement(_totalPriceBy).Text;
 
+
+        //metodos para comprobar la visibilidad de elementos en la UI (bocadillos y precio total)        
         public bool IsBocadillosVisible()
         {
             try
