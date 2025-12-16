@@ -51,21 +51,37 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach (var item in bonos)
+                                @if (bonos.Count == 0)
                                 {
-                                    <tr>
-                                        <td>@item.Nombre</td>
-                                        <td>@item.Tipo</td>
-                                        <td>@item.NumeroDeBocadillos</td>
-                                        <td>@item.Precio</td>
-                                        <td>
-                                            <button class="btn btn-outline-secondary" @onclick="@(() => AddBonoToCart(item))">Add</button>
-                                        </td>
-                                    </tr>
+                                    @* tabla vacía cuando no hay resultados *@
+                                }
+                                else
+                                {
+                                    @foreach (var item in bonos)
+                                    {
+                                        <tr id="BonoData_@item.BonoID">
+                                            <td>@item.Nombre</td>
+                                            <td>@item.Tipo</td>
+                                            <td>@item.NumeroDeBocadillos</td>
+                                            <td>@item.Precio</td>
+                                            <td>
+                                                <button class="btn btn-outline-secondary"
+                                                        id="addBono_@item.BonoID" @onclick="@(() => AddBonoToCart(item))">Add</button>
+                                            </td>
+                                        </tr>
+                                    }
                                 }
                             </tbody>
                         </table>
                     </div>
+
+                    @* Mostrar mensaje inline además del modal (de respaldo) *@
+                    @if (showNoResultsMessage)
+                    {
+                        <div class="alert alert-info mt-2" id="NoBonosMessage" role="status" aria-live="polite">
+                            El filtro introducido es incorrecto
+                        </div>
+                    }
                 }
             </div>
         </div>
@@ -78,7 +94,8 @@
                 {
                     <div class="row mb-2">
                         <div class="col">
-                            <button type="button" class="btn btn-light" @onclick="@(() => RemoveBonoItem(item))">
+                            <button type="button" class="btn btn-light"
+                                    id="removeBono_@item.BonoId" @onclick="@(() => RemoveBonoItem(item))">
                                 x @item.Nombre - @item.Precio€ (x @item.Cantidad)
                             </button>
                         </div>
@@ -87,13 +104,17 @@
 
                 <div class="row mt-2">
                     <div class="col">
-                        <p>Total: @bonoState.TotalPrice €</p>
+                        <p id="cartTotal">Total: @bonoState.TotalPrice €</p>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col">
-                        <button type="button" class="btn btn-primary" @onclick="ProceedToCreatePurchase">Procesar compra</button>
+                        <button type="button" class="btn btn-primary"
+                                id="btnProcesarCompra"
+                                @onclick="ProceedToCreatePurchase">
+                            Procesar compra
+                        </button>
                     </div>
                 </div>
             </div>
@@ -105,6 +126,28 @@
     </div>
 </div>
 
+@* Modal de "filtro incorrecto" *@
+@if (showNoResultsModal)
+{
+    <div class="modal fade show" id="NoBonosModal" style="display:block;" tabindex="-1" role="dialog" aria-modal="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Filtro incorrecto</h5>
+                    <button type="button" class="btn-close" aria-label="Close" @onclick="CloseNoBonosModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>El filtro introducido es incorrecto</p>
+                </div>
+                <div class="modal-footer">
+                    <button id="NoBonosModal_Ok" class="btn btn-primary" @onclick="CloseNoBonosModal">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
 @code {
     private System.Collections.Generic.ICollection<SelectBonoDTO>? bonos;
     private string errors = string.Empty;
@@ -115,8 +158,12 @@
 
     private bool HideCart => !compra.BonoItem.Any();
 
-    // Exponer la compra desde el state container (igual que en SelectCompraMerch)
+    // Exponer la compra desde el state container
     private CrearCompraDTO compra => bonoState.Compra;
+
+    // Modal / mensaje control
+    private bool showNoResultsModal = false;
+    private bool showNoResultsMessage = false;
 
     private void ProceedToCreatePurchase()
     {
@@ -127,8 +174,6 @@
     {
         try
         {
-            // Igual que SelectCompraMerch: delegar la gestión al state container.
-            // BonoStateContainer debe exponer un método AddBono(SelectBonoDTO) que convierta a BonoItemForCreateDTO y actualice Totales.
             bonoState.AddProduct(item);
             errors = string.Empty;
         }
@@ -143,8 +188,6 @@
     private void RemoveBonoItem(BonoItemForCreateDTO item)
     {
         if (item == null) return;
-
-        // Como en SelectCompraMerch, delegar en el state container para mantener la lógica compartida.
         bonoState.RemoveItem(item);
         StateHasChanged();
     }
@@ -153,14 +196,39 @@
     {
         try
         {
-            bonos = await apiclient.GetBonoParaCompraAsync(filtroNombre, filtroTipo);
+            var nombre = string.IsNullOrWhiteSpace(filtroNombre) ? null : filtroNombre;
+            var tipo = string.IsNullOrWhiteSpace(filtroTipo) ? null : filtroTipo;
+
+            var result = await apiclient.GetBonoParaCompraAsync(nombre, tipo);
+            bonos = result?.ToList() ?? new System.Collections.Generic.List<SelectBonoDTO>();
+
+            // Mostrar modal/mensaje sólo si el usuario introdujo algún filtro y no hay resultados
+            var filtersProvided = !string.IsNullOrWhiteSpace(filtroNombre) || !string.IsNullOrWhiteSpace(filtroTipo);
+            showNoResultsModal = filtersProvided && bonos.Count == 0;
+            showNoResultsMessage = filtersProvided && bonos.Count == 0;
+
             errors = string.Empty;
         }
         catch (ApiException ex)
         {
             logger.LogError(ex, "Error buscando bonos");
             errors = "Error while connecting to the system";
+            bonos = new System.Collections.Generic.List<SelectBonoDTO>();
+            showNoResultsModal = false;
+            showNoResultsMessage = false;
         }
         StateHasChanged();
+    }
+
+    private void CloseNoBonosModal()
+    {
+        showNoResultsModal = false;
+        StateHasChanged();
+    }
+
+    // Cargar todos los bonos al inicializar la página (sin necesidad de usar filtros)
+    protected override async Task OnInitializedAsync()
+    {
+        await BuscarBonos();
     }
 }
