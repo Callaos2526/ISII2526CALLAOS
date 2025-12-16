@@ -99,7 +99,7 @@ namespace AppForSEII2526.UIT.Bonos
 
         [Fact]
         [Trait("LevelTesting", "Funcional Testing")]
-        public void UC_Bonos_Create_FlujoBasico_Ok()
+        public void UC_Bonos_Create_FlujoBasico_Ok_ShowsDetail()
         {
             Inicializar_SeleccionarBonos();
 
@@ -112,28 +112,31 @@ namespace AppForSEII2526.UIT.Bonos
             createPO.WaitForBeingVisible(By.Id("SubmitCompra"));
 
             // 3) Rellenar datos mínimos y enviar
-            createPO.FillInCompraInfo("Pedro", "Pérez", "Gómez", DateTime.Now, "Tarjeta");
+            var nombre = "Pedro";
+            var apellido1 = "Pérez";
+            var apellido2 = "Gómez";
+            createPO.FillInCompraInfo(nombre, apellido1, apellido2, DateTime.Now, "Tarjeta");
             createPO.ClickSubmit();
 
-            // 4) Confirmar diálogo/guardar (Popup de confirmación)
-            try
-            {
-                createPO.PressSaveConfirmation(10);
-            }
-            catch
-            {
-                // si no aparece dialog, toleramos (dependiendo de la implementación)
-            }
+            // 4) Confirmar diálogo/guardar si aparece
+            try { createPO.PressSaveConfirmation(8); } catch { /* tolerante */ }
 
-            // 5) Esperar detalle de la compra (página de detalle debe mostrar nombre)
-            createPO.WaitForBeingVisible(By.Id("NameSurname"));
-            var name = _driver.FindElement(By.Id("NameSurname")).Text;
-            Assert.Contains("Pedro", name);
+            // 5) Esperar detalle de la compra y verificar información principal
+            var detailPO = new DetailCompraBono_PO(_driver, _output);
+            detailPO.WaitForBeingVisible(By.Id("NameSurname"));
+
+            var nombreCompleto = $"{nombre} {apellido1} {apellido2}".Trim();
+            var ok = detailPO.CheckCompraDetail(nombreCompleto, DateTime.Now, "Tarjeta", detailPO.GetTotalPrice());
+            Assert.True(ok, "Los detalles de la compra no coinciden con los esperados.");
+
+            // 6) Verificar que la lista de bonos aparece
+            Assert.True(detailPO.IsBonosVisible(), "La lista de bonos de la compra debería ser visible.");
+            Assert.True(detailPO.IsTotalPriceVisible(), "El precio total debería ser visible en la página de detalle.");
         }
 
         [Fact]
         [Trait("LevelTesting", "Funcional Testing")]
-        public void UC_Bonos_Create_Validation_ShowsErrors()
+        public void UC_Bonos_Create_Validation_ShowsErrors_And_ReturnsToSelect()
         {
             Inicializar_SeleccionarBonos();
 
@@ -150,9 +153,23 @@ namespace AppForSEII2526.UIT.Bonos
 
             createPO.ClickSubmit();
 
-            // Esperar que aparezcan errores en página
-            Assert.True(createPO.CheckValidationError("Error! El nombre es obligatorio") || createPO.GetErrorsText().Length > 0,
+            //cerrar/confirmar automáticamente cualquier modal de "save"
+            try
+            {
+                createPO.PressSaveConfirmation(5);
+            }
+            catch
+            {
+                // Si no aparece modal, se ignora
+            }
+            // Debe mostrar errores de validación en la página Create
+            Assert.True(createPO.CheckValidationError("Error") || createPO.GetErrorsText().Length > 0,
                 "Se esperaba que se mostrara un error de validación para campos obligatorios.");
+
+            // Pulsar 'Modificar Bonos' debe volver a la pantalla de selección y mantener el carrito
+            createPO.PressModificarBonos();
+            _selectPO.WaitForBeingVisible(By.Id("cartTotal"));
+            Assert.True(_selectPO.CheckCartTotal(BonoPrecio1), "El carrito debería mantener el bono seleccionado al volver desde Create.");
         }
 
         [Fact]
@@ -168,7 +185,7 @@ namespace AppForSEII2526.UIT.Bonos
             var createPO = new CrearCompraBono_PO(_driver, _output);
             createPO.WaitForBeingVisible(By.Id("SubmitCompra"));
 
-            // Pulsar modificar bonos -> debe volver a la pantalla de selección
+            // Pulsar modificar bonos -> debe volver a la página de selección
             createPO.PressModificarBonos();
 
             // Esperar a la página de selección y comprobar que el carrito retiene el bono

@@ -194,7 +194,7 @@ namespace AppForSEII2526.UIT.Pedido
             _createPO.WaitForBeingVisible(By.Id("SubmitPedido"));
 
            
-            _createPO.SetNombre("Tomy");
+            _createPO.SetNombre("Tomy"); // :*)
             _createPO.SetPrimerApellido("Romero");
             _createPO.SeleccionarMetodoPagoPorTexto("Tarjeta");
 

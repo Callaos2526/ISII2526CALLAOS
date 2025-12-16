@@ -2,6 +2,8 @@
 using Xunit.Abstractions;
 using System.Collections.Generic;
 using System.Linq;
+using OpenQA.Selenium.Support.UI;
+using System;
 
 namespace AppForSEII2526.UIT.ComprarBonos
 {
@@ -46,23 +48,17 @@ namespace AppForSEII2526.UIT.ComprarBonos
             var rows = tbody.FindElements(By.TagName("tr"));
             if (rows.Count == 0)
             {
-                // además comprobar que se muestra el mensaje inline o el modal
+                // además comprobar que se muestra el mensaje de no resultados
                 try
                 {
                     var msg = _driver.FindElement(By.Id("NoBonosMessage"));
-                    if (msg.Displayed) return true;
+                    return msg.Displayed;
                 }
-                catch (NoSuchElementException) { }
-
-                try
+                catch (NoSuchElementException)
                 {
-                    // modal visible
-                    var modal = _driver.FindElement(By.Id("NoBonosModal"));
-                    return modal.Displayed;
+                    // si no hay mensaje, igualmente consideramos que no hay resultados
+                    return true;
                 }
-                catch (NoSuchElementException) { }
-
-                return true; // fallback: no filas -> sin resultados
             }
             return false;
         }
@@ -89,7 +85,30 @@ namespace AppForSEII2526.UIT.ComprarBonos
         {
             WaitForBeingClickable(By.Id($"removeBono_{bonoId}"));
             _driver.FindElement(By.Id($"removeBono_{bonoId}")).Click();
-            WaitForBeingVisibleIgnoringExeptionTypes(By.Id("cartTotal"));
+
+            //            WaitForBeingVisibleIgnoringExeptionTypes(By.Id("cartTotal"));
+            // Esperar hasta que el botón de proceder desaparezca o deje de ser visible
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
+            try
+            {
+                wait.Until(d =>
+                {
+                    try
+                    {
+                        var btn = d.FindElement(By.Id("btnProcesarCompra"));
+                        return !btn.Displayed;
+                    }
+                    catch (NoSuchElementException)
+                    {
+                        // Si no existe, es correcto: ha desaparecido
+                        return true;
+                    }
+                });
+            }
+            catch
+            {
+                // tiempo de espera agotado: la prueba seguirá y dará fallo si todavía visible
+            }
         }
 
         public bool CheckCartTotal(string expectedTotal)
