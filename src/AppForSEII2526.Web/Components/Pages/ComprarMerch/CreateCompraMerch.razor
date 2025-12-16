@@ -12,7 +12,7 @@
 <h3>CreateCompraMerch</h3>
 <EditForm Model="compra" OnValidSubmit="OpenDialog">
     <div class="row">
-        <DataAnnotationsValidator/>
+        <DataAnnotationsValidator />
         <ValidationSummary />
         <ValidationSummary class="row alert alert-danger" />
     </div>
@@ -46,8 +46,8 @@
                 <label for="Direccion_Envio">Dirección de envio</label>
             </div>
         </div>
-
     </div>
+
     <div class="row g-2">
         <div class="col-md">
             <div class="form-floating">
@@ -61,22 +61,24 @@
             </div>
         </div>
     </div>
+
     <div class="col-md">
-            <div class="form-floating">
-                @* botón que lanza el diálogo de confirmación *@
-                <button class="btn btn-primary" type="submit" id="SubmitPedido" disabled="@compraButtonDisabled">
-                    Realizar compra
-                </button>
-            </div>
+        <div class="form-floating">
+            @* botón que lanza el diálogo de confirmación *@
+            <button class="btn btn-primary" type="submit" id="SubmitPedido" disabled="@compraButtonDisabled">
+                Realizar compra
+            </button>
+        </div>
     </div>
 
     <h4>Detalles de la compra</h4>
     <p>
         <b>Precio total:</b> @PrecioTotal €
-        <button class="btn btn-outline-primary" type="submit" @onclick="ModificarCompra" id="ModificarCompra">
+        <button class="btn btn-outline-primary" type="button" @onclick="ModificarCompra" id="ModificarCompra">
             Modificar Compra
         </button>
     </p>
+
     <div class="mh-100 table-responsive">
         <table class="table table-condensed table-hover" id="CompraMerch">
             <thead>
@@ -101,24 +103,26 @@
         </table>
     </div>
 </EditForm>
+
 @if (DialogIsOpen)
 {
     <Dialog Caption="Comprar Merch"
-    Message="¿Quieres seguir y comprar el merch seleccionado?"
-    OnClose="@OnDialogClose"
-    Type=Dialog.Category.SaveNot>
+            Message="¿Quieres seguir y comprar el merch seleccionado?"
+            OnClose="@OnDialogClose"
+            Type="Dialog.Category.SaveNot">
     </Dialog>
 }
+
 @code {
     private bool DialogIsOpen;
     private ComprarMerchCreateDTO compra => merchState.Compra;
     private string mensajeError = "";
-    private bool compraButtonDisabled
-    {
-        get { return (compra.MerchItems == null || compra.MerchItems.Count == 0); }
-    }
 
-    private bool hideErrors { get { return mensajeError.Length == 0; } }
+    private bool compraButtonDisabled
+        => (compra.MerchItems == null || compra.MerchItems.Count == 0);
+
+    private bool hideErrors => mensajeError.Length == 0;
+
     private decimal PrecioTotal
     {
         get
@@ -132,6 +136,7 @@
     {
         navigation.NavigateTo("/SeleccionarMerch/SelectCompraMerch");
     }
+
     private void OpenDialog()
     {
         DialogIsOpen = true;
@@ -184,7 +189,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-
         if (authenticationState is not null)
         {
             var authState = await authenticationState;
@@ -197,13 +201,16 @@
                     compra.Nombre = user.Identity.Name;
                 }
             }
-            compra.Nombre = compra.Nombre == null ? "" : compra.Nombre;
-            compra.Apellido_1 = compra.Apellido_1 == null ? "" : compra.Apellido_1;
-            compra.Direccion_Envio = compra.Direccion_Envio == null ? "" : compra.Direccion_Envio;
 
+            compra.Nombre ??= "";
+            compra.Apellido_1 ??= "";
+            compra.Direccion_Envio ??= "";
         }
-    }
 
+        // Valor por defecto del método de pago
+        if (string.IsNullOrEmpty(compra.Metodo_Pago))
+            compra.Metodo_Pago = "Tarjeta";
+    }
 
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
