@@ -156,7 +156,7 @@ namespace AppForSEII2526.UIT.Resenya
 
             createPO.PressModifyBocadillos();
 
-            // aquí puede tardar un pelín la navegación
+            
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
             wait.Until(d => d.Url.Contains("selectbocadillos"));
 

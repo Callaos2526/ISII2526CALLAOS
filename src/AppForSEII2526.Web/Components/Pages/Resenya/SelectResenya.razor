@@ -17,16 +17,15 @@
 
     <div class="row">
 
-        
+        <!-- LISTA DE BOCADILLOS -->
         <div class="col-8">
 
-            
             <div class="row">
-
                 <div class="col">
                     <div class="input-group mb-3">
                         <span class="input-group-text">Nombre</span>
-                        <input type="text" id="inputNombre" class="form-control"
+                        <input type="text" id="inputNombre"
+                               class="form-control"
                                @bind="filtroNombre"
                                placeholder="Nombre del bocadillo" />
                     </div>
@@ -35,7 +34,8 @@
                 <div class="col">
                     <div class="input-group mb-3">
                         <span class="input-group-text">PVP</span>
-                        <input type="number" id="inputPvp" step="0.1"
+                        <input type="number" id="inputPvp"
+                               step="0.1"
                                class="form-control"
                                @bind="filtroPvp"
                                placeholder="Precio exacto" />
@@ -43,18 +43,16 @@
                 </div>
 
                 <div class="col">
-                    <button type="button" id="searchBocadillos"
+                    <button type="button"
+                            id="searchBocadillos"
                             class="btn btn-primary"
                             @onclick="SearchBocadillos">
                         Buscar bocadillos
                     </button>
                 </div>
-
             </div>
 
-          
             <div class="row">
-
                 @if (bocadillos == null)
                 {
                     <p>Cargando bocadillos...</p>
@@ -63,8 +61,8 @@
                 {
                     <p>Resultados: @bocadillos.Count</p>
 
-                    <div class="mh-100 table-responsive">
-                        <table class="table table-condensed table-hover" id="TableOfBocadillos">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="TableOfBocadillos">
                             <thead>
                                 <tr>
                                     <th>Nombre</th>
@@ -74,7 +72,6 @@
                                     <th>Añadir</th>
                                 </tr>
                             </thead>
-
                             <tbody>
                                 @foreach (var b in bocadillos)
                                 {
@@ -92,17 +89,14 @@
                                     </tr>
                                 }
                             </tbody>
-
                         </table>
                     </div>
                 }
             </div>
-
         </div>
 
-        
-        <div class="col-2">
-
+        <!-- SELECCIÓN -->
+        <div class="col-4">
             <h4>Selección</h4>
 
             @if (resenya.ResenyaBocadillo.Count == 0)
@@ -111,27 +105,27 @@
             }
             else
             {
-                <ul>
+                <ul class="list-group">
                     @foreach (var item in resenya.ResenyaBocadillo)
                     {
-                        <li>@item.Nombre — Puntuación: @item.Puntuacion</li>
+                        <li class="list-group-item list-group-item-action"
+                            style="cursor:pointer"
+                            @onclick="@(() => RemoveBocadillo(item))">
+                            @item.Nombre — Puntuación: @item.Puntuacion
+                        </li>
                     }
                 </ul>
 
-                
                 <button class="btn btn-primary mt-3"
-                        @onclick="CrearResenya"
-                        id="goToCreateResenya">
+                        id="goToCreateResenya"
+                        @onclick="CrearResenya">
                     Crear reseña
                 </button>
             }
-
         </div>
 
     </div>
-
 </div>
-
 
 @code {
 
@@ -140,17 +134,19 @@
     private string errors = "";
     private bool hideErrors => errors.Length == 0;
 
-    private string? filtroNombre { get; set; }
-    private float? filtroPvp { get; set; }
+    private string? filtroNombre;
+    private float? filtroPvp;
 
-    // State container
     private ResenyaForCreateDTO resenya => resenyaState.Resenya;
-
 
     private void AddBocadilloToResenya(SelectBocadilloDTO b)
     {
-        resenyaState.AddBocadillo(b, 1); // Puntuación por defecto 1
-        // ya no es necesario llamar a StateHasChanged() aquí si nos suscribimos a OnChange
+        resenyaState.AddBocadillo(b, 1);
+    }
+
+    private void RemoveBocadillo(ResenyaItemDTO item)
+    {
+        resenyaState.RemoveBocadillo(item);
     }
 
     private async Task SearchBocadillos()
@@ -161,8 +157,8 @@
         }
         catch (ApiException ex)
         {
-            logger.LogError($"{DateTime.Now} Error: {ex}");
-            errors = "Error while connecting to the system";
+            logger.LogError(ex.ToString());
+            errors = "Error al obtener los bocadillos";
         }
 
         StateHasChanged();
@@ -175,21 +171,18 @@
 
     protected override Task OnInitializedAsync()
     {
-        // Suscribimos para que el componente se vuelva a renderizar cuando cambie el estado
-        resenyaState.OnChange += ResenyaState_OnChange;
-
+        resenyaState.OnChange += OnStateChanged;
         SearchBocadillos();
         return base.OnInitializedAsync();
     }
 
-    private void ResenyaState_OnChange()
+    private void OnStateChanged()
     {
         InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
-        // Anulamos la suscripción al desechar el componente
-        resenyaState.OnChange -= ResenyaState_OnChange;
+        resenyaState.OnChange -= OnStateChanged;
     }
 }
