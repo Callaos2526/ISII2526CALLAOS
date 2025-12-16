@@ -1,5 +1,4 @@
 ﻿@page "/resenya/selectbocadillos"
-
 @using AppForSEII2526.Web
 @using AppForSEII2526.Web.API
 @inject AppForSEII2526APIClient apiclient
@@ -150,7 +149,7 @@
 
     private void AddBocadilloToResenya(SelectBocadilloDTO b)
     {
-        resenyaState.AddBocadillo(b.BocadilloID, 1);  // Puntuación por defecto 1
+        resenyaState.AddBocadillo(b, 1); // Puntuación por defecto 1
         // ya no es necesario llamar a StateHasChanged() aquí si nos suscribimos a OnChange
     }
 

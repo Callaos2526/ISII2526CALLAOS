@@ -173,13 +173,13 @@ namespace AppForSEII2526.API.Controllers
             )).ToList();
 
             var compraDetailDTO = new ComprarMerchDetailDTO(
-                compra_entity.Id,
+                compra_entity.CompraId,
                 cliente,
                 compra_entity.DireccionEnvio,
                 metodoPago.metodoName,
                 lineasCompra.Sum(x => x.Cantidad),
                 itemsDTO,
-                compra_entity.CompraId
+                compra_entity.Id
             );
 
             return CreatedAtAction("GetCompraDetail", new { id = compra_entity.Id }, compraDetailDTO);
