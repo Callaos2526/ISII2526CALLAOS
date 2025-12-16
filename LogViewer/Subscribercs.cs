@@ -7,10 +7,15 @@ namespace LogViewer;
 
 public class Subscriber
 {
-    private readonly string _hostName = "localhost";
-    private readonly int _port = 5672;
-    private readonly string _userName = "miguel";      
-    private readonly string _password = "miguel1";  
+    private readonly string _hostName =
+    Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost";
+    private readonly int _port =
+        int.TryParse(Environment.GetEnvironmentVariable("RABBITMQ_PORT"), out var p) ? p : 5672;
+    private readonly string _userName =
+        Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? "guest";
+    private readonly string _password =
+        Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? "guest";
+
     private readonly string _exchangeName = "logs-topic";
     private readonly string _topic;
     public Subscriber(string topic)
