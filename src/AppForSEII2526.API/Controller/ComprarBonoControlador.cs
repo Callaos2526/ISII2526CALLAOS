@@ -88,10 +88,10 @@ namespace LosDelEspacio.API.Controllers
             }
 
             // Buscar método de pago por nombre (priorizamos el nombre en el DTO)
-            AppForSEII2526.API.Models.MetodoPago metodoPago = null;
+            MetodoPago metodoPago = null;
             if (!string.IsNullOrWhiteSpace(crearCompra.MetodoPagoName))
             {
-                metodoPago = _context.Set<AppForSEII2526.API.Models.MetodoPago>()
+                metodoPago = _context.Set<MetodoPago>()
                                      .FirstOrDefault(m => m.metodoName == crearCompra.MetodoPagoName);
             }
 
