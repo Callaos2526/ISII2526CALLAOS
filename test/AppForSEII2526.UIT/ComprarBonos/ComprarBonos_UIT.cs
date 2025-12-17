@@ -12,9 +12,10 @@ namespace AppForSEII2526.UIT.Bonos
     {
         private readonly SelectBonos_PO _selectPO;
 
-        // === DATOS DE PRUEBA (ajusta según seed DB) ===
         private const int BonoId1 = 1;
         private const string BonoPrecio1 = "10";
+        private const int BonoId2 = 2;
+        private const string BonoPrecio2 = "10";
 
         public ComprarBonos_UIT(ITestOutputHelper output) : base(output)
         {
@@ -191,6 +192,53 @@ namespace AppForSEII2526.UIT.Bonos
             // Esperar a la página de selección y comprobar que el carrito retiene el bono
             _selectPO.WaitForBeingVisible(By.Id("cartTotal"));
             Assert.True(_selectPO.CheckCartTotal(BonoPrecio1), "El carrito debería mantener el bono seleccionado al volver desde Create.");
+        }
+
+        [Fact]
+        [Trait("LevelTesting", "Funcional Testing")]
+        public void UC_Examen()
+        {
+            Inicializar_SeleccionarBonos();
+            
+            _selectPO.SearchBonos("Mixto", "");
+            
+            _selectPO.AddBono(BonoId2);
+            
+            Assert.True(_selectPO.CheckCartTotal(BonoPrecio2), $"El precio total no coincide con lo esperado ({BonoPrecio2}).");
+
+            
+            _selectPO.RemoveBonoFromCart(BonoId2);
+            
+            Assert.False(_selectPO.IsProceedButtonVisible(), "El botón 'Procesar compra' no debería ser visible si el carrito está vacío.");
+
+            _selectPO.SearchBonos("Completo", "");
+            _selectPO.AddBono(BonoId1);
+            Assert.True(_selectPO.CheckCartTotal(BonoPrecio1), $"El precio total no coincide con lo esperado ({BonoPrecio1}).");
+
+
+            _selectPO.ProceedToCreatePurchase();
+            var createPO = new CrearCompraBono_PO(_driver, _output);
+            createPO.WaitForBeingVisible(By.Id("SubmitCompra"));
+            
+            var nombre = "Pedro";
+            var apellido1 = "Pérez";
+            var apellido2 = "Gómez";
+            createPO.FillInCompraInfo(nombre, apellido1, apellido2, DateTime.Now, "Tarjeta");
+            createPO.ClickSubmit();
+            
+            try { createPO.PressSaveConfirmation(8); } catch { /* tolerante */ }
+            
+            var detailPO = new DetailCompraBono_PO(_driver, _output);
+            detailPO.WaitForBeingVisible(By.Id("NameSurname"));
+
+            var nombreCompleto = $"{nombre} {apellido1} {apellido2}".Trim();
+            var ok = detailPO.CheckCompraDetail(nombreCompleto, DateTime.Now, "Tarjeta", detailPO.GetTotalPrice());
+            Assert.True(ok, "Los detalles de la compra no coinciden con los esperados.");
+
+
+            Assert.True(detailPO.IsBonosVisible(), "La lista de bonos de la compra debería ser visible.");
+            Assert.True(detailPO.IsTotalPriceVisible(), "El precio total debería ser visible en la página de detalle.");
+
         }
     }
 }
