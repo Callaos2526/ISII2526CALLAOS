@@ -12,10 +12,10 @@ namespace AppForSEII2526.UIT.Bonos
     {
         private readonly SelectBonos_PO _selectPO;
 
-        // === DATOS DE PRUEBA (ajusta según seed DB) ===
         private const int BonoId1 = 1;
         private const string BonoPrecio1 = "10";
         private const int BonoId2 = 2;
+        private const string BonoPrecio2 = "10";
 
         public ComprarBonos_UIT(ITestOutputHelper output) : base(output)
         {
@@ -196,7 +196,7 @@ namespace AppForSEII2526.UIT.Bonos
 
         [Fact]
         [Trait("LevelTesting", "Funcional Testing")]
-        public void UC_Bonos_FiltrarAñadirQuitarAñadir_RealizarCompra_Ok()
+        public void UC_Examen()
         {
             Inicializar_SeleccionarBonos();
             
@@ -204,16 +204,18 @@ namespace AppForSEII2526.UIT.Bonos
             
             _selectPO.AddBono(BonoId2);
             
-            Assert.True(_selectPO.CheckCartTotal(BonoPrecio1), $"El precio total no coincide con lo esperado ({BonoPrecio1}).");
+            Assert.True(_selectPO.CheckCartTotal(BonoPrecio2), $"El precio total no coincide con lo esperado ({BonoPrecio2}).");
+
             
             _selectPO.RemoveBonoFromCart(BonoId2);
             
             Assert.False(_selectPO.IsProceedButtonVisible(), "El botón 'Procesar compra' no debería ser visible si el carrito está vacío.");
-            
+
             _selectPO.SearchBonos("Completo", "");
             _selectPO.AddBono(BonoId1);
             Assert.True(_selectPO.CheckCartTotal(BonoPrecio1), $"El precio total no coincide con lo esperado ({BonoPrecio1}).");
-            
+
+
             _selectPO.ProceedToCreatePurchase();
             var createPO = new CrearCompraBono_PO(_driver, _output);
             createPO.WaitForBeingVisible(By.Id("SubmitCompra"));
