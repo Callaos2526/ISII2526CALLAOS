@@ -16,6 +16,7 @@ namespace AppForSEII2526.UIT.Pedido
 
         private const string BocadilloId1 = "1"; //
         private const string ItemIdCarrito1 = "1"; //articulo especifico del carrito de compra 
+        private const string BocadilloId2 = "4";
 
         public UCPedirBocadillo_UIT(ITestOutputHelper output) : base(output)
         {
@@ -104,7 +105,7 @@ namespace AppForSEII2526.UIT.Pedido
         [Trait("LevelTesting", "Funcional Testing")]
         public void UC_Pedido_Detail_MuestraCampos_PedidoSembrado()
         {
-            
+
             var seededPedidoId = 2;
             _driver.Navigate().GoToUrl(_URI + $"Pedido/DetailPedido/?PedidoID={seededPedidoId}");
 
@@ -121,11 +122,11 @@ namespace AppForSEII2526.UIT.Pedido
             Assert.False(string.IsNullOrWhiteSpace(metodo), "El método de pago debe mostrarse en detalle.");
             Assert.True(_detailPO.IsBocadillosVisible(), "La lista de bocadillos debe ser visible.");
 
-           
+
             Assert.True(_detailPO.IsTotalPriceVisible(), "El precio total debe ser visible en el detalle.");
             if (string.IsNullOrWhiteSpace(total) || total.Trim().StartsWith("0"))
             {
-               
+
                 _output?.WriteLine($"AVISO: El total mostrado para el pedido seed id={seededPedidoId} es '{total}'. Si esperas otro valor revisa el seed o crea la compra en la BD usada por la app.");
             }
         }
@@ -138,23 +139,23 @@ namespace AppForSEII2526.UIT.Pedido
         [Trait("LevelTesting", "Funcional Testing")]
         public void UC_Pedido_Create_MuestraErroresSiFaltanDatos()
         {
-           
+
             Inicializar_SeleccionarBocadillos();
             _selectPO.SearchBocadillos("All", "");
             _selectPO.AddBocadilloToPedido(BocadilloId1);
 
-           
+
             _selectPO.ProceedToCreatePedido();
 
-           
+
             _createPO.WaitForBeingVisible(By.Id("SubmitPedido"));
 
-          
+
             _createPO.SetNombre("");
             _createPO.SetPrimerApellido("Javier");
             _createPO.SeleccionarMetodoPagoPorTexto("Tarjeta");
 
-          //verifica que se muestren errores de validacion si no se ingresan datos validos 
+            //verifica que se muestren errores de validacion si no se ingresan datos validos 
             Assert.True(_createPO.IsSubmitEnabled(), "El botón de enviar debe estar habilitado.");
             _createPO.ClickSubmit();
             try
@@ -163,10 +164,10 @@ namespace AppForSEII2526.UIT.Pedido
             }
             catch
             {
-                
+
             }
 
-           
+
             var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(8));
             wait.Until(d => d.FindElements(By.Id("ErrorsShown")).Count > 0
                             || d.FindElements(By.Id("ErrorMessage")).Count > 0);
@@ -177,28 +178,28 @@ namespace AppForSEII2526.UIT.Pedido
             Assert.True(!string.IsNullOrWhiteSpace(errorsText), "Se esperaba mensaje de error de validación al crear pedido sin nombre.");
         }
 
-      //Verifica que flujo basico de creacion pedido funcione bien cuando se ingresan datos validos
+        //Verifica que flujo basico de creacion pedido funcione bien cuando se ingresan datos validos
         [Fact]
         [Trait("LevelTesting", "Funcional Testing")]
         public void UC_Pedido_Create_FlujoBasico_UsuarioSembrado_NoErrores()
         {
-            
+
             Inicializar_SeleccionarBocadillos();
             _selectPO.SearchBocadillos("All", "");
             _selectPO.AddBocadilloToPedido(BocadilloId1);
 
-           
+
             _selectPO.ProceedToCreatePedido();
 
-           
+
             _createPO.WaitForBeingVisible(By.Id("SubmitPedido"));
 
-           
-            _createPO.SetNombre("Tomy"); // :*)
+
+            _createPO.SetNombre("Tomy"); // 
             _createPO.SetPrimerApellido("Romero");
             _createPO.SeleccionarMetodoPagoPorTexto("Tarjeta");
 
-           
+
             Assert.True(_createPO.IsSubmitEnabled(), "El botón de enviar debe estar habilitado.");
             _createPO.ClickSubmit();
 
@@ -211,12 +212,12 @@ namespace AppForSEII2526.UIT.Pedido
 
             }
 
-            
+
             var waitDetail = new WebDriverWait(_driver, TimeSpan.FromSeconds(20));
             waitDetail.Until(d => d.FindElements(By.Id("NameSurname")).Count > 0
                                    || d.FindElements(By.Id("ErrorMessage")).Count > 0);
 
-          
+
             if (_driver.FindElements(By.Id("ErrorMessage")).Count > 0)
             {
                 var em = _driver.FindElement(By.Id("ErrorMessage")).Text;
@@ -229,5 +230,68 @@ namespace AppForSEII2526.UIT.Pedido
 
             Assert.Contains("Tomy", nombreDetalle, StringComparison.OrdinalIgnoreCase);
         }
-    }
+        [Theory]
+        [InlineData("pequeno", "")]
+        [Trait("LevelTesting", "Funcional Testing")]
+        public void UC_Examen(string tamano, string tipoPan)
+        {
+            
+        
+            Inicializar_SeleccionarBocadillos();
+            //añado
+            _selectPO.AddBocadilloToPedido(BocadilloId1);
+            //filtro
+            _selectPO.SearchBocadillos(tamano,tipoPan);
+            //añado otro
+            _selectPO.AddBocadilloToPedido(BocadilloId2);
+            //elimino primero
+            _selectPO.RemoveBocadilloFromPedidoByItemId(ItemIdCarrito1);
+
+            //flujo de la compra
+            _selectPO.ProceedToCreatePedido();
+
+            _createPO.WaitForBeingVisible(By.Id("SubmitPedido"));
+
+
+            _createPO.SetNombre("Tomy"); // :*)
+            _createPO.SetPrimerApellido("Romero");
+            _createPO.SeleccionarMetodoPagoPorTexto("Tarjeta");
+
+
+            Assert.True(_createPO.IsSubmitEnabled(), "El botón de enviar debe estar habilitado.");
+            _createPO.ClickSubmit();
+
+            try
+            {
+                _createPO.PressSaveConfirmation(10); //confirma el guardado del pedido
+            }
+            catch
+            {
+
+            }
+
+
+            var waitDetail = new WebDriverWait(_driver, TimeSpan.FromSeconds(20));
+            waitDetail.Until(d => d.FindElements(By.Id("NameSurname")).Count > 0
+                                   || d.FindElements(By.Id("ErrorMessage")).Count > 0);
+
+
+            if (_driver.FindElements(By.Id("ErrorMessage")).Count > 0)
+            {
+                var em = _driver.FindElement(By.Id("ErrorMessage")).Text;
+                Assert.False(true, $"Se mostró error al abrir detalle tras crear pedido: {em}");
+            }
+
+            _detailPO.WaitForBeingVisibleIgnoringExeptionTypes(By.Id("NameSurname"));
+            var nombreDetalle = _detailPO.GetNombreCliente();
+            _output?.WriteLine($"Nombre en detalle tras crear: {nombreDetalle}");
+
+            Assert.Contains("Tomy", nombreDetalle, StringComparison.OrdinalIgnoreCase);
+
+
+
+
+
+        }
+}
 }
