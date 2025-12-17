@@ -83,7 +83,7 @@ INSERT INTO [dbo].[TiposPan] ([PanId], [Nombre]) VALUES (4, N'Blanco')
 SET IDENTITY_INSERT [dbo].[TiposPan] OFF
 
 SET IDENTITY_INSERT [dbo].[Bocadillos] ON
-INSERT INTO [dbo].[Bocadillos] ([Id], [ComprasDelBocadillo], [Nombre], [Pvp], [Resenyabocadillo], [Stock], [Tamano], [tipopanPanId]) VALUES (1, 1, N'Submarino', 6, N'Bien', 5, 10, 4)
+INSERT INTO [dbo].[Bocadillos] ([Id], [ComprasDelBocadillo], [Nombre], [Pvp], [Resenyabocadillo], [Stock], [Tamano], [tipopanPanId]) VALUES (1, 1, N'Submarino', 6, N'Bien', 5, 1, 4)
 SET IDENTITY_INSERT [dbo].[Bocadillos] OFF
 
 SET IDENTITY_INSERT [dbo].[Resenyas] ON
