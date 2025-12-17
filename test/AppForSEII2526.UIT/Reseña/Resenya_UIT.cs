@@ -112,6 +112,69 @@ namespace AppForSEII2526.UIT.Resenya
 
         [Fact]
         [Trait("LevelTesting", "Funcional Testing")]
+        public void Sprint3Examen()
+        {
+            var createResenya_PO = new CreateResenya_PO(_driver, _output);
+            var detailResenya_PO = new DetailResenya_PO(_driver, _output);
+
+            var wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
+
+            // Ir a seleccionar bocadillos
+            _driver.Navigate().GoToUrl(_URI + "resenya/selectbocadillos");
+            selectPO.WaitForBeingVisible(By.Id("TableOfBocadillos"));
+
+            // Añadir 
+            selectPO.AddBocadillo(1);
+
+            // Filtrar y añadir
+            selectPO.SearchBocadillos("", "3");
+            selectPO.AddBocadillo(4);
+
+            var items = wait.Until(d => d.FindElements(By.CssSelector("li.list-group-item-action"))
+            );
+            items[0].Click(); // quitamos uno
+
+            // Ir a crear reseña
+            wait.Until(d => d.FindElement(By.Id("goToCreateResenya"))).Click();
+
+            // Rellenar reseña
+            createResenya_PO.FillInResenyaInfo(
+            "Miguel",
+            "Reseña Sprint 3",
+            "Todo muy bien",
+            "Cuatro"
+            );
+
+            // Crear reseña
+            createResenya_PO.PressCreateResenya();
+
+            // Pulso Save
+            var saveBtn = wait.Until(d => {
+                var el = d.FindElement(By.XPath("//button[normalize-space()='Save']"));
+                return (el.Displayed && el.Enabled) ? el : null;
+            });
+            saveBtn.Click();
+
+            // Esperar detalle
+            wait.Until(d => d.Url.Contains("detailresenya"));
+
+            Assert.True(
+            _driver.FindElement(By.Id("ResenyaBocadillos")).Displayed,
+            "No se ha mostrado el detalle de la reseña"
+            );
+
+            var expectedBocadillos = new List<string[]> {
+new string[] { "jamon" }
+};
+
+            Assert.True(
+            detailResenya_PO.CheckListOfResenyaBocadillos(expectedBocadillos),
+            "Los bocadillos del detalle no son correctos"
+            );
+        }
+
+        [Fact]
+        [Trait("LevelTesting", "Funcional Testing")]
         public void UC_Resenya_Create_OK()
         {
             // Entra a Create SIN perder estado
