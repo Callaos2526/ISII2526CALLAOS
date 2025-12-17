@@ -1,10 +1,10 @@
-﻿using System;
+﻿using AppForSEII2526.UIT.ComprarBonos; // Page Object namespace
+using AppForSEII2526.UIT.PageObjects; // CreateCompraBono_PO
+using AppForSEII2526.UIT.Shared;
+using OpenQA.Selenium;
+using System;
 using Xunit;
 using Xunit.Abstractions;
-using OpenQA.Selenium;
-using AppForSEII2526.UIT.ComprarBonos; // Page Object namespace
-using AppForSEII2526.UIT.Shared;
-using AppForSEII2526.UIT.PageObjects; // CreateCompraBono_PO
 
 namespace AppForSEII2526.UIT.Bonos
 {
@@ -192,5 +192,58 @@ namespace AppForSEII2526.UIT.Bonos
             _selectPO.WaitForBeingVisible(By.Id("cartTotal"));
             Assert.True(_selectPO.CheckCartTotal(BonoPrecio1), "El carrito debería mantener el bono seleccionado al volver desde Create.");
         }
+
+
+        //Uit nuevo
+        //Con filtrar por nombre
+        //O lo que tengas para filtrar
+        //Añadir la compra
+        //Quitar la compra
+        //Añadir otro
+        //Y hacer la compra
+        [Fact]
+        [Trait("LevelTesting", "Funcional Testing")]
+        public void UC_Bonos_FiltrarAñadirQuitarAñadir_RealizarCompra_Ok()
+        {
+            Inicializar_SeleccionarBonos();
+            // Filtrar por nombre
+            _selectPO.SearchBonos("Completo", "");
+            // Añadir bono filtrado
+            _selectPO.AddBono(BonoId1);
+            // Verificar total actualizado
+            Assert.True(_selectPO.CheckCartTotal(BonoPrecio1), $"El precio total no coincide con lo esperado ({BonoPrecio1}).");
+            // Quitar bono
+            _selectPO.RemoveBonoFromCart(BonoId1);
+            // Verificar que el carrito está vacío
+            Assert.False(_selectPO.IsProceedButtonVisible(), "El botón 'Procesar compra' no debería ser visible si el carrito está vacío.");
+            // Añadir otro bono (el mismo para simplificar)
+            _selectPO.AddBono(BonoId1);
+            Assert.True(_selectPO.CheckCartTotal(BonoPrecio1), $"El precio total no coincide con lo esperado ({BonoPrecio1}).");
+            // Proceder a crear compra
+            _selectPO.ProceedToCreatePurchase();
+            var createPO = new CrearCompraBono_PO(_driver, _output);
+            createPO.WaitForBeingVisible(By.Id("SubmitCompra"));
+            // Rellenar datos mínimos y enviar
+            var nombre = "Pedro";
+            var apellido1 = "Pérez";
+            var apellido2 = "Gómez";
+            createPO.FillInCompraInfo(nombre, apellido1, apellido2, DateTime.Now, "Tarjeta");
+            createPO.ClickSubmit();
+            // Confirmar diálogo/guardar si aparece
+            try { createPO.PressSaveConfirmation(8); } catch { /* tolerante */ }
+            // Verificar detalle de la compra
+            var detailPO = new DetailCompraBono_PO(_driver, _output);
+            detailPO.WaitForBeingVisible(By.Id("NameSurname"));
+
+            var nombreCompleto = $"{nombre} {apellido1} {apellido2}".Trim();
+            var ok = detailPO.CheckCompraDetail(nombreCompleto, DateTime.Now, "Tarjeta", detailPO.GetTotalPrice());
+            Assert.True(ok, "Los detalles de la compra no coinciden con los esperados.");
+
+
+            Assert.True(detailPO.IsBonosVisible(), "La lista de bonos de la compra debería ser visible.");
+            Assert.True(detailPO.IsTotalPriceVisible(), "El precio total debería ser visible en la página de detalle.");
+
+        }
+
     }
 }
